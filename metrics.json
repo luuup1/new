@@ -1,0 +1,12 @@
+{
+  "peak_load": 0.9090909090909091,
+  "average_load": 0.10672940274698327,
+  "resource_utilization": 0.08704592186429061,
+  "deadline_satisfaction_ratio": 1.0,
+  "scheduled_packet_count": 124.0,
+  "infeasible_packet_count": 0.0,
+  "drop_ratio": 0.0,
+  "load_variance_across_links": 0.006028718270337186,
+  "max_load_per_link": 0.9090909090909091,
+  "average_delay_ms": 1.7419354838709677
+}
