@@ -120,6 +120,58 @@ def compare_with_milp(
     return rows
 
 
+def sweep_delay_analysis(config: SimulationConfig, scales: Iterable[float]):
+    """Analyze average delay across different load scales."""
+    from .candidate import build_candidates, instantiate_packets
+    from .scenario import build_scenario as build_scenario_inner
+    
+    rows: List[Mapping[str, float | str]] = []
+    for scale in scales:
+        run_config = replace(config, load_scale=scale)
+        scenario = build_scenario(run_config)
+        result = schedule_with_heuristic(scenario, run_config.heuristic, seed=run_config.seed)
+        
+        # Calculate max delay from schedule
+        max_delay = 0.0
+        if result.schedule:
+            max_delay = max(entry.delay_ms for entry in result.schedule)
+        
+        rows.append(
+            {
+                "load_scale": scale,
+                "status": result.status,
+                "average_delay_ms": result.metrics["average_delay_ms"],
+                "max_delay_ms": max_delay,
+                "scheduling_success_rate": result.metrics["scheduling_success_rate"],
+                "drop_ratio": result.metrics["drop_ratio"],
+                "resource_utilization": result.metrics["resource_utilization"],
+            }
+        )
+    return rows
+
+
+def sweep_rb_utilization(config: SimulationConfig, scales: Iterable[float]):
+    """Analyze RB resource utilization across different load scales."""
+    rows: List[Mapping[str, float | str]] = []
+    for scale in scales:
+        run_config = replace(config, load_scale=scale)
+        result = run_single(run_config)
+        rows.append(
+            {
+                "load_scale": scale,
+                "status": result.status,
+                "resource_utilization": result.metrics["resource_utilization"] * 100,
+                "peak_load": result.metrics["peak_load"],
+                "effective_peak_load": result.metrics["effective_peak_load"],
+                "scheduling_success_rate": result.metrics["scheduling_success_rate"],
+                "total_packets": result.metrics.get("total_packets", 0),
+                "scheduled_packets": result.metrics.get("scheduled_packets", 0),
+                "drop_ratio": result.metrics["drop_ratio"] * 100,
+            }
+        )
+    return rows
+
+
 def _heuristic_with_strategy(base: HeuristicConfig, strategy: str) -> HeuristicConfig:
     return HeuristicConfig(
         strategy=strategy,

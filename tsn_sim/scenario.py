@@ -35,6 +35,25 @@ def build_scenario(config: SimulationConfig) -> Scenario:
     )
 
 
+def _select_period(
+    config: SimulationConfig, flow_id: int, rng: random.Random
+) -> int:
+    """按 period_mode 选择当前流的周期。
+
+    - cyclic : 沿用历史行为，按 periods_ms 循环固定分配（保持已有 seed=7 基线不变）。
+    - simple : 从 simple_periods（默认 2 个固定值）中随机取，周期多样性低。
+    - random : 从 periods_ms 全集随机取，周期多样性高（复刻论文 Random Set）。
+    超周期(lcm(periods_ms)=32) 在三种模式下保持一致，env 的 96 格动作空间不受影响。
+    """
+    mode = config.period_mode
+    if mode == "simple":
+        return config.simple_periods[rng.randrange(len(config.simple_periods))]
+    if mode == "random":
+        return config.periods_ms[rng.randrange(len(config.periods_ms))]
+    # cyclic（默认）：完全复现改动前的周期分配，保证既有实验基线可复现
+    return config.periods_ms[flow_id % len(config.periods_ms)]
+
+
 def _build_flows(
     config: SimulationConfig, links: tuple[Link, ...], rng: random.Random
 ) -> List[Flow]:
@@ -42,7 +61,7 @@ def _build_flows(
     user_classes = ("edge", "middle", "close")
 
     for flow_id in range(config.flow_count):
-        period = config.periods_ms[flow_id % len(config.periods_ms)]
+        period = _select_period(config, flow_id, rng)
         packet_size = int(
             config.packet_size_bits[flow_id % len(config.packet_size_bits)]
             * config.load_scale

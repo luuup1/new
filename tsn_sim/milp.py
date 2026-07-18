@@ -40,7 +40,7 @@ def solve_optimal_milp(scenario: Scenario, time_limit_s: float = 30.0) -> Simula
     rows = []
     lower_bounds = []
     upper_bounds = []
-
+#C7
     for packet_key in packet_keys:
         row = lil_matrix((1, variable_count), dtype=float)
         for index in packet_to_indices[packet_key]:
@@ -48,7 +48,7 @@ def solve_optimal_milp(scenario: Scenario, time_limit_s: float = 30.0) -> Simula
         rows.append(row.tocsr())
         lower_bounds.append(1.0)
         upper_bounds.append(1.0)
-
+#C1
     for cell in cells:
         capacity = scenario.rb_capacity[cell]
 

@@ -23,9 +23,12 @@ class SimulationConfig:
     seed: int = 7
     slot_ms: float = 1.0
     link_count: int = 3
-    flow_count: int = 20
+    flow_count: int = 50
     periods_ms: Tuple[int, ...] = (2, 4, 8, 16, 32)
-    packet_size_bits: Tuple[int, ...] = (800, 1200, 2400, 4800, 9600)
+    period_mode: str = "cyclic"
+    order_mode: str = "edf"
+    simple_periods: Tuple[int, ...] = (4, 8)
+    packet_size_bits: Tuple[int, ...] = (800, 1200, 1800, 2400)
     load_scale: float = 1.0
     deadline_ratio_min: float = 0.5
     deadline_ratio_max: float = 1.0

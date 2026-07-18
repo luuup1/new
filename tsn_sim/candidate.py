@@ -45,7 +45,7 @@ def build_candidates(
 ) -> Tuple[Dict[PacketKey, List[Candidate]], Tuple[PacketKey, ...]]:
     flows = {flow.flow_id: flow for flow in scenario.flows}
     candidates: Dict[PacketKey, List[Candidate]] = {key: [] for key in packets}
-
+#C2-C8
     for packet_key, packet in packets.items():
         flow = flows[packet.flow_id]
         for link in flow.available_links:
