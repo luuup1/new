@@ -43,6 +43,13 @@ from tsn_sim.bc import generate_demonstrations, bc_train
 #  Training Loop
 # =====================================================================
 
+def _save_curves(history, save_dir):
+    """Incrementally save training curves to JSON (survives Ctrl+C)."""
+    curves_path = os.path.join(save_dir, "training_curves.json")
+    with open(curves_path, "w") as f:
+        json.dump(dict(history), f, indent=2)
+
+
 def train(
     env: TSNSchedulingEnv,
     agent: DDQNAgent,
@@ -67,7 +74,8 @@ def train(
     no_improve_count = 0
     early_stopped = False
 
-    for ep in range(1, episodes + 1):
+    try:
+      for ep in range(1, episodes + 1):
         ep_start = time.time()
         state, info = env.reset()
         mask = env.action_masks()
@@ -169,6 +177,9 @@ def train(
             else:
                 no_improve_count += 1
 
+            # --- Incremental save: write training_curves.json every eval ---
+            _save_curves(history, save_dir)
+
             if verbose:
                 print(f"  [EVAL] ep={ep}  "
                       f"eff_peak={eval_metrics['eff_peak_mean']:.4f} +/- "
@@ -188,6 +199,15 @@ def train(
         if ep % save_interval == 0:
             save_path = os.path.join(save_dir, f"ddqn_ep{ep}.pth")
             agent.save(save_path)
+
+    except KeyboardInterrupt:
+        if verbose:
+            print(f"\n[INTERRUPTED] Saving training curves at ep={ep}...")
+        _save_curves(history, save_dir)
+        agent.save(os.path.join(save_dir, "ddqn_checkpoint.pth"))
+        if verbose:
+            print(f"  Saved to {save_dir}")
+        early_stopped = True
 
     final_path = os.path.join(save_dir, "ddqn_checkpoint.pth")
     agent.save(final_path)

@@ -76,6 +76,7 @@ def collect_rollout(
             "eff_peak": next_info.get("effective_peak_load", 0.0),
             "peak": next_info.get("peak_load", 0.0),
             "drop": next_info.get("drop_ratio", 0.0),
+            "delay": next_info.get("average_delay_ms", 0.0),
             "reward": ep_reward,
             "steps": ep_steps,
         })
@@ -87,18 +88,25 @@ def collect_rollout(
 #  Training loop
 # =====================================================================
 
+def _save_curves(history, save_dir):
+    """Incrementally save training curves to JSON (survives Ctrl+C)."""
+    curves_path = os.path.join(save_dir, "training_curves.json")
+    with open(curves_path, "w") as f:
+        json.dump(dict(history), f, indent=2)
+
+
 def train(
     env: TSNSchedulingEnv,
     agent: PPOAgent,
     *,
     total_episodes: int = 2000,
-    rollout_episodes: int = 8,
+    rollout_episodes: int = 10,  # 改为10：LCM(10,10)=10打印, LCM(10,50)=50评估, 和SAC频率一致
     epochs: int = 4,
     minibatch: int = 256,
     eval_interval: int = 50,
     save_interval: int = 200,
     save_dir: str = "checkpoints_ppo",
-    log_interval: int = 10,
+    log_interval: int = 10,  # rollout=10 → LCM(10,10)=10, 每10ep打印（和SAC一致）
     verbose: bool = True,
     patience: int = 5,
     min_episodes: int = 100,
@@ -110,26 +118,32 @@ def train(
     no_improve_count = 0
     early_stopped = False
 
-    while episodes_done < total_episodes and not early_stopped:
+    try:
+      while episodes_done < total_episodes and not early_stopped:
         ep_metrics = collect_rollout(env, agent, rollout_episodes)
-        episodes_done += len(ep_metrics)
         metrics = agent.update(epochs=epochs, minibatch=minibatch)
 
-        avg_eff = float(np.mean([m["eff_peak"] for m in ep_metrics]))
-        avg_peak = float(np.mean([m["peak"] for m in ep_metrics]))
-        avg_drop = float(np.mean([m["drop"] for m in ep_metrics]))
-        avg_reward = float(np.mean([m["reward"] for m in ep_metrics]))
+        # ---- Per-episode recording (unified format with SAC/DDQN) ----
+        for m in ep_metrics:
+            episodes_done += 1
+            history["episode"].append(episodes_done)
+            history["ep_reward"].append(m["reward"])
+            history["ep_eff_peak"].append(m["eff_peak"])
+            history["ep_peak"].append(m["peak"])
+            history["ep_drop"].append(m["drop"])
+            history["ep_delay"].append(m["delay"])
+            history["ep_steps"].append(m["steps"])
 
-        history["episode"].append(episodes_done)
-        history["ep_eff_peak"].append(avg_eff)
-        history["ep_peak"].append(avg_peak)
-        history["ep_drop"].append(avg_drop)
-        history["ep_reward"].append(avg_reward)
+        # PPO rollout-level metrics (fewer entries than per-episode data)
         history["policy_loss"].append(metrics.get("policy_loss", 0.0))
         history["value_loss"].append(metrics.get("value_loss", 0.0))
         history["entropy"].append(metrics.get("entropy", 0.0))
 
         if episodes_done % log_interval == 0 and verbose:
+            n = min(log_interval, len(history["ep_reward"]))
+            avg_reward = float(np.mean(history["ep_reward"][-n:]))
+            avg_eff = float(np.mean(history["ep_eff_peak"][-n:]))
+            avg_drop = float(np.mean(history["ep_drop"][-n:]))
             print(
                 f"Ep {episodes_done:>5d}/{total_episodes}  "
                 f"R={avg_reward:>7.3f}  "
@@ -160,6 +174,9 @@ def train(
             else:
                 no_improve_count += 1
 
+            # --- Incremental save: write training_curves.json every eval ---
+            _save_curves(history, save_dir)
+
             if verbose:
                 print(f"  [EVAL] ep={episodes_done}  "
                       f"eff_peak={eval_metrics['eff_peak_mean']:.4f} +/- "
@@ -176,6 +193,15 @@ def train(
 
         if episodes_done % save_interval == 0:
             agent.save(os.path.join(save_dir, f"ppo_ep{episodes_done}.pth"))
+
+    except KeyboardInterrupt:
+        if verbose:
+            print(f"\n[INTERRUPTED] Saving training curves at ep={episodes_done}...")
+        _save_curves(history, save_dir)
+        agent.save(os.path.join(save_dir, "ppo_checkpoint.pth"))
+        if verbose:
+            print(f"  Saved to {save_dir}")
+        early_stopped = True
 
     final_path = os.path.join(save_dir, "ppo_checkpoint.pth")
     agent.save(final_path)
@@ -229,7 +255,7 @@ def evaluate(env: TSNSchedulingEnv, agent: PPOAgent, num_episodes: int = 10):
 def main():
     parser = argparse.ArgumentParser(description="PPO training for 5G-TSN scheduling")
     parser.add_argument("--episodes", type=int, default=2000)
-    parser.add_argument("--rollout-episodes", type=int, default=8)
+    parser.add_argument("--rollout-episodes", type=int, default=10)
     parser.add_argument("--epochs", type=int, default=4)
     parser.add_argument("--minibatch", type=int, default=256)
     parser.add_argument("--lr", type=float, default=3e-4)
