@@ -75,7 +75,7 @@ class ReplayBuffer:
 
         return {
             "state":      torch.from_numpy(np.stack([t.state for t in batch])).float(),
-            "action":     torch.tensor([t.action for t in batch], dtype=torch.long),
+            "action":     self._stack_actions([t.action for t in batch]),
             "reward":     torch.tensor([t.reward for t in batch], dtype=torch.float32),
             "next_state": torch.from_numpy(np.stack([t.next_state for t in batch])).float(),
             "done":       torch.tensor([t.done for t in batch], dtype=torch.float32),
@@ -87,6 +87,13 @@ class ReplayBuffer:
 
     def __len__(self) -> int:
         return len(self._buf)
+
+    @staticmethod
+    def _stack_actions(actions):
+        """Stack actions into a tensor. Native: (B,) long. Dimred: (B, n_bits)."""
+        if isinstance(actions[0], np.ndarray):
+            return torch.from_numpy(np.stack(actions)).float()
+        return torch.tensor(actions, dtype=torch.long)
 
 
 # =====================================================================
@@ -246,9 +253,11 @@ class SACAgent:
         target_entropy_ratio: float = 0.5,
         max_alpha: float = 10.0,
         device: str = "cpu",
+        action_mode: str = "native",
     ):
         self.obs_dim = obs_dim
         self.n_actions = n_actions
+        self._action_mode = action_mode
         self.gamma = gamma
         self.tau = tau
         self.device = torch.device(device)
@@ -306,10 +315,22 @@ class SACAgent:
         state: np.ndarray,
         mask: np.ndarray,
         deterministic: bool = False,
-    ) -> int:
-        """Select an action given state and action mask."""
+    ):
+        """Select an action. Native: returns int. Dimred: returns (bits, logp)."""
         with torch.no_grad():
             s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
+            if self._action_mode == "dimred":
+                logits = self.policy(s)                 # (1, n_bits)
+                probs = torch.sigmoid(logits).squeeze(0)   # (n_bits,)
+                if deterministic:
+                    bits = (probs > 0.5).int().cpu().numpy()
+                    logp = self._bits_logprob(probs, torch.from_numpy(bits).float())
+                else:
+                    dist = torch.distributions.Bernoulli(probs)
+                    b = dist.sample()
+                    bits = b.int().cpu().numpy()
+                    logp = dist.log_prob(b).sum().item()
+                return bits, logp
             m = torch.from_numpy(mask).bool().unsqueeze(0).to(self.device)
             action, _ = self.policy.sample(s, m, deterministic=deterministic)
             return int(action.item())
@@ -323,6 +344,9 @@ class SACAgent:
         """
         if len(buffer) < batch_size:
             return {}
+
+        if self._action_mode == "dimred":
+            return self._update_dimred(buffer, batch_size)
 
         batch = buffer.sample(batch_size)
         state = batch["state"].to(self.device)
@@ -409,6 +433,102 @@ class SACAgent:
 
         self._step += 1
 
+        return {
+            "q1_loss": float(q1_loss.item()),
+            "q2_loss": float(q2_loss.item()),
+            "policy_loss": float(policy_loss.item()),
+            "q1_value": float(q1_pred.mean().item()),
+            "q2_value": float(q2_pred.mean().item()),
+            "alpha": self.alpha,
+            "entropy": float(entropy.item()),
+        }
+
+    # --- dimred helpers ------------------------------------------------
+
+    @staticmethod
+    def _bits_logprob(probs: torch.Tensor, bits: torch.Tensor) -> float:
+        """Sum of independent Bernoulli log-probs for a 7-bit action."""
+        return float(((bits) * torch.log(probs + 1e-8) +
+                      (1 - bits) * torch.log(1 - probs + 1e-8)).sum().item())
+
+    def _all_combos(self) -> torch.Tensor:
+        """All 2^n_bits binary combinations, cached on device."""
+        if getattr(self, "_combos", None) is None:
+            n = self.n_actions
+            idx = torch.arange(2 ** n, device=self.device)
+            combos = torch.zeros(2 ** n, n, device=self.device)
+            for i in range(n):
+                combos[:, i] = ((idx >> (n - 1 - i)) & 1).float()
+            self._combos = combos
+        return self._combos
+
+    def _update_dimred(self, buffer, batch_size):
+        """Factored SAC update for the 7-bit action space.
+
+        Actor outputs 7 per-bit Bernoulli logits; Q-networks output 7 per-bit
+        Q-values with joint Q = Σ_i q_bit[i] * bit[i]. V(s') and the policy
+        objective are computed by enumerating the 2^7 = 128 joint actions.
+        """
+        batch = buffer.sample(batch_size)
+        state = batch["state"].to(self.device)
+        action = batch["action"].to(self.device)        # (B, n_bits) 0/1
+        reward = batch["reward"].to(self.device)
+        next_state = batch["next_state"].to(self.device)
+        done = batch["done"].to(self.device)
+        alpha_val = self.log_alpha.exp()
+        combos = self._all_combos()                      # (K, n_bits)
+
+        # ---- V(s') over all joint actions ----
+        with torch.no_grad():
+            next_probs = torch.sigmoid(self.policy(next_state))          # (B, n)
+            logp_c = (combos.unsqueeze(0) * torch.log(next_probs.unsqueeze(1) + 1e-8) +
+                      (1 - combos).unsqueeze(0) *
+                      torch.log(1 - next_probs.unsqueeze(1) + 1e-8)).sum(-1)
+            logpi = logp_c                                      # (B, K)
+            pi = torch.exp(logpi)
+            qmin_bit = torch.min(self.q1_target(next_state),
+                                 self.q2_target(next_state))     # (B, n)
+            q_comb = (qmin_bit.unsqueeze(1) * combos.unsqueeze(0)).sum(-1)  # (B, K)
+            v_next = (pi * (q_comb - alpha_val * logpi)).sum(-1)
+            q_target = reward + self.gamma * (1.0 - done) * v_next
+
+        # ---- Q updates (joint Q = Σ q_bit * bit) ----
+        q1_pred = (self.q1(state) * action).sum(-1)
+        q1_loss = F.mse_loss(q1_pred, q_target)
+        self.opt_q1.zero_grad(); q1_loss.backward(); self.opt_q1.step()
+        q2_pred = (self.q2(state) * action).sum(-1)
+        q2_loss = F.mse_loss(q2_pred, q_target)
+        self.opt_q2.zero_grad(); q2_loss.backward(); self.opt_q2.step()
+
+        # ---- Policy update ----
+        probs = torch.sigmoid(self.policy(state))               # (B, n)
+        logp_cs = (combos.unsqueeze(0) * torch.log(probs.unsqueeze(1) + 1e-8) +
+                   (1 - combos).unsqueeze(0) *
+                   torch.log(1 - probs.unsqueeze(1) + 1e-8)).sum(-1)
+        logpi_s = logp_cs
+        pi_s = torch.exp(logpi_s)
+        qmin_s = torch.min(self.q1(state), self.q2(state))
+        q_comb_s = (qmin_s.unsqueeze(1) * combos.unsqueeze(0)).sum(-1)   # (B, K)
+        policy_loss = (pi_s * (alpha_val * logpi_s - q_comb_s)).sum(-1).mean()
+
+        self.opt_policy.zero_grad(); policy_loss.backward(); self.opt_policy.step()
+
+        # ---- Alpha ----
+        with torch.no_grad():
+            entropy = -(pi_s * logpi_s).sum(-1).mean()
+        if self.auto_alpha:
+            alpha_loss = (self.log_alpha * (entropy + self.target_entropy).detach()).mean()
+            self.opt_alpha.zero_grad(); alpha_loss.backward(); self.opt_alpha.step()
+            with torch.no_grad():
+                self.log_alpha.data.clamp_(min=np.log(0.01), max=np.log(self.max_alpha))
+
+        # ---- soft target ----
+        with torch.no_grad():
+            for p, p_t in zip(self.q1.parameters(), self.q1_target.parameters()):
+                p_t.data.mul_(1.0 - self.tau).add_(p.data, alpha=self.tau)
+            for p, p_t in zip(self.q2.parameters(), self.q2_target.parameters()):
+                p_t.data.mul_(1.0 - self.tau).add_(p.data, alpha=self.tau)
+        self._step += 1
         return {
             "q1_loss": float(q1_loss.item()),
             "q2_loss": float(q2_loss.item()),

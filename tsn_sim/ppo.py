@@ -46,6 +46,7 @@ class PPOAgent:
         value_coef: float = 0.5,
         grad_clip: float = 0.5,
         device: str = "cpu",
+        action_mode: str = "native",
     ):
         self.obs_dim = obs_dim
         self.n_actions = n_actions
@@ -56,6 +57,7 @@ class PPOAgent:
         self.ent_coef = ent_coef
         self.value_coef = value_coef
         self.grad_clip = grad_clip
+        self._action_mode = action_mode
         self.device = torch.device(device)
 
         self.actor = MLP(obs_dim, hidden_dims, output_dim=n_actions,
@@ -133,10 +135,26 @@ class PPOAgent:
 
     def select_action(
         self, state: np.ndarray, mask: np.ndarray, deterministic: bool = False,
-    ) -> tuple[int, float, float]:
-        """Return (action, log_prob, value)."""
+    ):
+        """Return (action, log_prob, value). Native: action is int.
+        Dimred: action is a (n_bits,) 0/1 array."""
         with torch.no_grad():
             s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
+            if self._action_mode == "dimred":
+                logits = self.actor(s)                 # (1, n_bits)
+                probs = torch.sigmoid(logits).squeeze(0)
+                value = self.critic(s).item()
+                if deterministic:
+                    bits = (probs > 0.5).int().cpu().numpy()
+                    b_t = torch.from_numpy(bits).float()
+                    logp = float(((b_t) * torch.log(probs + 1e-8) +
+                                  (1 - b_t) * torch.log(1 - probs + 1e-8)).sum().item())
+                else:
+                    dist = torch.distributions.Bernoulli(probs)
+                    b = dist.sample()
+                    bits = b.int().cpu().numpy()
+                    logp = dist.log_prob(b).sum().item()
+                return bits, logp, float(value)
             m = torch.from_numpy(mask).bool().unsqueeze(0).to(self.device)
             logits = self.actor(s)
             masked = self._mask_logits(logits, m)
@@ -154,7 +172,10 @@ class PPOAgent:
         self, state, action, logp, reward, value, next_value, done, mask,
     ) -> None:
         self._obs.append(state.astype(np.float32))
-        self._actions.append(int(action))
+        if isinstance(action, np.ndarray):
+            self._actions.append(action.copy())
+        else:
+            self._actions.append(int(action))
         self._logps.append(float(logp))
         self._rewards.append(float(reward))
         self._values.append(float(value))
@@ -169,7 +190,10 @@ class PPOAgent:
             return {}
 
         obs = torch.from_numpy(np.stack(self._obs)).float().to(self.device)
-        actions = torch.tensor(self._actions, dtype=torch.long, device=self.device)
+        if isinstance(self._actions[0], np.ndarray):
+            actions = torch.from_numpy(np.stack(self._actions)).float().to(self.device)
+        else:
+            actions = torch.tensor(self._actions, dtype=torch.long, device=self.device)
         old_logps = torch.tensor(self._logps, dtype=torch.float32, device=self.device)
         rewards = torch.tensor(self._rewards, dtype=torch.float32, device=self.device)
         values = torch.tensor(self._values, dtype=torch.float32, device=self.device)
@@ -213,10 +237,18 @@ class PPOAgent:
                 if len(mb) == 0:
                     continue
                 logits = self.actor(obs[mb])
-                masked = self._mask_logits(logits, masks[mb])
-                dist = torch.distributions.Categorical(logits=masked)
-                new_logp = dist.log_prob(actions[mb])
-                entropy = dist.entropy().mean()
+                if self._action_mode == "dimred":
+                    probs = torch.sigmoid(logits)              # (mb, n_bits)
+                    bits = actions[mb]                         # (mb, n_bits)
+                    new_logp = (bits * torch.log(probs + 1e-8) +
+                                (1 - bits) * torch.log(1 - probs + 1e-8)).sum(-1)
+                    entropy = -(probs * torch.log(probs + 1e-8) +
+                                (1 - probs) * torch.log(1 - probs + 1e-8)).sum(-1).mean()
+                else:
+                    masked = self._mask_logits(logits, masks[mb])
+                    dist = torch.distributions.Categorical(logits=masked)
+                    new_logp = dist.log_prob(actions[mb])
+                    entropy = dist.entropy().mean()
 
                 ratio = torch.exp(new_logp - old_logps[mb])
                 surr1 = ratio * advantages[mb]

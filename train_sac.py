@@ -94,15 +94,18 @@ def train(
         while True:
             # --- Action selection ---
             if total_steps < warmup_steps:
-                # Warmup: random valid action
-                valid = np.where(mask)[0]
-                if len(valid) > 0:
-                    action = int(np.random.choice(valid))
+                if agent._action_mode == "dimred":
+                    action = np.random.randint(0, 2, size=env.n_actions).astype(int)
                 else:
-                    action = 0
+                    # Warmup: random valid action
+                    valid = np.where(mask)[0]
+                    if len(valid) > 0:
+                        action = int(np.random.choice(valid))
+                    else:
+                        action = 0
             else:
-                # SAC policy
-                action = agent.select_action(state, mask, deterministic=False)
+                out = agent.select_action(state, mask, deterministic=False)
+                action = out[0] if isinstance(out, tuple) else out
 
             # --- Step ---
             next_state, reward, done, truncated, next_info = env.step(action)
@@ -111,7 +114,7 @@ def train(
             ep_steps += 1
             total_steps += 1
 
-            if action == 0 and not mask.any():
+            if not isinstance(action, np.ndarray) and action == 0 and not mask.any():
                 dropped += 1
 
             # --- Store transition ---
@@ -283,7 +286,8 @@ def evaluate(
         ep_reward = 0.0
 
         while True:
-            action = agent.select_action(state, mask, deterministic=True)
+            out = agent.select_action(state, mask, deterministic=True)
+            action = out[0] if isinstance(out, tuple) else out
             state, reward, done, _, info = env.step(action)
             mask = env.action_masks()
             ep_reward += reward
@@ -316,7 +320,7 @@ def _make_transition(state, action, reward, next_state, done, mask, next_mask):
     from tsn_sim.sac import Transition
     return Transition(
         state=state.astype(np.float32),
-        action=int(action),
+        action=action if isinstance(action, np.ndarray) else int(action),
         reward=float(reward),
         next_state=next_state.astype(np.float32),
         done=bool(done),
@@ -381,6 +385,9 @@ def main():
     parser.add_argument("--order-mode", type=str, default="random",
                         choices=["edf", "random"],
                         help="edf=固定EDF顺序(历史); random=随机顺序(在基线上进行,默认)")
+    parser.add_argument("--action-mode", type=str, default="native",
+                        choices=["native", "dimred"],
+                        help="native=Discrete(96)动作; dimred=结构化7位二值动作(动作空间降维)")
     parser.add_argument("--multi-scenario", action="store_true",
                         help="Train with diverse scenarios: each episode uses seed+ep_count")
     parser.add_argument("--save-dir", type=str, default="checkpoints")
@@ -416,6 +423,7 @@ def main():
         reward_delta=args.reward_delta,
         reward_zeta=args.reward_zeta,
         order_mode=args.order_mode,
+        action_mode=args.action_mode,
         multi_scenario=args.multi_scenario,
     )
 
@@ -424,7 +432,7 @@ def main():
     print(f"[Device] {device}" + (f" ({torch.cuda.get_device_name(0)})" if device == "cuda" else ""))
     agent = SACAgent(
         obs_dim=env.observation_space.shape[0],
-        n_actions=env.action_space.n,
+        n_actions=env.n_actions,
         hidden_dims=tuple(args.hidden_dims),
         lr=args.lr,
         gamma=args.gamma,
@@ -433,6 +441,7 @@ def main():
         auto_alpha=args.auto_alpha,
         target_entropy_ratio=args.target_entropy_ratio,
         max_alpha=args.max_alpha,
+        action_mode=args.action_mode,
         device="cuda" if torch.cuda.is_available() else "cpu",
     )
 
@@ -440,7 +449,7 @@ def main():
     print(f"SAC Training for 5G-TSN Scheduling")
     print(f"{'='*60}")
     print(f"  Obs dim:       {env.observation_space.shape[0]}")
-    print(f"  Action dim:    {env.action_space.n}")
+    print(f"  Action dim:    {env.n_actions} ({env.action_mode})")
     print(f"  Episodes:      {args.episodes}")
     print(f"  Warmup steps:  {args.warmup}")
     print(f"  Batch size:    {args.batch_size}")

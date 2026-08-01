@@ -1,0 +1,2394 @@
+
+===== PAGE 1 =====
+
+Ad Hoc Networks 170 (2025) 103783
+Contents lists available at ScienceDirect
+Ad Hoc Networks
+journal homepage: www.elsevier.com/locate/adhoc
+A 5G-TSN joint resource scheduling algorithm based on optimized deep
+reinforcement learning model for industrial networks
+Yang Zhanga, Lei Suna,* , Zhangchao Maa, Jianquan Wanga, Meixia Fua, Jinoo Joungb
+aSchool of Automation and Electrical Engineering, University of Science and Technology Beijing, China
+bDepartment of Human-Centered Artificial Intelligence, Sangmyung University, Republic of Korea
+A R T I C L E I N F O A B S T R A C T
+Keywords: As the Industrial Internet of Things (IIoT) evolves, the rapid growth of connected devices in industrial networks
+5G-TSN network generates massive amounts of data. These transmissions impose stringent requirements on network communi-
+End-to-End scheduling cations, including reliable bounded latency and high throughput. To address these challenges, the integration of
+DDPG algorithm
+the fifth-generation (5G) mobile cellular networks and Time-Sensitive Networking (TSN) has emerged as a
+Dynamic priority scheme
+prominent solution for scheduling diverse traffic flows. While Deep Reinforcement Learning (DRL) algorithms
+have been widely employed to tackle scheduling issues within the 5G-TSN architecture, existing approaches
+often neglect throughput optimization in multi-user scenarios and the impact of Channel Quality Indicators (CQI)
+on resource allocation. To overcome these limitations, this study introduces ME-DDPG, a novel joint resource
+scheduling algorithm. ME-DDPG extends the Deep Deterministic Policy Gradient (DDPG) model by embedding a
+Modulation and Coding Scheme (MCS)-based priority scheme. This improvement in computational efficiency is
+critical for real-time scheduling in IIoT environments. Specifically, ME-DDPG provides latency guarantees for
+time-triggered applications, ensures throughput for video applications, and maximizes overall system throughput
+across 5 G and TSN domains. Simulation results demonstrate that the proposed ME-DDPG achieves 100 % latency
+reliability for time-triggered flows and improves system throughput by 10.84 % over existing algorithms under
+varying Gate Control List (GCL) configurations and user ratios. Furthermore, due to the combination of MCS-
+based resource allocation scheme with DDPG model, the proposed ME-DDPG achieves faster convergence
+speed of the reward function compared to the original DDPG method.
+1. Introduction 10]. The combination of these technologies generates and processes
+larger volumes of data, demanding more advanced network infrastruc-
+IIoT constitutes a crucial technological foundation for promoting ture to handle various communication tasks. Hence, the development
+automation, enhancing intelligence within industrial production and and implementation of advanced industrial networks are essential for
+realizing smart manufacturing [1–4]. In modern manufacturing envi- achieving the goals of smart manufacturing, driving innovation, and
+ronments, numerous interconnected devices and systems, including maintaining competitive edge in the industrial sector [11].
+sensors, machinery, and control systems, rely on robust and efficient In industry scenarios, common data flows consist of time-triggered
+communication networks [5–7]. To ensure seamless interoperability flows and video flows. The time-triggered flow holds a higher priority
+among these heterogeneous devices, industrial networks are required to as it encompasses the information of control tasks of production
+support diverse communication protocols and standards. This capability equipment, such as the action instructions of mechanical arm and motor.
+is vital for real-time data acquisition, monitoring, and control, thereby This type of service is typically periodic, and imposes high requirements
+laying the groundwork for optimizing production processes, enhancing on transmission performance metrics such as latency, jitter and reli-
+operational efficiency, and ensuring safety [8]. With the integration of ability [12]. Specially, in the industrial low-latency scenario, the latency
+IIoT and artificial intelligence (AI), the demand for reliable, low-latency, between end-to-end devices is constrained to the millisecond range,
+and high-throughput communication has become more prominent [9, while jitter is kept within the microsecond range, and the transmission
+* Corresponding author.
+E-mail addresses: m202220765@xs.ustb.edu.cn (Y. Zhang), sun_lei@ustb.edu.cn (L. Sun), mazhangchao@ustb.edu.cn (Z. Ma), wangjianquan@ustb.edu.cn
+(J. Wang), mxfu1205@ustb.edu.cn(M. Fu), jjoung@smu.ac.kr(J. Joung).
+https://doi.org/10.1016/j.adhoc.2025.103783
+Received 27 July 2024; Received in revised form 24 December 2024; Accepted 24 January 2025
+Available online 26 January 2025
+1570-8705/© 2025 The Author(s). Published by Elsevier B.V. This is an open access article under the CC BY license ( http://creativecommons.org/licenses/by/4.0/ ).
+
+===== PAGE 2 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+success rate is required to reach 99.9999 %. In contrast, video flows, 2. Related works
+sampled by collecting devices, are used to facilitate intelligent
+decision-making in various IIoT-related businesses like target detection, 2.1. Overview of TSN scheduling mechanisms
+fault diagnosis, and remote monitoring. High-speed sampling causes
+video flows to consume more bandwidth resources, thus necessitating The IEEE 802.1 TSN task group has developed a series of standards to
+the network to provide throughput guarantees [11]. enable Ethernet-based networks to provide reliable real-time commu-
+To address the challenge of deterministic communication in indus- nication for both time-critical and non-time-critical flows. These stan-
+trial networks, the combination of 5 G and TSN has emerged as a solu- dards cover aspects such as time synchronization, traffic scheduling, and
+tion. 5 G provides large capacity, high speed, low latency, and high resource management, thereby facilitating the delivery of deterministic
+mobility. Specially, the 5 G system (5GS) is capable of offering over one services within local area networks (LANs).
+million connections per square kilometer, thereby laying a solid foun- In TSN, scheduling mechanisms are essential for ensuring bounded
+dation for IIoT transmission [13,14]. TSN, which is standardized by the latency. The primary methods are described as follows:
+IEEE 802.1 task group, represents an Ethernet-based networking tech- Time-Aware Shaping (TAS): Specified in IEEE 802.1Qbv. TAS is a
+nology. It can uniformly carry multiple services on the Ethernet physical time-triggered traffic scheduling mechanism ensuring deterministic
+layer, thus providing bounded latency and highly reliable transmission guarantee for real-time flows. Firstly, it maps flows with different QoS
+for high-priority industrial control services. With the deepening devel- requirements into various priority queues at the egress port of a TSN
+opment of the industrial Internet, the convergence of information switch. Secondly, as illustrated in Fig. 1, TAS utilizes synchronized
+technology (ICT) and operational technology (OT) has been accelerated. clocks to regulate the transmission periods of each queue, enabling
+TSN has emerged as a new industrial network technology that furnishes precise control of the timing and volume of frame transmissions. Each
+a unified and open network architecture for the construction of intelli- priority queue is controlled by a gate mechanism, which periodically
+gent factories. It is compatible with various industrial network protocols opens or closes based on a pre-configured time list called GCL. Based on
+and guarantees the unified support and reliable performance of IT op- GCL, packets in the high-priority queue are transmitted without inter-
+erations within factories. [15]. Moreover, TSN enables time-critical ruption from low-priority queues, ensuring that high-priority traffic
+applications to be transmitted at precise intervals. The time-triggered obtains guaranteed bandwidth and avoids queuing delays, making TAS
+scheduling paradigm ensures bounded latency, even when multiple particularly suitable for industrial applications requiring strict timing
+flows simultaneously compete for the same network resources [16]. guarantees.
+The 3GPP has incorporated TSN into 5GS since Release 16 [17]. Cyclic Queueing and Forwarding (CQF): Specified in IEEE
+Through the integration of 5G-TSN and by capitalizing on the charac- 802.1Qch. Although TAS can achieve “zero-jitter” and “no waiting
+teristics of two common data streams in industrial networks, the chal- scheduling” for hard real time flows, the GCL planning for large scale
+lenge of attaining deterministic end-to-end industrial communication switching nodes and massive flows is too complex. CQF proposes a
+can be addressed. This is achieved by guaranteeing latency for deterministic scheduling method that is easy to implement regardless of
+time-triggered flows, ensuring throughput for video flows, and maxi- network topology. CQF divides the time into time slots with the same
+mizing the overall throughput. According to 3GPP specifications, the duration T, named as cycle, meanwhile, two queues are deployed for
+5GS architecture has been enhanced with a series of new functionalities packet receiving and transmission. In one cycle, one queue is responsible
+to seamlessly integrate TSN and 5 G in both the control and data planes. for packet receiving but closed for packet transmission while another
+However, it should be noted that 5 G and TSN are based on funda- queue is only permitted for packet transmission. In the next cycle, the
+mentally different networking principles, such as differences in physical responsibilities of two queues are swapped, with the previous receiving
+layer techniques, MAC (Media Access Control) schemes, and upper-layer queue allowed to transmit packets received in the last cycle and the
+protocols. Therefore, to ensure deterministic communication between 5 previous transmission queue changed to receive packets. Following this
+G and TSN, it is crucial to make dynamic resource allocation decisions at manner, CQF can assure that the packet received in current cycle would
+the 5 G base station (gNB) based on the GCL status [18,19]. be forwarded to the next node in the next cycle. However, the jitter of
+flows adopting CQF is from 0 to 2T, which cannot provide absolutely no
+waiting scheduling as TAS. Furthermore, similar to TAS, CQF also needs
+time synchronization among nodes.
+Fig. 1. Time Aware Shaping in TSN Switch.
+2
+
+===== PAGE 3 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Asynchronous Traffic Shaper (ATS): Specified in IEEE 802.1Qcr. IEEE 802.1Qcc standards, the TSN-AF conveys the status of the 5G-TSN
+Unlike TAS and CQF, ATS doesn’t need time synchronization among bridge to the CNC and receives critical service information, including
+network nodes, which is suitable for large scale deterministic commu- flow periods, directions, packet specifications, and QoS requirements for
+nications. ATS is a flexible and efficient traffic shaping mechanism time-sensitive applications. Subsequently, the TSN-AF relays this QoS
+designed to handle diverse traffic patterns. Unlike traditional shaping information to the Policy Control Function (PCF) within the 5 G core
+mechanisms, ATS calculates an eligibility time for each packet upon network, facilitating the establishment of appropriate QoS profiles. In
+arrival. This eligibility time is related to the maximum allowable resi- the data plane, the Network-side TSN Translator (NW-TT) and the
+dence time in one switching nodes and determines when a packet can be Device-side TSN Translator (DS-TT) function as gateways between the
+transmitted, allowing the scheduler to avoid real-time recalculations TSN and 5 G domains. These translators are in charge of protocol
+during the transmission phase. Additionally, ATS enables hop-by-hop translation and data forwarding. Both NW-TT and DS-TT monitor the
+shaping, prevents the accumulation and amplification of bursts across status of time-sensitive applications, report to the TSN-AF, and obtain
+the network, and improves overall performance. ATS is particularly configuration details from the CNC through the TSN-AF. To manage
+suitable for time-sensitive networking scenarios with mixed-criticality flows and schedule resources, TAS is implemented within NW-TT and
+traffic, such as industrial automation, real-time control systems, and DS-TT. This enables data forwarding with precise timing and effectively
+audio-video streaming, where low latency, low jitter, and deterministic reduces delay for time-sensitive applications. The scheduling capabil-
+behavior are critical. Due to the lack of a time synchronization mecha- ities provided by TAS are vital for maintaining the synchronization and
+nism in ATS, it is relatively weak in terms of delay determinism and it is timing required in industrial applications. Through the integration of
+difficult to ensure stable low-latency services in various situations. these components and functionalities, the 5G-TSN architecture con-
+Therefore, among these mechanisms, TAS is particularly suitable for structs a robust framework with the capability of scheduling multiple
+scenarios requiring strict timing guarantees, such as industrial auto- services.
+mation [20]. The pre-configured and cyclically operated GCL de-
+termines the network resources available for each queue, effectively
+2.3. 5G-TSN joint scheduling
+managing transmission rates and ensuring that time-critical applications
+receive the necessary bandwidth and priority. Through the imple-
+Under the 5G-TSN integration architecture, end-to-end scheduling
+mentation of TAS, TSN ensures that the network can meet the stringent
+mechanisms are investigated to guarantee deterministic communica-
+requirements of industrial automation.
+tions for time-triggered traffics. However, when scheduling involves
+both 5 G and TSN domains, significant challenges arise. The funda-
+2.2. 5G-TSN integration architecture mental differences between 5 G and TSN, including their physical layer
+technologies and MAC protocols, contribute to the difficulty. Hence, 5G-
+The integration of TSN protocols into 5 G networks of great signifi- TSN joint scheduling is a cross-domain issue that requires the coordi-
+cance for supporting industrial applications with requirements of strict nation of resources in different network domains. Orthogonal Frequency
+timing and low-latency communication. As shown in Fig. 2, specific Division Multiplexing (OFDM) is a key technology in 5 G networks,
+functional entities are added to 5GS in both the control and data planes, known for its efficient use of spectrum utilization and interference
+thereby transforming the 5GS into a TSN bridge. This section focuses on resistance. In OFDM, the available bandwidth is divided into multiple
+the essential components and their roles in the 5G-TSN integrated ar- orthogonal sub-carriers that can be independently modulated and
+chitecture, with an emphasis on the coordination necessary for efficient demodulated, enabling high data rates and flexible resource allocation.
+joint scheduling. In the context of 5 G, the smallest unit of resource allocation is the
+In the TSN domain, there are two critical entities that facilitate ser- Resource Block (RB). RBs are allocated to users in both the time and
+vice management and network control: the Centralized User Configu- frequency domains, providing the granularity necessary to manage the
+ration (CUC) and the Centralized Network Configuration (CNC). The diverse requirements of different applications and services. Each RB
+CUC undertakes the tasks of collecting service requirements and iden- consists of a fixed number of sub-carriers over a specified number of
+tifying TSN capabilities at end stations. It acts as an intermediary be- OFDM symbols, ensuring efficient and flexible use of the available
+tween user requirements and network capabilities. Meanwhile, the CNC spectrum. This modular approach facilitates dynamic resource man-
+functions as the network controller, managing network topology dis- agement and enhances the overall network performance. Therefore,
+covery, transmission path selection, and GCL orchestration. To achieve scheduling in 5 G focuses on the RB allocation capability of gNB at the
+seamless compatibility with the CNC, namely the TSN Application air interface, while TSN emphasizes designing GCL configurations and
+Function (TSN-AF), is introduced in the 5 G control plane. Adhering to scheduling slots for different flows.
+Fig. 2. 5G System as a TSN Bridge.
+3
+
+===== PAGE 4 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+There are several existing studies investigating scheduling problems flows and CQI. Specific RBs are then identified after the acceptance of
+in 5G-TSN architecture. In [21], Martenvormfelde et al. presented a the binary output generated by the DDPG algorithm. This approach
+simulation model using OMNet++, detailing the transmission proced- utilizes the non-Markov CQI and reduces the action space of the DDPG
+ures in a 5G-TSN environment. However, this study does not propose algorithm. Specifically, this paper processes the multi-dimensional in-
+any specific scheduling schemes. In [22], Gintho¨r et al. logically divided formation of the dual domains, thereby highly reliably meeting the
+the SDN scheduler into 5G-side scheduler, TSN-side scheduler and low-latency requirements of time-sensitive services and enhancing the
+end-to-end scheduler. The scheduling algorithm under this framework overall throughput of the system.
+could achieve high resource utilization. In [23], Zhang et al. integrated
+Virtual Network Function (VNF) into 5G-TSN framework and designed a 3. System model and problem formulation
+mixed-integer linear programming resource scheduling method, which
+realized the decoupling of infrastructure and application functions, In 5G-TSN industrial networks, multiple applications coexist and
+satisfying the diversified QoS requirements of industrial applications transmit simultaneously. High-priority data streams, typically related to
+and achieving good performance in terms of delay and success rate. In critical tasks and real-time control applications, are known as time-
+[24], Cai et al. proposed a dynamic QoS mapping method based on the triggered flows. Medium-priority data streams may include di-
+improved K-means clustering algorithm and rough set theory to ensure agnostics, condition monitoring, and applications like remote surveil-
+the deterministic transmission of time-sensitive flows in the 5G-TSN lance and visual inspection. Video flows are considered medium priority
+network. Nazari et al. in [25] proposed a novel Incremental Joint due to their real-time transmission requirements and higher bandwidth
+Scheduling and Routing (IJSR) framework for 5G-TSN integration, of- demands. Our system model integrates both 5 G and TSN to form the
+fering a heuristic solution for deterministic communication. However, industrial network. Applications within this network are classified into
+those methods discussed above are difficult to apply to the large-scale two main types: time-triggered and video applications. It is assumed that
+and dynamic networks. 5G-TSN network consists of M TSN users and N video users, denoted as
+Currently, reinforcement learning (RL) has gained widespread two different flow sets Ft and Fv. For the ease of analysis, we assume that
+attention as an effective approach to address scheduling problems [26]. each terminal receives only one type of flow. The set of all flows is
+RL can effectively model the relationship between the state and action. presented as F, F =Ft ∪Fv. The currently scheduled flow is denoted as i,
+Wang et al. in [27] proposed a hierarchical particle swarm optimization ∀i ∈ F. In a 5G-TSN industrial network, time-triggered flows demand
+algorithm (DQHPSO) with double Q-learning to find optimal solutions stringent end-to-end latency limits, while video flows require minimum
+for 5G-TSN joint scheduling. However, it only focuses on time-triggered throughput guarantees. The definitions and specific QoS requirements
+flows and does not consider other types of services. The work by Yang for these applications are detailed below:
+et al. in [28] developed a GCN-based deep reinforcement learning (DRL) { }
+method to solve the joint optimization target, but it didn’t consider the 5 Ft = ft,1 , ft,2 , …,ft,M (1)
+G domain and would face action space aggregation of DRL in large-scale
+{ }
+n
+ca
+e
+t
+t
+i
+w
+on
+or k
+p
+s
+r
+.
+o
+I
+b
+n
+le
+[
+m
+29
+(
+]
+O
+,
+F
+P
+A
+ra
+P
+d
+)
+o
+i
+s
+n
+-G
+A
+ar
+T
+z
+S
+o
+-
+n
+b a
+e
+s
+t
+e
+a
+d
+l .
+a
+a
+sy
+d
+n
+d
+c
+re
+h
+s
+r
+s
+o
+e
+n
+d
+o
+t
+u
+h
+s
+e
+n
+o
+e
+n
+tw
+lin
+o
+e
+r k
+fl
+s
+o
+.
+w
+It
+a
+p
+l
+r
+lo
+e-
+- Fv = fv,1 , fv,2 , …,fv,N (2)
+sented a RL solution that combines data-driven techniques with
+analytical models to enhance the network operator’s revenue. Li et al. di <dqos ∀i∈Ft (3)
+investigated the co-design of flow scheduling in 5 G and TSN [30],
+implementing 5G’s grant-free configured-grants (CGs) and TSN’s CQF thi ≥thmin ∀i∈Fv (4)
+mechanisms. In [31], Zhu et al. proposed a DDPG algorithm, which
+delayed the transmission of time-triggered flow as much as possible and
+where di is the maximum end-to-end delay of flow i in Ft in the 5 G
+encouraged the transmission of video flows to improve the throughput
+system, and dqos is the latency requirement of Ft; thi is the achieved
+of the 5G-TSN system. However, it fails to address scenarios where
+average throughput of the scheduled flow i in Fv, and thmin is the minimal
+time-triggered flows have sufficient resources, do not need to be post-
+throughput requirement of Fv.
+In 5 G communication systems, for the reliable transmission of time-
+poned the scheduling. and it also lacks a detailed allocation method for
+sensitive data, the adaptive MCS is adopted. MCS maps different Signal-
+user scheduling. In [32], Feng et al. proposed a dynamic scheduling
+to-Interference plus Noise Ratio (SINR) to corresponding values, which
+method based on a Delay-based Proportional Fairness (DPF) algorithm
+combine modulation methods and the coding rate of Forward Error
+to balance low latency and fairness in resource allocation, but the
+Correction (FEC) in physical layer. Common modulation methods
+improvement of the throughput by this algorithm is not significant.
+Based on the current state-of-the-art on 5G-TSN joint resource include Binary Phase Shift Keying (BPSK) with strong anti-interference
+ability but a low data rate using two phases for modulation, Quadra-
+scheduling, it can be observed that joint scheduling is traditionally
+modeled as a non-deterministic polynomial (NP-hard) problem, then ture Phase Shift Keying (QPSK) balancing anti-interference ability and
+data rate using four phases, 16-level Quadrature Amplitude Modulation
+transformed into optimization problems and solved by heuristic algo-
+rithms or intelligent algorithms. However, due to the complexity of (16-QAM) providing a higher data rate under higher SINR conditions by
+combining amplitude and phase, and 64-level Quadrature Amplitude
+nonlinear objective functions and multiple optimization factors,
+obtaining analytical solutions is challenging, and the design of numer- Modulation (64-QAM) achieving higher data transmission rates with 64
+different amplitude and phase combinations when the SINR is high.
+ical iterative algorithms significantly affects the resource scheduling
+performance. The methods discussed in [26–32] cannot simultaneously When transmitting data packets over a wireless channel, setting MCS
+based on CQI can enhance resistance to interference and signal attenu-
+consider large-scale networks, maximum throughput, lower action
+space, and dynamic CQI. This article proposes an adaptive 5G-TSN joint ation. Our model adopts adaptive MCS by translating the SINR to the
+required RB numbers for flow i in each Time Transmission Interval (TTI).
+scheduling method using an DDPG algorithm embedded a priority
+scheme. The proposed method considers the GCL setting in the TSN The mapping relationship from SINR to bytes permitted in one RB is
+shown in Table 1. The values in the table are set according to the rules
+domain, the characteristics of multiple applications, the number of
+defined in 3GPP, higher SINR corresponds to higher modulation order.
+available RBs, and the current CQI in the 5 G domain. The optimization
+Then, the scheduled throughput of flow i is calculated as:
+objectives are to reliably guarantee the latency requirements of
+∑
+t
+a
+i
+p
+m
+p
+e
+li
+-
+c
+c
+a
+ri
+t
+t
+i
+i
+o
+c
+n
+a
+s
+l
+,
+a
+a
+p
+n
+p
+d
+li c
+t
+a
+o
+t i
+m
+on
+a
+s
+x
+,
+i m
+to
+i z
+s
+e
+e c
+t
+u
+h
+r
+e
+e t
+o
+h
+v
+e
+e r
+m
+al
+i
+l
+n i
+t
+m
+hr
+u
+o
+m
+ug
+t
+h
+h
+p
+r
+u
+o
+t
+u g
+fo
+h
+r
+p u
+a
+t
+l l
+f o
+a
+r
+p p
+vi
+l
+d
+ic
+e
+a
+o
+- thi =
+T
+t=1
+RBt
+sc
+T
+heduled,i
+∗bt
+i (5)
+tions. Priorities are differentiated based on the characteristics of data
+4
+
+===== PAGE 5 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Table 1 and transmitted sequentially through DS-TT and TSN User Equipment
+Relationship of SINR, Modulation Method, MCS and Permitted Bytes per RB. (TSN-UE). Fv are scheduled by gNB and directly delivered to the Video
+SINR Range Modulation Bits withing related Permitted Bytes User Equipment (Video-UE). Packets of Ft are mapped into the GCL,
+(dB) Method with MCS per RB which is pre-defined in DS-TT. The transmission duration for the time-
+<10 QPSK 4 84 triggered queue is 1 TTI, indicating that the ON/OFF state alternates
+10–20 16-QAM 12 252 in each TTI. The detailed scheduling procedures are as follows:
+>20 64-QAM 20 420
+Step 1: At the start of a TTI, the agent gathers environment infor-
+mation, including the GCL state of the time-triggered queue in DS-TT
+Assuming scheduling begins from the 1st TTI, where each TTI has a
+and the status of each active flow’s queue in gNB, such as the number
+period of T, RBt sheduled,i denotes the actual number of RBs scheduled for of queued packets and the queuing delay for each flow. The agent is
+flow i, and bt represents the number of bytes per RB according to the
+i physically located in the gNB and receives the queue state from the
+relevant MCS. Thus, it can be inferred that with the variation of the CQI
+gNB via an internal interface, while the CQI and GCL state are re-
+at each moment, btcorresponding to each data stream will change when
+i ported by the UE through radio signaling. Additionally, each user
+crossing the critical values, and the corresponding throughput will
+generates a variable number of data packets, causing the number of
+change accordingly. To calculate the required number of RBs in each
+queued packets and queueing delay for each flow to change in each
+queue, the bits permitted in one RB are firstly calculated as:
+TTI.
+√̅̅̅̅̅̅̅̅̅̅̅
+mi =Blog
+2
+(1+gi )(cid:0) Q (cid:0)1(ε) V(gi ) (6) S
+sc
+te
+h
+p
+e d
+2
+u
+:
+l
+A
+in
+ll
+g
+a
+.
+p
+U
+p
+s
+l
+i
+i
+n
+c
+g
+a t
+i
+i
+n
+o
+f
+n
+o r
+p
+m
+ac
+a
+k
+ti
+e
+o
+t
+n
+s a
+g
+r
+a
+e
+t h
+b
+e
+u
+r
+f
+e
+f
+d
+er
+f
+e
+r
+d
+o m
+in
+U
+th
+E
+e
+s ,
+g
+g
+N
+N
+B
+B
+f
+,
+o
+a
+r
+n
+d
+d
+o w
+DS
+n
+-
+l
+T
+in
+T
+k
+,
+the agent decides which flow to schedule based on the number of
+where ε is the tolerable bit error rate, B is the frequency bandwidth of
+one RB, Q (cid:0) 1(ε) and V(gi) are defined as: p
+dq
+a
+o
+c
+s
+k
+,
+e
+a
+t
+n
+s
+d
+a w
+se
+a
+l
+i
+e
+t
+c
+in
+ts
+g
+w
+tr
+h
+a
+i
+n
+c
+s
+h
+m
+fl
+is
+o
+s
+w
+io n
+c
+,
+a n
+se r
+b
+v
+e
+i c
+s
+e
+c h
+p
+e
+r
+d
+io
+u
+r
+l
+i
+e
+t
+d
+y,
+.
+o
+P
+b
+o
+t
+l
+a
+ic
+i
+y
+n
+-
+e
+N
+d
+e t
+t h
+o
+i,
+f
+a
+t
+n
+h
+d
+e
+∫∞ DDPG agent outputs binary scheduling actions Atdetermining which
+Q (cid:0)1(ε)=√ 1 ̅̅̅̅̅̅ e (cid:0)t 2 2 dt (7) user will be allocated RBs. The number of RBs is fi i nite, and the sum of
+2π
+ε allocated RBs should not exceed the available RBs. When the
+( ) following condition is satisfied:
+1
+V(gi )=(log
+2
+(e))2 1(cid:0)
+(1+gi )2
+(8) ∑k
+At i ∗RBt required,i ≤RBavailable (10)
+Then the required numbers of RB in flow i can be obtained from:
+i=1
+RBt required,i =
+si
+m
+×
+i
+li
+∀i∈F (9)
+where At i is the binary output of DDPG, RBt required,i indicates the required
+where si and li mean the packet size and packet number in queue of flow RB numbers of flow i calculated by Eq. (9), RBavailable is the number of
+i. available RBs. If Eq. (10)is not satisfied, the number of RBs is insuffi-
+As shown in Fig. 3, the process for 5 G and TSN joint scheduling for cient to allocate, it means that RBt scheduled,i ≤RBt required,i under At i =1
+downlink data transmission is based on an AI agent. This agent functions condition, and the scheduling process moves to Step 3. If Eq. (10) is
+as a logical entity within the gNB and is responsible for flexible resource satisfied, RBs allocated by the environment are sufficient to allocate, and
+s
+m
+c
+i
+h
+n
+e
+e
+d u
+th
+li
+e
+n
+a
+g
+p
+d
+p
+e
+r
+c
+o
+i
+p
+si
+r
+o
+ia
+n
+t
+s
+e
+.
+“
+T
+a
+h
+c
+e
+t io
+ag
+n
+e
+”
+n
+.
+t
+I n
+l e
+t
+a
+h
+r
+i
+n
+s
+s
+p
+f
+r
+r
+o
+o
+c
+m
+es s
+t
+,
+h
+F
+e
+t
+e
+a
+n
+r
+v
+e
+i
+s
+r
+c
+o
+h
+n
+e
+m
+d
+e
+u
+n
+le
+t
+d
+t o
+b y
+d e
+g
+t
+N
+er
+B
+- RBt scheduled,i can be assigned as:
+Fig. 3. Scheduling Process.
+5
+
+===== PAGE 6 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+{
+RBt scheduled,i = RBt re 0 quired,i i i f f A A t i t = = 1 0 (11) of DRL model to replace its continuous action space.
+i 4. Resource scheduling algorithm based on ME-DDPG model
+Step 3: MCS-based priority calculation and scheduling decision- 4.1. Markov model of DDPG
+making. In current TTI, flows are divided into three types: urgent
+Ft, Fv, and non-urgent Ft. Within each type of data flow, RBs are In RL, the fundamental aim is to seek an optimal policy which
+allocated in order of descending MCS levels. For the queues that maximizes the cumulative rewards obtained from the environment [33].
+executed “1" in Step 2, RBs are first allocated to Ft whose latencies are DRL analyzes environmental data for the purpose of making decisions
+close to QoS requirements, referred to urgent Ft. The remaining RBs and attaining desired rewards. Deep Q-learning conventionally involves
+are then distributed to Fv based on their MCS levels. When the MCS multiple dimensions of Q-values corresponding to each action. In
+levels of data packets are identical, RBs are allocated based on queue contrast, DDPG, which stem from the Actor-Critic framework, is
+length. If any RBs remain not allocated, they are then assigned to designed to improve policy optimization efficiency and computational
+non-urgent Ft in order of MCS levels. Once the number of RBs to be speed over that of standard DRL. The actor-network in DDPG learns a
+allocated is determined, transmission can proceed accordingly, gNB deterministic policy, enabling it to map extensive states to actions,
+transmits data packets to UEs, and the allocated resources are thereby facilitating fine-grained control outputs. A DDPG-based
+configured for packet delivery of each eligible flow. resource scheduling algorithm is developed to ascertain the optimal
+result, rendering it well-suited for tasks involving multiple users. The
+Once the agent allocates radio resources to the corresponding flow, Markov Decision Process (MDP) supplies the mathematical structure for
+the environment changes, including the GCL state in DS-TT, the queue DDPG, consisting of state space S, action space A, transition probability
+state in gNB, and the channel state in the UE. The agent then learns new P and instantaneous reward γ. These elements form the tuple (S,A,P,γ).
+states and makes the suitable actions for the next TTI. This means that Thus, a suitable MDP model is necessary to effectively handle the
+the Step 1 to 3 will be performed periodically in each TTI. As previously formulated problem. Based on the previous discussion, an MDP model
+discussed, the agent functions as a scheduler to balance QoS between Ft customized for the optimization problem specified in Eq. (14) is con-
+and Fv through joint optimization of radio resource allocation. The structed. Through iterative training, the optimal policy is obtained to
+scheduling objective in this article is to ensure solid latency guarantees maximize the expected reward.
+for Ft, minimum throughput guarantees for Fv, and maximum total In MDP model, the state represents an observation of the current
+throughput. To achieve these goals, the utility function of flow i at the tth environment, upon which the agent makes decisions. The future state
+TTI is defined as: depends solely on the current one, adhering to the memoryless property.
+{(cid:0) ) In this research, the state is defined based on the information of each
+Ui (t)= dqos (cid:0) di (cid:0) dGC
+0
+L ∗(thi (cid:0) thmin ) if di ≤d
+o
+qo
+t
+s
+h
+a
+er
+n
+w
+d
+is
+t
+e
+hi ≥thmin a
+q
+p
+u
+p
+eu
+li
+e
+c a
+i
+t
+n
+i o
+t
+n
+h e
+q u
+D
+e
+S
+u
+-
+e
+T T
+in
+. S
+th
+p
+e
+e c
+g
+i
+N
+fi
+B
+ca
+a
+ll
+n
+y
+d
+,
+t
+t
+h
+h
+e
+e
+G
+st
+C
+a
+L
+te
+s e
+sp
+tt
+a
+in
+ce
+g s
+i s
+f o
+d
+r
+e
+t
+fi
+h
+n
+e
+e
+t
+d
+im
+a
+e
+s:
+- triggered
+(12) { }
+S= RBexp , L, Dnor , G (15)
+where dGCL represents the delay caused by GCL.
+dGCL = { 1 0 i∈Ft i ∩ ∈ G F C t L ∩ (t G ) C = L( 1 t) o = r∀ 0 i∈Fv (13) w r
+q
+e
+u
+h q
+e
+e u
+u
+r i
+e
+e r
+i
+e
+n
+e d a
+g
+c f h
+p
+o
+a
+r e
+c
+l e
+k
+e a
+e
+m c
+t
+e h
+n
+n
+u
+q t
+m
+u o e f
+b
+u S
+e
+e
+r
+i
+.
+s a
+G
+a n d v
+d
+e
+e
+i c s
+n
+t o
+o
+c r
+t
+a .
+e
+l R
+s
+c u B
+th
+l e a x
+e
+t p e
+G
+r d e
+C
+p b
+L
+r y e
+s
+s
+t
+E e
+a
+n q
+te
+. t s (
+i
+t
+n
+9 h ) e
+D
+. n
+S
+L u
+- T
+m d
+T
+e b n
+f
+e o
+o
+r t
+r
+o e
+t
+s f
+i m
+R th B
+e
+e s
+-
+triggered application. G = 1 means the GCL state of time-triggered
+w th h a e t r t e h e G C G L A ( T t) E r e is p o re p s e e n n t in s t c h u e r r G e C n L t T st T a I t e in in T T S S N N , o d t o h m er a w in is , e G G C C L( L t ( ) t ) = = 1 0 m . e d a G n C s L q th u e e u n e o r i m n a D li S z - e T d T q i u s e “ u O e P in E g N ” d , e a la n y d , e G a c = h 0 o f m w e h a i n c s h “ i C s L c O al S c E u D la ” t . e D d n a o s r : i ndicates
+is set to 1 only when the active flow is belonged to Ft and the GATE is
+clos
+I
+e
+n
+d
+E
+.
+q
+T
+.
+h
+(
+e
+1
+c
+2
+a
+)
+l
+,
+c
+s
+u
+in
+la
+c
+t
+e
+io
+t
+n
+h e
+o f
+p
+t
+a
+h
+c
+i
+k
+i
+e
+s
+t
+a
+s
+c
+i
+c
+z
+o
+e
+r
+o
+d
+f
+i n
+F
+g
+t i
+t
+s
+o
+s
+E
+m
+q
+a
+.
+l
+(
+le
+5
+r
+) .
+than that of the Fv,
+dnormalized,i =
+d
+d
+qo
+i
+s
+(16)
+priority transmission of Fv to should be encouraged to enhance the
+Based on the defined state space, the action space needs to be
+throughput under the strict delay guarantee of Ft. Therefore, the value of
+determined to complete the decision- making framework. As mentioned
+Ui(t) is higher when (dqos (cid:0) di (cid:0) dGCL) is aim to minimize the difference earlier, if the agent’s output action is the number of RBs scheduled for
+between dqosand di, and considering the GCL state of TSN. Ui(t) is posi-
+each flow, it may lead to a high-dimensional action space. To address
+tively correlated with thi of Fv as well. Assuming the system has K users this issue, the action space in DDPG is confined to binary values:
+to allocate RBs in current TTI, the discussed issue can be transformed as
+an optimization problem: A={pi } (M+N)∗1 pi ∈{0,1},i∈F (17)
+max
+∑K
+Ui (t) (14) w
+sc
+h
+h
+e
+e
+r
+d
+e
+u l
+a
+e d
+v
+i
+a
+n
+l u
+th
+e
+e
+o
+c
+f
+u r
+"
+r
+1
+e
+"
+n t
+in
+T
+d
+T
+ic
+I,
+a
+w
+te
+h
+s
+er
+th
+ea
+a
+s
+t
+a
+t h
+v
+e
+a lu
+c
+e
+o r
+o
+r
+f
+e s
+"0
+p
+"
+o
+i
+n
+n
+d
+d
+i
+i
+n
+c
+g
+a te
+fl
+s
+o
+o
+w
+t h
+w
+er
+i
+w
+ll
+is
+b
+e
+e
+.
+i=1
+Consequently, the RL model only needs to determine whether or not to
+subject to Eqs. (3), (4), (10)and (13). schedule each flow. For the queues determined to be allocated resources,
+The above optimization problem is non-convex and involves both how to calculate the specific number of RBs to be allocated will be
+continuous and discrete variables. In this case, the relationship between explained in the next section.
+the observation and resource allocation scheme is implicit, thus it is hard The reward function is designed to quantitatively describe the opti-
+to analytically solve the non-convex problem. But DRL model can find mization goal for RL training, guiding the model to learn a better policy.
+the relationship and optimize it. However, concerning the optimization It is designed according to the optimization target in Eq. (14)to provide
+problem discussed in this paper, it may lead to massive action space for guarantees for all flows in the 5G-TSN architecture and improve the
+DRL model. If the allocated RBs for each scheduled flows are directly set overall system throughput, which is influenced by CQI. It is expressed as:
+as the model’s output, it will impose a heavy computational consump-
+tion for searching the optimal. To address this issue, a priority scheme
+with low computational complexity is introduced into the training loop
+6
+
+===== PAGE 7 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+⎧
+⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎨
+(cid:0)
+(
+(
+1
+1
++
++
+d d
+d
+q
+d
+o i
+q
+s
+o i
+)
+s
+)
+∗
+∗
+φ
+φ
+i
+i
+d
+d
+i
+i
+≤
+>
+d
+d
+t
+t
+h
+h
+r
+r
+e
+e
+s
+s
+h
+h
+o
+o
+l
+l
+d
+d
+,
+,
+i
+i
+∈
+∈
+F
+F
+t
+t
+∩
+∩
+G
+G
+=
+=
+1
+1
+a
+a F
+a tr
+r
+r
+n
+v
+a
+e
+e
+d
+i
+r
+n
+y
+i
+i
+a
+d
+n
+,
+d e
+s
+i w
+e
+u
+f
+n s
+f
+R a
+t c
+fi
+i
+r B
+c e
+n
+c
+a n
+a
+i
+i v
+l
+e
+d
+n
+,
+a
+n
+i
+g i
+R
+l
+n
+t
+a
+,
+b
+B g
+o l
+a
+f e
+s o
+l
+a r
+a
+l
+r
+e r
+d r
+R
+e s
+e e
+o
+B
+s
+r a
+u u
+s
+o l
+r f
+l
+w
+c
+f
+fi
+o
+e
+c M
+c
+i l
+a
+i i
+l
+e
+C
+n
+t
+n
+e
+b
+s
+S d
+t u
+e
+.
+, f
+I b
+a
+t fi
+f
+h
+a
+l
+c
+t
+l
+e
+s
+o
+h
+i
+e
+e
+c
+r
+e d
+n e
+a
+M
+c m
+t
+o
+e
+y
+n C
+a
+d
+w i
+S t
+n
+t
+h
+i
+o
+i
+l
+l
+e
+n
+e
+l
+i
+u
+v
+g b
+r e
+r
+e R
+g
+q l s
+e
+B
+u
+p
+n
+o e
+s u
+t
+f u
+b a
+e a
+F
+r li e
+t
+s
+l p e
+h
+i
+t
+a
+n
+n
+h e
+r g
+e d
+t
+o
+n
+t
+.
+o
+r
+h
+d
+O
+f
+a
+.
+e
+l
+d
+n l
+r
+o
+a
+t
+o
+c
+t
+h
+a
+a
+f
+e t
+fl
+M
+e c
+o
+d o
+C
+w
+t n
+S
+o
+s
+-
+,
+R(φ i )= ⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎩
+(cid:0)
+( ( 1
+1
+(cid:0)
+(cid:0)
+2
+d d
+∗
+d
+q
+d
+o i
+q
+φ
+s
+o i
+)
+s
+i
+) ∗
+∗
+φ
+φ
+i
+i
+d
+d
+i
+i
+≤
+>
+d
+d
+t
+t
+h
+h
+r
+r
+e
+e
+s
+s
+h
+h
+o
+o
+∀
+l
+l
+d
+d
+i
+,
+,
+∈
+i
+i
+∈
+∈
+Fv
+F
+F
+t
+t
+∩
+∩
+G
+G
+=
+=
+0
+0
+(18)
+a
+n
+o r
+a
+i
+s s
+F
+b t
+:
+v
+h j
+m
+e T
+=
+m c
+a
+h t
+n
+⌊
+e i E v
+y
+R
+q p e
+p
+B
+. a
+a
+f (
+a
+c u
+v
+1
+c
+k
+a
+n
+k
+9
+i
+e
+la
+c
+e
+) t
+b
+t .
+t
+l
+s
+e
+i
+s
+R
+T o i
+(cid:0)
+z
+o
+B
+h n e
+f
+F
+e
+R
+F
+E
+v
+o r
+B
+e
+v
+q f f
+u
+a
+. F o
+r
+s
+g
+( v r
+e
+1
+p
+e i
+n
+s 2
+t
+,
+o
+)
+F
+l a
+s
+a
+t
+s
+f
+⌋
+a r
+i
+t
+b
+n g e
+l
+r e d
+e
+r a t
+i
+t l h
+s
+l h o e
+n
+a c
+e
+n r a
+c
+e t t
+e
+w i h
+s
+n a
+s
+a g
+a
+t r
+r
+d R o
+y
+f B f
+.
+u F s
+T
+n t t
+h
+, o c a
+i
+t
+s
+s u i o
+p
+r in n
+r
+g
+o
+d e o
+c
+n ic
+e
+f t a
+s
+t F
+s
+t h e t
+i
+e ,
+s
+d t D
+r
+r b
+e
+a D y
+p
+n P
+r
+b s
+e
+m G o
+s
+t
+e
+i h a t
+n
+(
+t l
+2
+t i
+t
+g n h
+e
+1
+o
+d
+g e
+)
+-
+(cid:0) )
+wher
+{
+e φ i is defined as: RBr = RBavailable (cid:0) RBurgentFt modRBFv (22)
+φ i = δ∗ 0 thi thi ≥ t t h h i m < in , th i m ∈ in , F i v ∈ or Fv ∀i∈Ft (19) where nFv represents the number of Fv that can be transmitted, RBFv is
+the number of RBs required for each flow of Fv, and RBr is the number of
+Eq. (18)expresses the requirement for Ft. Considering the reliability residual RBs. Then, the number of bytes corresponding to RBr is
+of the di, its upper bound of it is restricted to dthreshold, which is lower compared with thmin. If it is less than thmin, RBr is allocated to trans-
+than dqos in Ft. Exceeding this threshold will incur penalties. Moreover, mitting non-urgent Ft:
+considering the characteristic of TSN domain, rewards increase when ⌊ ⌋
+t
+r
+h
+ew
+e
+a
+G
+r
+C
+d
+L
+i n
+i
+c
+s
+r
+o
+e
+p
+as
+e
+e
+n
+s
+a
+o
+n
+r
+d
+d e
+d
+c
+e
+r
+c
+e
+r
+a
+e
+s
+a
+e
+s
+s
+e
+i s
+w
+p
+h
+o
+e
+s
+n
+it i
+i
+v
+t
+e
+i
+l
+s
+y
+c
+c
+l
+o
+o
+r
+s
+r
+e
+e
+d
+la
+.
+t
+T
+e
+h
+d
+e
+w
+m
+ith
+ag
+d
+n
+i.
+i t
+I
+u
+n
+d
+E
+e
+q .
+o
+(
+f
+1
+t
+9
+h
+)
+e
+,
+nnon(cid:0)urgentFt =
+R
+R
+B
+B
+F
+r
+t
+(23)
+δ is implemented to control the deviation between different φ i, aiming to
+keep the range of different reward values within 1000. thi is required to
+w
+sc
+h
+h
+e
+e
+r
+d
+e
+u l
+n
+e
+n
+d
+o
+.
+n(cid:0)urgentFt is the packet number of non-urgentFt that can be
+be higher than thmin in Fv, otherwise, the reward is set to zero.
+Otherwise, RBr is used to partially transmit an additional Fv packet,
+For each reward value of Ft, the coefficient is always lower than 2.
+with the unfinished part of this packet being kept in the scheduling
+However, for flows in Fv that thi ≥thmin, the coefficient δ is directly set to
+queue for future transmission. For non-urgent Ft, resources are allocated
+2. Hence, the reward value for Fv is slightly higher than that for Ft. This
+first based on MCS levels, and then on queue length. If there are
+design considers that Fv have larger packet size, thereby encouraging the
+remaining RBs that are insufficient to meet the transmission re-
+scheduling of Fv while solidly ensuring the delay guarantee of Ft.
+quirements of a packet of Ft, these RBs are not utilized. After deter-
+mining the nFv and nnon(cid:0)urgentFt , the packets to be scheduled are
+4.2. MCS-Embedded priority scheme determined based on the priority mechanism, and the RBt scheduled,i for
+each queue is calculated accordingly.
+The DDPG algorithm makes 0–1 decisions to reduce the computa- Eqs. (18) and (19) show that the reward function reflects the
+tional space for determining the specific flows to be scheduled in this objective of maximizing throughput. To facilitates the DDPG algorithm
+in iterating towards a more optimal solution, this priority scheme is
+part. According to Eq. (5), thi is calculated based on CQI. According to
+employed to ensure the QoS for different types of data flows. Since
+Eqs. (13)and (15), maximizing thi is a component of the optimization
+throughput enhancement cannot be observed in current episode, so the
+objective, which influences the allocation strategies. Thus, CQI is sig-
+average throughput is maximized in each TTI.
+nificant in this optimization model. CQI is influenced by various factors,
+In 5 G OFDM, an example of RBs allocation sequence associated with
+including multi-path fading, multi-path interference, noise, etc. These
+factors show temporal and spatial variations, and there are correlations
+MCS-based priority scheme is shown in Fig. 4. Assuming each flow of Ft
+among them. Therefore, CQI is regarded as a non-Markov state and
+requires 1 mini-block, each flow of Fv requires 15 mini-blocks, thmin of
+cannot be directly included in the MDP state space of DRL. In Table 1,
+each flow in Fv requires 10 mini-blocks. This model first allocates re-
+CQI is mapped to the number of bytes per RB with related MCS bt. In this
+sources to urgent Ft to ensure the delay guarantee. Then it schedules the
+i flows of Fv, but the available RBs only support the transmission of 3
+section, MCS levels are utilized as the first priority to maximize the
+throughput and reduce the computation by replacing the DDPG’s
+flows. It is assumed that the unscheduled Fv contains one high-MCS flow
+and one medium-MCS flow, so a low-MCS flow will be scheduled. After
+continuous action space.
+Many data flows await scheduling in various users’ queue due to the
+determination, 8 mini-blocks remain, then the non-urgent flows of Ft are
+allocated to them. But if the number of remained blocks meets the thmin
+finite availability of RBs. In such circumstances, the transmission of Ft
+of Fv, a part of flow in Fv will be allocated to them.
+whose di is approaching their QoS should be prioritized. dthreshold is used
+Overall, the 5G-TSN joint resource scheduling action is decomposed
+to distinguish urgent Ft and non-urgent Ft to ensure the latency reli-
+into two components, one is executed through DDPG, and the other is
+ability. Head-of-line (HOL) timestamps denote the generation time of
+handled by the MCS-based priority method. The whole resource
+the data, by examining them in all Ft queues, flows are classified based
+scheduling process is detailed in Algorithm 1. Through iteration, the
+on their urgency. Specifically, for the flows that satisfy Eq. (20), then
+agent can select the channel with better CQI to allocate the limited re-
+they will be deemed as urgent Ft:
+sources, thereby improving various aspects of performance.
+tcurrent (cid:0) ttimestamp,i ≥dthreshold i∈Ft (20)
+Algorithm 1. Resource scheduling process based on the ME-DDPG
+1. Initialize replay memory
+where tcurrent is the current time in system, ttimestamp,i is the timestamp of
+2. Initialize the channel model and DDPG model
+flow i which belongs to Ft. Conversely, for flows whose differences of 3. for episode=1,2…E do
+tcurrent and ttimestamp,i are less than dthreshold, they are considered non- 4. Initialize the packet model
+urgent Ft. 5. fort =1,2…Step do
+The sum of RBs required by the urgent Ft, namely RBurgentFt . It is 6. Given the current state St.
+compared with RBavailable in the environment. If the RBs in environment (continued on next page)
+7
+
+===== PAGE 8 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Fig. 4. An Example of Allocation Sequence of Specific RBs.
+(continued)
+Table 2
+7. Get binary action At from π(St; Θ). // binary outputs determine which flows
+Simulation parameters.
+are scheduled or not
+8. if Eq. (10)is satisfied then Simulation parameters Value
+9. RBt scheduled,i ←RBt required,i
+The probability of packets arriving 0.8
+10. else
+within each TTI
+11. for each queue in the unscheduled queues of Ft do // unscheduled queues are
+The number of packets arriving The number is valued from 1 to 3, followed by
+those where At i =1 within each TTI a uniform distribution
+12. Determine urgent Ft and non-urgent Ft using Eq. (21).
+Packet size of time-triggered flow 50 Bytes
+13. end for
+Packet size of Video Flow 1000 Bytes
+14. Calculate the RBurgentFt .
+gNodeB Transmit power 20 dBm
+15. if RBavailable (cid:0) RBurgentFt <0 then Channel Noise power (cid:0) 90 dBm
+16. Determine urgent Ft to be scheduled based on two-tier priority scheme Subcarrier interval 15 kHz
+(MCS level and queue length) dqos 10ms
+17. Publish a warning of resource insufficiency. dthreshold 8.5ms
+18. else thmin 400 Bytes
+19. All urgent Ft are considered for immediate scheduling. α 0.01
+20. Calculate nFv and RBr using Eq. (22). β 0.01
+21. Determine Fv to be scheduled based on two-tier priority scheme. δ 0.001
+22. if RBr >RBthmin then Discount Factor γ 0.9
+23. RBr used to transmit a part of additional Fv, the remainder kept in queue. Episode number 500
+24. else TTI number in each episode 500
+25. RBr used to schedule the non-urgent Ft, using Eq. (23)to attain nnon(cid:0)urgentFt . Batch Size 32
+26. Determine non-urgent Ft to be scheduled based on two-tier priority scheme.
+27. end if
+28. end if Rayleigh distribution with a standard deviation of 1.0. The distance
+29. Calculate RBt scheduled,i in each queue based on the determined flows. between the gNB and UE is subject to a uniform distribution ranging
+30. end if
+31. Follow the RBt scheduled,i to allocate RBs to each flow i and get reward Rt(φ i) with f a r n o d m t h 0 e t o n o 1 i s [ e 3 4 p ] o . w A e d r d o it f i o th n e a l c l h y a , t n h n e e t l r i a s n (cid:0) sm 90 is d si B o m n . p T o h w e e s r u o b f - g c N ar B r i i e s r 2 s 0 p a d c B i m ng ,
+Eq. (18).
+32. Transit to the next state St +1. set in this study is 15 kHz, which corresponds to a TTI period of 1 ms.
+33. Store (St,At,Rt(φ i),St +1). The dqos of Ft is 10ms. In the reward function in Eq. (18), the delay
+34. Update the DDPG network. threshold of Ft is dthreshold, and exceeding this threshold results in a
+35. end for
+36. end for
+penalty to the reward value. And according to Eq. (2) and Eq. (19), thmin
+of each flow in Fv is set to 400 Bytes. α and β represent the learning rates
+of the actor network and the critic network. γ is the discount factor. In
+whole model training, we have set 500 episodes and each episode has
+500 TTI.
+5. Simulation results and discussion
+Table 3presents the architecture of ME-DDPG. The Actor network
+includes an input layer with a fully connected structure of N_UE×4 and
+5.1. Simulation parameters
+ReLU activation function, followed by a normalization layer; a hidden
+layer with N_UE×4 ×5, and ReLU activation function, also followed by a
+Table 2presents the simulation parameters. The UE model follows a normalization layer; and an output layer with N_UE×1 using a Tanh
+Bernoulli distribution with a probability of 0.8 for generating new data
+activation function. The Critic network consists of an input layer with
+packets in each TTI. According to 3GPP TS 22.104, time-triggered ap- N_UE×5 and ReLU activation function, followed by a normalization
+plications generate smaller data packets, while video applications layer; a hidden layer with N_UE×5 ×5 and ReLU activation function,
+generally produce larger ones. Therefore, the packet size in Ft is set to 50
+also followed by a normalization layer; and an output layer with a single
+bytes and that in Fv is set to 1000 bytes. The channel model follows a
+8
+
+===== PAGE 9 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Table 3 The network simulation generates packets based on the number of
+Network parameters. users, which affects the experimental results. Fig.5illustrates the num-
+Layers Actor network Critic network ber of packets per episode under two configurations: the minimum
+number of users (|Ft|: |Fv| =2: 7) and the maximum number of users (|
+Input layer F
+R
+u
+e
+l
+L
+l
+U
+y c
+N
+o
+o
+n
+n
+n
+l
+e
+in
+ct
+e
+e
+a
+d
+r
+l
+a
+a
+c
+y
+t
+e
+iv
+r
+a
+(
+t
+N
+io
+_
+n
+U E
+fu
+*
+n
+4
+c
+)
+tion
+Fully connected layer (N_UE*5) Ft|: |Fv| = 12: 12). Through calculation, the standard deviation of
+Normalization Layer packets per episode in the minimum-user scenario remains within 10 %
+Hidden Fully connected layer (N_UE*4 Fully connected layer (N_UE*5 of the average, indicating steady performance. Similarly, in the
+layer ×5) ×5) maximum-user case, the deviation remains within 5 %, which is further
+ReLU Nonlinear activation function
+stable.
+Normalization Layer
+Output Fully connected layer (N_UE*1) Fully connected layer (1) To ensure fairness and consistency in algorithm comparisons, the
+layer Tanh Nonlinear activation —— same random seed was used for packet generation after achieving sta-
+function bility in packet counts. This approach eliminates errors caused by the
+randomness and ensures that all algorithms are compared under iden-
+tical testing conditions, making the evaluation results more reliable and
+unit.
+reproducible.
+To evaluate the impact of different GCL settings in DS-TT on 5 G
+scheduling, three distinct GCL schemes are compared. The first scheme
+alternates the time-triggered queue state between “ON” for one TTI and
+5.2. Simulation results
+“CLOSE” for the next, represented as “0101". In the second scheme, the
+GCL state changes every two TTIs, denoted as “0011". The third scheme
+To evaluate the performance of different algorithms and configura-
+selects the “ON” state with a probability of 0.5, which is named as
+tions under diverse scenarios, extensive simulations were conducted.
+“random.”
+The results are presented and analyzed across multiple dimensions,
+In this study, six user configurations are considered for simulation for
+including reward stability, latency performance, reliability, and
+joint resource scheduling, including 2 time-triggered users with 7 video
+throughput.
+users (|Ft|: |Fv| =2: 7 ≈0.286), 3 time-triggered users with 9 video users
+The DDPG-based algorithm proposed in [31] shows that this algo-
+F (| t F |: t | | : F | v F | v = | = 5: 3 1 : 0 9 = ≈ 0 0 .5 .3 ), 3 7 3 ) t , i m 5 e t - i t m ri e g - g tr e i r g e g d e u re s d er u s s w er it s h w 1 i 1 th v 1 id 0 e o v i u d s e e o r s u ( s | e F r t s | : ( | | r w it h h i m le b a e ls t o te r e x g h u i a b r i a ti n n t g e e g s r t e h a e t e d r q o u s n o i f v F e t r s a a n l d it y p . r o T m hi o s t e a s l g th or e i t t h h m ro u e g m h p p l u o t y o s f t F h v e ,
+Fv| =7: 11 ≈0.636), 9 time-triggered users with 12 video users (|Ft|: |
+ordinary DDPG algorithm (hereafter referred to as O-DDPG), where the
+Fv| =9: 12 =0.75) and 12 time-triggered users with 12 video users (|Ft|:
+reward function is designed to postpone the time-triggered flows from
+|Fv| =12: 12 =1). As the total number of users increases, the proportion
+approaching their QoS limits as much as possible, thereby promoting the
+of time-triggered flow increases.
+transmission of video flows. After the DDPG algorithm makes binary
+Fig. 5. Packet Number Vs Episode.
+9
+
+===== PAGE 10 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+decisions for resource allocation, specific assignments are simply made Table 4
+according to the proportion of the RB’s number required in each queue. Comparison of Reward Value.
+However, this approach does not consider the impact of channel quality User Algorithm Average Convergence Stable
+and the potential negative effect on the reliability of time-triggered Configuration Reward Speed (step) Reward
+flows due to the postpone. Compared with the O-DDPG, ME-DDPG has |Ft|: |Fv| =2: 7 O-DDPG 0.6407 118 0.6857
+fewer neural network layers for two-dimensional action output and ​ ME-DDPG 0.8877 85 0.9882
+modifies the reward function. |Ft|: |Fv| =3: 9 O-DDPG 0.7467 49 0.7959
+The DPF-based algorithm proposed in [32] addresses the resource ​ ME-DDPG 0.8796 92 0.9873
+scheduling problem in URLLC scenarios by integrating a pricing mech-
+|Ft|: |Fv| =5: 10 O-DDPG 0.7629 79 0.8135
+​ ME-DDPG 0.8818 90 0.9882
+anism and non-cooperative game theory. By incorporating delay con- |Ft|: |Fv| =7: 11 O-DDPG 0.6966 195 0.7565
+straints into the utility function, this algorithm effectively balances ​ ME-DDPG 0.8801 89 0.9872
+transmission reliability, scheduling delay, and fairness, while dynami- |Ft|: |Fv| =9: 12 O-DDPG 0.7403 146 0.7441
+cally maximizing throughput. However, its reliance on static traffic ​ ME-DDPG 0.8812 98 0.9908
+priorities may fail to adapt to dynamic channel variations, potentially
+|Ft|: |Fv| =12: O-DDPG 0.8043 48 0.8092
+12
+limiting the throughput of lower-priority flows and impacting overall ​ ME-DDPG 0.8798 98 0.9877
+performance in scenarios with mixed traffic types.
+mean of all reward values over 500 episodes. This provides an overall
+5.2.1. Reward convergence and stability
+measure of the reward performance. Our algorithm attains a higher
+Since both the O-DDPG and ME-DDPG are RL algorithms, they first
+average reward in all user configurations.
+made a comparison in terms of the reward value.
+Convergence Speed: The convergence speed is determined by
+Fig.6 depicts the normalized reward convergence of O-DDPG and
+identifying the number of episodes for the reward values to reach a
+ME-DDPG under different user configurations, with the GCL set to
+“random” for both algorithms. Under all user proportions in Fig.6, the stable level, calculated as the point where the they first stabilize within a
+predefined threshold (in this case, 0.8) and remain stable for subsequent
+reward of the proposed algorithm can converge more smoothly than that
+iterations. Although the O-DDPG sometimes converges faster, in the
+of the O-DDPG. It reflects that the reward function design in this article
+cases where it converges more slowly, it requires approximately twice
+is more reasonable, and the priority consideration is suitable for reward
+the number of episodes as the proposed algorithm.
+function. Concretely, the MCS-based strategy takes overall throughput
+Stable Reward: The stable reward is calculated as the mean reward
+and into account and divides Ft into urgent flows and non-urgent flows,
+value after the convergence point has been reached. This metric in-
+allowing it to make more informed decisions during training. Moreover,
+dicates the performance of the system once it has stabilized and can be
+a smoothly converging reward helps to reduce significant fluctuations in
+considered a measure of long-term performance. In this article, the
+the policy update process, making the model iteration process more
+average reward values in the last 100 episodes are chosen as the
+reliable. To quantitatively describe the reward value, the average
+convergence rewards. As shown in Table 4, the reward of proposed al-
+reward, convergence speed, and stable reward are calculated in Table 4.
+gorithm is indicated greater stability.
+The methods for calculating these metrics are described as follows:
+In Table 4, it can be observed that the algorithm proposed in this
+Average Reward: The average reward is computed by taking the
+Fig. 6. Reward Comparison Vs Episode.
+10
+
+===== PAGE 11 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+article outperforms the O-DDPG in terms of reward values. To further episodes and is plotted in Fig. 10. It is used to compare the latency
+analyze its performance, the reward values of the proposed algorithm is performance under different GCL settings and user configurations. The
+compared under different GCL settings, as depicted in Fig. 7. Specif- ME-DDPG selects channels with better CQI in resource-constrained ep-
+ically, the standard deviation of the reward values during the conver- isodes, achieving 100 % reliability in all scenarios and episodes. In
+gence process under different GCL settings is relatively small, which contrast, DPF and O-DDPG only occasionally achieves 100 % reliability.
+reflects its robustness in handling different network conditions. In RL, This result indicates that the proposed ME-DDPG can better guarantee
+the stabilization and near-convergence of the reward function suggest the delay of Ft, which is conducive to 5G-TSN transmission
+that the agent has gradually found a relatively stable strategy, enabling environments.
+it to continuously receive favorable feedback in a given environment.
+This implies that the agent’s understanding of the environment and its 5.2.4. Throughput performance
+action strategy has reached a relatively mature stage. Fig. 11illustrates the comparison of the average throughput under
+different user ratios and GCL settings. Each throughput value is calcu-
+5.2.2. Latency performance lated as the mean value over 500 episodes. When compared with O-
+In our models, time-sensitive services are not required to have the DDPG, the ME-DDPG enhances overall throughput at least 9.16 %, and
+lowest possible latency, as long as they remain within the acceptable when compared with DPF, the ME-DDPG achieves an overall throughput
+QoS range. Fig. 8 illustrates the comparison of average di of Ft under improvement in the range of 10.84 %. Among them, the throughput of Fv
+“random” GCL setting. It demonstrates that all the three algorithms can and that of Ft have both been significantly improved. Due to the average
+guarantee the QoS of Ft to a certain extent, but the ME-DDPG have an throughput is positively correlated with the increasing proportion of Fv
+edge in terms of latency optimization. It utilizes a more sophisticated in ME-DDPG. It is indicated that considering CQI and utilizing it in a
+mechanism for resource allocation and scheduling, which involves the priority scheme to resource allocation positively impacts throughput
+real-time analysis of conditions within both 5 G domain and the TSN improvement, enabling more video flows to be transmitted. Further-
+domain, thereby making more precise decisions on latency control. more, the algorithm consistently improves throughput performance
+Furthermore, as depicted in Fig. 9, it is evident that under diverse under different GCL settings. In IIoT scenarios, where a larger amount of
+GCL settings in the TSN domain, ME-DDPG consistently maintains the data needs to be transmitted, thus, the enhancement of the throughput
+latency within the QoS requirements. The algorithm leverages real-time transmission contributes to stronger network performance.
+analysis of network conditions and applies dynamic adjustments to
+prioritize urgent traffic flows Our approach not only guarantees the 6. Conclusion and future works
+required QoS but also suits well to varying network conditions, ensuring
+reliable performance in a wide range of scenarios. This study addresses the critical challenge of joint resource sched-
+uling in 5G-TSN networks, particularly in IIoT scenarios requiring
+5.2.3. Reliability performance deterministic transmission and efficient resource utilization. The pro-
+Reliability is defined as the proportion of di below to dqos in all posed ME-DDPG algorithm combines a DDPG model with an MCS-based
+Fig. 7. Reward of the Proposed Algorithm under Different GCL Settings.
+11
+
+===== PAGE 12 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Fig. 8. Comparison of Latency Performance.
+Fig. 9. Latency Comparison of Different GCL Settings.
+12
+
+===== PAGE 13 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+Fig. 10. Reliability Comparison.
+Fig. 11. Throughput Comparison.
+priority scheme to optimize latency and overall system through radio outcomes highlight the capability of ME-DDPG to balance multiple QoS
+resource allocation. By leveraging CQI to dynamically prioritize data objectives. This is particularly essential for large-scale deployment in
+flows and by reducing the action space, ME-DDPG achieves significant industrial scenarios, where diverse applications with various QoS re-
+computational efficiency and adaptability, making it highly suited for quirements coexist and should be satisfied.
+complex industrial environments. Simulation results demonstrate that While ME-DDPG demonstrates strong performance, further work is
+ME-DDPG can provide reliable latency guarantee for time-triggered needed to expand its applicability to more industrial scenarios. Appli-
+flows under various configurations, ensuring robust QoS for time- cations such as motion control, which require ultra-low and bounded
+sensitive applications. Additionally, ME-DDPG deployed an MCS-based jitter, present additional challenges. Even slight timing deviations in
+resource allocation optimization model within DDPG, which acceler- these contexts may lead to task failures or degraded product quality.
+ates reward function convergence and improves overall system Future research will focus on developing distributed decision-making
+throughput compared to baseline methods, effectively addressing the mechanisms among multiple agents to enable real-time synchroniza-
+bandwidth-intensive requirements of video flows. These research tion, improving jitter control while maintaining low latency and high
+13
+
+===== PAGE 14 =====
+
+Y. Zhang et al. A d H o c N e t w o r k s 170 (2025) 103783
+throughput. In those scenarios, motion control scenarios can be [11] M. Noor-A-Rahim, J. John, F. Firyaguna, H.H.R. Sherazi, S. Kushch, A. Vijayan,
+addressed by designating motion devices as DRL agents, synchronizing E. O’Connell, D. Pesch, B. O’Flynn, W. O’Brien, Wireless communications for smart
+manufacturing and industrial IoT: existing technologies, 5G and beyond, Sensors
+their local state information, and adapting their reward function based 23 (2022) 73, https://doi.org/10.3390/s23010073.
+on dynamic 5 G resources availability and GCL configuration in TSN. [12] L.L. Bello, W. Steiner, A perspective on IEEE time-sensitive networking for
+Additionally, deploying ME-DDPG in real-world industrial environ- industrial communication and automation systems, Proc. IEEE 107 (2019)
+1094–1120, https://doi.org/10.1109/JPROC.2019.2905334.
+ments will provide valuable insights into its practical performance and
+[13] M. Bennis, M. Debbah, H.V. Poor, Ultrareliable and low-latency wireless
+validate its feasibility for large-scale IIoT applications. By addressing communication: Tail, risk, and scale, Proc. IEEE 106 (2018) 1834–1853, https://
+these future directions, the ME-DDPG framework can further establish doi.org/10.1109/JPROC.2018.2867029.
+[14] P. Varga, J. Peto, A. Franko, D. Balla, D. Haja, F. Janky, G. Soos, D. Ficzere, M.
+itself as a versatile and robust solution for next-generation industrial Maliosz, L. Toka, 5g support for industrial IoT applications—challenges, solutions,
+communication networks. and research gaps, Sensors 20 (2020) 828. https://doi.org/10.3390/s20030828.
+[15] T. Fedullo, A. Morato, F. Tramarin, L. Rovati, S. Vitturi, A comprehensive review
+on Time Sensitive Networks with a special focus on its applicability to industrial
+CRediT authorship contribution statement
+smart and distributed measurement systems, Sensors 22 (2022) 1638, https://doi.
+org/10.3390/s22041638.
+Yang Zhang: Writing – review & editing, Writing – original draft, [16] J. Lv, Y. Zhao, X. Wu, Y. Li, Q. Wang, Formal analysis of TSN scheduler for real-
+time communications, IEEe Trans. Reliab. 70 (2020) 1286–1294, https://doi.org/
+Validation, Software, Methodology, Formal analysis, Data curation,
+10.1109/TR.2020.3026689.
+Conceptualization. Lei Sun: Writing – review & editing, Validation, [17] M. Pope, Technical Specification (TS 23.501): system architecture for the 5G
+Supervision, Funding acquisition. Zhangchao Ma: Writing – review & System (5GS), 3GPP (2017).
+editing, Validation, Supervision. Jianquan Wang: Writing – review & [18] L. Zhao, P. Pop, Z. Gong, B. Fang, Improving latency analysis for flexible window-
+based GCL scheduling in TSN networks by integration of consecutive nodes offsets,
+editing, Validation, Supervision, Funding acquisition. Meixia Fu: IEEe Internet. Things. J. 8 (2020) 5574–5584, https://doi.org/10.1109/
+Writing – review & editing, Validation, Supervision. Jinoo Joung: JIOT.2020.3031932.
+Writing – review & editing, Validation. [19] R.S. Oliver, S.S. Craciunas, W. Steiner, IEEE 802.1Qbv gate control list synthesis
+using array theory encoding, IEEE Real-Time Embedded Technol. Appl. Sympos.
+(RTAS) (2018), https://doi.org/10.1109/RTAS.2018.00008.
+[20] A. Nasrallah, A.S. Thyagaturu, Z. Alharbi, C. Wang, X. Shao, M. Reisslein,
+Declaration of competing interest H. Elbakoury, Performance comparison of IEEE 802.1 TSN time aware shaper
+(TAS) and asynchronous traffic shaper (ATS), IEEe Access. 7 (2019) 44165–44181,
+The authors declare the following financial interests/personal re- https://doi.org/10.1109/ACCESS.2019.2908613.
+[21] L. Martenvormfelde, A. Neumann, L. Wisniewski, J. Jasperneite, A simulation
+lationships which may be considered as potential competing interests: model for integrating 5g into time sensitive networking as a transparent bridge,
+Jianquan Wang reports financial support was provided by Natural 2020 25th IEEE International Conference on Emerging Technologies and Factory
+Science Foundation of Beijing Municipality with Grant No. L232001. Lei Automation (ETFA) 1 (2020) 1103–1106. https://doi.org/10.1109/ETFA46521
+.2020.9211877.
+Sun reports financial support was provided by Beijing Science and [22] D. Gintho¨r, R. Guillaume, J. von Hoyningen-Huene, M. Schüngel, H.D. Schotten,
+Technology Planning Project with Grant No. Z231100005923025. If End-to-end optimized joint scheduling of converged wireless and wired time-
+there are other authors, they declare that they have no known sensitive networks, 2020 25th IEEE International Conference on Emerging
+Technologies and Factory Automation (ETFA) 1 (2020) 222–229. https://doi.org/1
+competing financial interests or personal relationships that could have
+0.1109/ETFA46521.2020.9212049.
+appeared to influence the work reported in this paper. [23] Y. Zhang, Q. Xu, M. Li, C. Chen, X. Guan, Qos-aware mapping and scheduling for
+virtual network functions in industrial 5g-tsn network, 2021 IEEE Global
+Communications Conference (GLOBECOM) (2021) 1–6. https://doi.org/10.11
+Data availability
+09/GLOBECOM46510.2021.9685749.
+[24] Y. Cai, X. Zhang, S. Hu, X. Wei, Dynamic QoS mapping and adaptive semi-
+Data will be made available on request. persistent scheduling in 5G-TSN integrated networks, China Commun. 20 (2023)
+340–355, https://doi.org/10.23919/JCC.fa.2022-0548.202304.
+[25] H.K. Nazari, M.A. Kurt, H.-H. Liu, S. Senk, G.T. Nguyen, F.H. Fitzek, Incremental
+References joint scheduling and routing for 5G-TSN integration, European Wireless 2023; 28th
+European Wireless Conference (2023) 110–116.
+[1] H. Boyes, B. Hallaq, J. Cunningham, T. Watson, The industrial internet of things [26] A. Alwarafy, M. Abdallah, B.S. Ciftler, A. Al-Fuqaha, M. Hamdi, Deep
+(IIoT): an analysis framework, Comput. Ind. 101 (2018) 1–12, https://doi.org/ reinforcement learning for radio resource allocation and management in next
+10.1063/5.0081996. generation heterogeneous wireless networks: a survey, arXiv preprint arXiv:
+[2] M. Wollschlaeger, T. Sauter, J. Jasperneite, The future of industrial 2106.00574 (2021) https://doi.org/10.1109/OJCOMS.2022.3153226.
+communication: automation networks in the era of the internet of things and [27] X. Wang, H. Yao, T. Mai, S. Guo, Y. Liu, Reinforcement learning-based particle
+industry 4.0, IEEE Ind. Electron. Mag. 11 (2017) 17–27, https://doi.org/10.1109/ swarm optimization for end-to-end traffic scheduling in TSN-5G networks, IEEE/
+MIE.2017.2649104. ACM Trans. Netw. (2023), https://doi.org/10.1109/TNET.2023.3276363.
+[3] E. Sisinni, A. Saifullah, S. Han, U. Jennehag, M. Gidlund, Industrial internet of [28] L. Yang, Y. Wei, F.R. Yu, Z. Han, Joint routing and scheduling optimization in time-
+things: challenges, opportunities, and directions, IEEe Trans. Ind. Inform. 14 sensitive networks using graph-convolutional-network-based deep reinforcement
+(2018) 4724–4734, https://doi.org/10.1109/TII.2018.2852491. learning, IEEE Internet Things. J. 9 (2022) 23981–23994, https://doi.org/
+[4] Z. Li, F. Fei, G. Zhang, Edge-to-cloud IIoT for condition monitoring in 10.1109/JIOT.2022.3188826.
+manufacturing systems with ubiquitous smart sensors, Sensors 22 (2022) 5901, [29] J. Prados-Garzon, T. Taleb, M. Bagaa, LEARNET: reinforcement learning based
+https://doi.org/10.3390/s22155901. flow scheduling for asynchronous deterministic networks, in: ICC 2020-2020 IEEE
+[5] J. Zhang, D. Tao, Empowering things with intelligence: a survey of the progress, International Conference on Communications (ICC), 2020, pp. 1–6, https://doi.
+challenges, and opportunities in artificial intelligence of things, IEEe Internet. org/10.1109/ICC40277.2020.9149092.
+Things. J. 8 (2020) 7789–7817, https://doi.org/10.1109/JIOT.2020.3039359. [30] M. Li, S. Guo, C. Chen, C. Chen, X. Liao, X. Guan, DecAge: decentralized flow
+[6] S. Vitturi, C. Zunino, T. Sauter, Industrial communication systems and their future scheduling for Industrial 5G and TSN integrated networks, IEEe Trans. Netw. Sci.
+challenges: next-generation Ethernet, IIoT, and 5G, Proc. IEEE 107 (2019) Eng. (2023), https://doi.org/10.1109/TNSE.2023.3301879.
+944–961, https://doi.org/10.1109/JPROC.2019.2913443. [31] Y. Zhu, L. Sun, J. Wang, R. Huang, X. Jia, Deep reinforcement learning-based joint
+[7] J. Cheng, W. Chen, F. Tao, C.-L. Lin, Industrial IoT in 5G environment towards scheduling of 5G and TSN in industrial networks, Electronics (Basel) 12 (2023)
+smart manufacturing, J. Ind. Inf. Integr. 10 (2018) 10–19, https://doi.org/ 2686, https://doi.org/10.3390/electronics12122686.
+10.1016/j.jii.2018.04.001. [32] L. FENG, K. XIE, L. ZHU, X. QIU, S. GUO, 5G ultra-reliable and low latency
+[8] I. Behnke, H. Austad, Real-time performance of Industrial IoT communication communication resource scheduling for power business quality assurance,
+technologies: a review, IEEe Internet. Things. J. (2023), https://doi.org/10.1109/ J. Electron. Inf. Technol. 43 (2021) 3418–3426.
+JIOT.2023.3332507. [33] N.C. Luong, D.T. Hoang, S. Gong, D. Niyato, P. Wang, Y.-C. Liang, D.I. Kim,
+[9] Y.W. Lin, Y.B. Lin, C.Y. Liu, AItalk: a tutorial to implement AI as IoT devices, IET Applications of deep reinforcement learning in communications and networking: a
+Netw. 8 (2019) 195–202, https://doi.org/10.1049/iet-net.2018.5182. survey, IEEE Commun. Surv. Tutor. 21 (2019) 3133–3174, https://doi.org/
+[10] A. Dhar Dwivedi, R. Singh, K. Kaushik, R. Rao Mukkamala, W.S. Alnumay, 10.1109/COMST.2019.2916583.
+Blockchain and artificial intelligence for 5G-enabled Internet of Things: challenges, [34] B. Sklar, Rayleigh fading channels in mobile digital communication systems. I.
+opportunities, and solutions, Trans. Emerg. Telecommun. Technol. 35 (2024) Characterization, IEEE Commun. Mag. 35 (1997) 90–100, https://doi.org/
+e4329, https://doi.org/10.1002/ett.4329. 10.1109/35.601747.
+14

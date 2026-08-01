@@ -91,6 +91,7 @@ class DDQNAgent:
         epsilon_decay_steps: int = 10_000,
         target_update_freq: int = 500,
         device: str = "cpu",
+        action_mode: str = "native",
     ):
         self.obs_dim = obs_dim
         self.n_actions = n_actions
@@ -100,6 +101,7 @@ class DDQNAgent:
         self.epsilon_end = epsilon_end
         self.epsilon_decay_steps = epsilon_decay_steps
         self.target_update_freq = target_update_freq
+        self._action_mode = action_mode
         self.device = torch.device(device)
 
         # --- Networks ---
@@ -134,16 +136,24 @@ class DDQNAgent:
         state: np.ndarray,
         mask: np.ndarray,
         deterministic: bool = False,
-    ) -> int:
-        """Select an action given state and action mask.
-
-        When deterministic=True: always pick argmax of masked Q-values.
-        When deterministic=False: epsilon-greedy with random VALID actions.
-        """
+    ):
+        """Select an action. Native: returns int. Dimred: returns (n_bits,) 0/1 array."""
         with torch.no_grad():
             s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
-            m = torch.from_numpy(mask).bool().unsqueeze(0).to(self.device)
 
+            if self._action_mode == "dimred":
+                q_vals = self.q_net(s)              # (1, n_bits)
+                if deterministic:
+                    bits = (q_vals.squeeze(0) > 0).int().cpu().numpy()
+                else:
+                    eps = self.epsilon
+                    if np.random.random() < eps:
+                        bits = np.random.randint(0, 2, size=self.n_actions).astype(int)
+                    else:
+                        bits = (q_vals.squeeze(0) > 0).int().cpu().numpy()
+                return bits
+
+            m = torch.from_numpy(mask).bool().unsqueeze(0).to(self.device)
             q_vals = self.q_net(s)  # (1, n_actions)
             masked_q = self._mask_q(q_vals, m)  # invalid → -1e9
 
@@ -179,6 +189,9 @@ class DDQNAgent:
         """
         if len(buffer) < batch_size:
             return {}
+
+        if self._action_mode == "dimred":
+            return self._update_dimred(buffer, batch_size)
 
         batch = buffer.sample(batch_size)
         state = batch["state"].to(self.device)
@@ -242,6 +255,67 @@ class DDQNAgent:
         gradient update happens (e.g., during warmup).
         """
         self._total_steps += n
+
+    # --- dimred helpers ------------------------------------------------
+
+    def _all_combos(self) -> torch.Tensor:
+        """All 2^n_bits binary combinations, cached on device."""
+        if getattr(self, "_combos", None) is None:
+            n = self.n_actions
+            idx = torch.arange(2 ** n, device=self.device)
+            combos = torch.zeros(2 ** n, n, device=self.device)
+            for i in range(n):
+                combos[:, i] = ((idx >> (n - 1 - i)) & 1).float()
+            self._combos = combos
+        return self._combos
+
+    def _update_dimred(self, buffer, batch_size):
+        """Double-DQN update for the 7-bit (per-bit Q) action space.
+
+        Joint Q(a) = Σ_i q_bit[i] * bit[i]; the best next action is found by
+        enumerating the 2^7 = 128 joint combinations; the target network
+        evaluates that combination.
+        """
+        batch = buffer.sample(batch_size)
+        state = batch["state"].to(self.device)
+        action = batch["action"].to(self.device)        # (B, n_bits) 0/1
+        reward = batch["reward"].to(self.device)
+        next_state = batch["next_state"].to(self.device)
+        done = batch["done"].to(self.device)
+
+        with torch.no_grad():
+            combos = self._all_combos()                  # (K, n)
+            q_online_bit = self.q_net(next_state)        # (B, n)
+            joint_online = (q_online_bit.unsqueeze(1) *
+                            combos.unsqueeze(0)).sum(-1)  # (B, K)
+            best_idx = joint_online.argmax(-1)           # (B,)
+            best_comb = combos[best_idx]                 # (B, n)
+            q_target_bit = self.q_target(next_state)     # (B, n)
+            next_q_best = (q_target_bit * best_comb).sum(-1)   # (B,)
+            q_target = reward + self.gamma * (1.0 - done) * next_q_best
+
+        q_pred = (self.q_net(state) * action).sum(-1)
+        loss = F.mse_loss(q_pred, q_target)
+        self.opt.zero_grad()
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.q_net.parameters(), max_norm=1.0)
+        self.opt.step()
+
+        self._train_steps += 1
+        if self.tau > 0:
+            with torch.no_grad():
+                for p, p_t in zip(self.q_net.parameters(),
+                                  self.q_target.parameters()):
+                    p_t.data.mul_(1.0 - self.tau).add_(p.data, alpha=self.tau)
+        elif self._train_steps % self.target_update_freq == 0:
+            self.q_target.load_state_dict(self.q_net.state_dict())
+        self._total_steps += 1
+
+        return {
+            "q_loss": float(loss.item()),
+            "q_value": float(q_pred.mean().item()),
+            "epsilon": self.epsilon,
+        }
 
     # --- save / load -----------------------------------------------------
 

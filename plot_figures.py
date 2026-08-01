@@ -113,8 +113,8 @@ ax1.legend(handles=[Patch(facecolor="#d62728", label="Naïve baseline (random fe
 ax1.text(0.99, 0.02, "* cold start = memory value, not robustly re-evaluated",
          transform=ax1.transAxes, ha="right", va="bottom", fontsize=8, style="italic", color="#555555")
 
-fig1.savefig("figure1_method_comparison.png", dpi=300)
-print("saved figure1_method_comparison.png")
+fig1.savefig("method_comparison.png", dpi=300)
+print("saved method_comparison.png")
 
 
 # ============================================================================
@@ -206,7 +206,7 @@ ALGORITHMS = [
 ]
 
 
-def plot_multi_algorithm_convergence(algorithms, save_name="figure3_training_curves.png"):
+def plot_multi_algorithm_convergence(algorithms, save_name="figure3.png"):
     """三算法同图收敛曲线，各算法 3 种子 mean±std，正数平移。"""
     
     # 先收集所有有效算法的数据，算全局 offset

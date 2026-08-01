@@ -94,6 +94,7 @@ class TSNSchedulingEnv(Env):
         reward_zeta: float = 3.0,
         multi_scenario: bool = False,
         order_mode: str = "edf",
+        action_mode: str = "native",
     ):
         """Initialize the environment.
 
@@ -133,6 +134,17 @@ class TSNSchedulingEnv(Env):
         self.S: int = self._get_hyperperiod()              # slot count (32)
         self._n_cells: int = self.L * self.S              # 96
 
+        # --- Action-mode dimensions ---
+        # native: Discrete(L*S) picks one of 96 (link, slot) cells.
+        # dimred: factored binary action — 2 link bits + ceil(log2 S) slot bits
+        #         (32 slots -> 5 bits) = 7 (0/1) outputs, decoded + projected
+        #         to a valid cell by the env. This is the action-space
+        #         dimensionality reduction (the paper's contribution).
+        self._action_mode: str = action_mode
+        self._n_link_bits: int = 2                      # 3 links -> 2 bits
+        self._n_slot_bits: int = int(math.ceil(math.log2(self.S)))  # 32 -> 5
+        self._n_bits: int = self._n_link_bits + self._n_slot_bits      # 7
+
         # Build initial episode data (scenario, packets, flows, order)
         self._build_episode_data(self._config.seed)
 
@@ -156,8 +168,11 @@ class TSNSchedulingEnv(Env):
             shape=(self._obs_dim,), dtype=np.float32,
         )
 
-        # Action space: discrete index over all (link, slot) cells
-        self.action_space = _spaces.Discrete(self._n_cells)
+        # Action space: native = Discrete(96); dimred = 7 (0/1) bits
+        if self._action_mode == "dimred":
+            self.action_space = _spaces.MultiBinary(self._n_bits)
+        else:
+            self.action_space = _spaces.Discrete(self._n_cells)
 
         # Runtime state (populated in reset)
         self._used_rb: Dict[CellKey, int] = {}
@@ -195,15 +210,19 @@ class TSNSchedulingEnv(Env):
         return self._get_obs(), self._get_info()
 
     def step(
-        self, action: int
+        self, action
     ) -> Tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
         """Execute one scheduling decision.
 
         Parameters
         ----------
-        action : int
+        action : int  (native mode)
             Index into the flattened (link, slot) grid:
             link = action // S + 1, slot = action % S
+        action : np.ndarray of shape (n_bits,)  (dimred mode)
+            7 (0/1) bits: [link_bit0, link_bit1, slot_bit0..slot_bit4].
+            Decoded to (link, slot) and deterministically projected to the
+            nearest *valid* cell (min Hamming distance) if infeasible.
 
         Returns
         -------
@@ -216,8 +235,16 @@ class TSNSchedulingEnv(Env):
         packet = self._packets[packet_key]
         flow = self._flows[packet.flow_id]
 
-        link = action // self.S + 1
-        slot = action % self.S
+        if self._action_mode == "dimred":
+            action = np.asarray(action, dtype=int).reshape(-1)
+            projected = self._project_to_valid(action)
+            if projected is None:
+                link = slot = -1            # no valid cell at all -> infeasible
+            else:
+                link, slot = projected
+        else:
+            link = int(action) // self.S + 1
+            slot = int(action) % self.S
 
         valid, required_rb, bits_per_rb, delay_ms = self._validate_action(
             link, slot, packet, flow,
@@ -227,7 +254,6 @@ class TSNSchedulingEnv(Env):
 
         if valid:
             cell = (link, slot)
-            prev_peak = self._compute_current_peak()
             self._remaining_rb[cell] -= required_rb
             self._used_rb[cell] += required_rb
             self._schedule.append(
@@ -243,46 +269,23 @@ class TSNSchedulingEnv(Env):
                     delay_ms=delay_ms,
                 )
             )
-
-            # --- Step reward based on mode ---
-            if self._reward_mode == "exponential":
-                # Dense feedback: reward = delta * exp(-zeta * current_peak)
-                # Agent gets immediate signal about how this placement affects global peak
-                current_peak = self._compute_current_peak()
-                reward = self._reward_delta * math.exp(-self._reward_zeta * current_peak)
-            elif self._reward_mode == "load_balance":
-                # Dense, strongly-correlated local signal: penalize the post-placement
-                # load of the chosen cell. Each placement immediately changes this
-                # value, giving the Critic a real gradient at every step. Minimizing
-                # per-cell load is exactly the local objective that drives down the
-                # global peak, so this teaches the agent to spread packets evenly.
-                cell_load = self._used_rb[cell] / self._scenario.rb_capacity[cell]
-                reward = -cell_load
-            elif self._reward_mode == "mixed":
-                # Hybrid: local load balancing + incremental peak penalty.
-                # -cell_load drives even spreading; the peak-increase term fires
-                # ONLY when this placement pushes the global peak to a new high,
-                # teaching the agent to avoid filling the hottest cell even when
-                # a marginally emptier cell would look better locally. This is the
-                # signal that lets DRL beat a pure greedy min-load heuristic.
-                cell_load = self._used_rb[cell] / self._scenario.rb_capacity[cell]
-                current_peak = self._compute_current_peak()
-                peak_increase = max(0.0, current_peak - prev_peak)
-                reward = -cell_load - 2.0 * peak_increase
-            elif self._use_step_shaping:
-                # Original weak shaping
-                slot_load = self._used_rb[cell] / self._scenario.rb_capacity[cell]
-                reward = -self._shaping_weight * slot_load
         else:
-            # Action was invalid → packet is infeasible → skip it
+            # Action was invalid → packet is infeasible → record as dropped.
+            # (The environment already applies action masking, so a truly
+            #  infeasible raw action here means no valid cell was available.)
             self._infeasible_keys.append(packet_key)
-            reward = -self._infeasible_penalty
+
+        # --- Single unified dense reward: negative effective peak load ---
+        #   r_t = -hat_P_t = -(max_{l,s} L_{l,s} + N_inf,t / N_total)
+        # The per-step signal and the terminal objective live in this one
+        # expression; the final step's reward already equals the terminal
+        # reward, so no separate terminal addition is needed.
+        reward = -self._effective_peak_load()
 
         self._current_idx += 1
 
         if self._current_idx >= self._total_packets:
             self._done = True
-            reward += self._compute_terminal_reward()
 
         return self._get_obs(), float(reward), self._done, False, self._get_info()
 
@@ -323,6 +326,46 @@ class TSNSchedulingEnv(Env):
                 mask[base_idx + slot] = True
 
         return mask
+
+    # --- dimred action helpers ------------------------------------------
+
+    def _decode_bits(self, bits: np.ndarray):
+        """Decode 7 (0/1) bits -> (link, slot). link=-1 if link bits invalid."""
+        bits = np.asarray(bits, dtype=int).reshape(-1)
+        link_code = int(bits[0]) * 2 + int(bits[1])
+        link = link_code + 1 if link_code < self.L else -1
+        slot = 0
+        for i in range(self._n_slot_bits):
+            slot = (slot << 1) | int(bits[2 + i])
+        return link, slot
+
+    def _cell_to_bits(self, link: int, slot: int) -> np.ndarray:
+        """Encode a valid (link, slot) cell back to its canonical 7-bit form."""
+        link_code = link - 1  # 0..L-1
+        bits = np.zeros(self._n_bits, dtype=int)
+        bits[0] = (link_code >> 1) & 1
+        bits[1] = link_code & 1
+        for i in range(self._n_slot_bits):
+            bits[2 + i] = (slot >> (self._n_slot_bits - 1 - i)) & 1  # MSB first
+        return bits
+
+    def _project_to_valid(self, bits: np.ndarray):
+        """Decode bits; if the resulting cell is invalid, return the valid cell
+        whose canonical bit-pattern has the smallest Hamming distance (ties:
+        lowest cell index). Pure constraint projection — no scheduling
+        preference. Returns None only if no valid cell exists at all."""
+        link, slot = self._decode_bits(bits)
+        mask = self.action_masks()
+        if link > 0 and 0 <= slot < self.S and mask[(link - 1) * self.S + slot]:
+            return link, slot
+        best, best_h = None, 1_000_000
+        for c in np.where(mask)[0]:
+            l, s = c // self.S + 1, c % self.S
+            cb = self._cell_to_bits(l, s)
+            h = int(np.sum(cb != np.asarray(bits, dtype=int)))
+            if h < best_h or (h == best_h and best is None):
+                best, best_h = (l, s), h
+        return best
 
     def expert_min_load_action(self) -> int:
         """Return the feasible action that minimizes post-placement cell load
@@ -564,15 +607,25 @@ class TSNSchedulingEnv(Env):
 
         return (True, required_rb, bits_per_rb, delay_ms)
 
+    def _effective_peak_load(self) -> float:
+        """Effective peak load = max cell load + current drop ratio.
+
+            hat_P = max_{l,s} (used_rb / capacity) + N_inf / N_total
+
+        This is the single unified reward quantity: r_t = -hat_P.
+        """
+        peak = 0.0
+        for cell, cap in self._scenario.rb_capacity.items():
+            if cap > 0:
+                load = self._used_rb[cell] / cap
+                if load > peak:
+                    peak = load
+        drop_ratio = len(self._infeasible_keys) / max(1, self._total_packets)
+        return peak + drop_ratio
+
     def _compute_terminal_reward(self) -> float:
-        """Compute the terminal reward: negative effective peak load."""
-        metrics = compute_metrics(
-            self._scenario,
-            tuple(self._schedule),
-            self._packets,
-            tuple(self._infeasible_keys),
-        )
-        return -metrics["effective_peak_load"]
+        """Terminal reward: negative effective peak load (== last step reward)."""
+        return -self._effective_peak_load()
 
     def _compute_current_peak(self) -> float:
         """Compute current peak load across all cells (max used_rb/capacity)."""
@@ -601,6 +654,15 @@ class TSNSchedulingEnv(Env):
     @property
     def num_packets(self) -> int:
         return self._total_packets
+
+    @property
+    def n_actions(self) -> int:
+        """Action dimension for the agent: 96 (native) or 7 (dimred)."""
+        return self._n_bits if self._action_mode == "dimred" else self._n_cells
+
+    @property
+    def action_mode(self) -> str:
+        return self._action_mode
 
     @property
     def schedule(self) -> Tuple[ScheduleEntry, ...]:
