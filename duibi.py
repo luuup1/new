@@ -6,7 +6,7 @@
 【数据口径：方案甲主线（cold 三算法对比）】
   与 plot_figures.py 里旧的 figure1（PPO+BC + 记忆值 cold）不同，本脚本按
   当前论文主线重新组织：
-    - 唯一合法朴素基线: random_feasible (random 顺序 + random 放置)
+    - 参考标尺: random_feasible (random 顺序 + random 放置) 标注随机下界，非对比基线
     - 三个冷启动 DRL 算法: PPO / SAC / DDQN，统一
         --order-mode random --period-mode simple --reward-mode load_balance
     - MILP 最优下界 (≤50 流, 0.545) 作为 green 参考线，不是基线
@@ -58,9 +58,9 @@ ALGOS = [
         "name": "PPO (cold)",
         "color": "#1f77b4",   # 蓝
         "dirs": [
-            "checkpoints_ppo_seed42_0716",
-            "checkpoints_ppo_seed123_0716",
-            "checkpoints_ppo_seed2024_0716",
+            "checkpoints_ppo_cold_seed42",
+            "checkpoints_ppo_cold_seed123",
+            "checkpoints_ppo_cold_seed2024",
         ],
     },
     {
@@ -128,7 +128,7 @@ def collect_algo(algo):
 
 
 # ---------------------------------------------------------------------------
-# 3) 朴素基线 random_feasible: 优先读 json → 否则 env 重算 → 否则常数兜底
+# 3) 参考标尺 random_feasible: 优先读 json → 否则 env 重算 → 否则常数兜底
 # ---------------------------------------------------------------------------
 def get_baseline():
     # (a) 读 results_plot_data.json

@@ -4,16 +4,34 @@
 - **实际工作目录: e:\Master\new**（旧记 e:\Master\codex 已过时，作废）
 - 目标: 5G-TSN 多链路调度，minimize effective_peak_load，满足 deadline 约束
 - 当前阶段: Phase 3 论文实验设计（方案甲 cold 三算法对比口径）
+- **运行环境: macOS（用户 2026-09-06 明确，以后都用 Mac）**，RL venv = `RL/bin/python`（torch 2.13.0 + gymnasium 1.3.0，CPU）
+- **用户偏好：训练轮数自己决定，指令里显式给 --episodes（不依赖默认值）**
 
 ## 核心文件
-- `tsn_scheduler.py` CLI入口; `train_ppo.py`/`train_sac.py`/`train_ddqn.py` 训练; `plot_figures.py` 唯一画图; `eval_plot_data.py` 出图数据
-- `tsn_sim/env.py`(TSNSchedulingEnv, obs199/act96); `tsn_sim/ddqn.py`(DDQNAgent); `tsn_sim/heuristics.py`(random_feasible/edf_min_load/urgency_lexicographic); `tsn_sim/milp.py`(MILP 最优参考)
+- `tsn_scheduler.py` CLI入口; `train_ppo.py`/`train_sac.py`/`train_ddqn.py`/`train_td3.py` 训练; `plot_figures.py` 唯一画图; `eval_plot_data.py` 出图数据
+- `tsn_sim/env.py`(TSNSchedulingEnv, obs199/act96 native, act7 dimred); `tsn_sim/ddqn.py`(DDQNAgent); `tsn_sim/td3.py`(TD3Agent 连续松弛桥接); `tsn_sim/heuristics.py`(random_feasible/edf_min_load/urgency_lexicographic); `tsn_sim/milp.py`(MILP 最优参考)
 - `EXPERIMENT_PROTOCOL.md` 实验铁律（每次任务先读）
 
-## 指标与基线铁律
+## 指标与基线铁律（2026-09-06 重大变更）
 - effective_peak_load = peak_load + drop_ratio（α=1.0），统一 objective
-- **朴素 baseline = random_feasible**（随机顺序+随机放置）≈1.0；EDF/urgency 是启发式改进，非基线、仅对照
-- 铁律: env 必须 `order_mode="random"`；对比只比 random_feasible；最终报告用 best checkpoint 不用 final
+- **对比基线 = native（未降维）同算法**：论文创新点是动作空间降维(dimred 96→7)，dimred 的唯一合法对比对象是同一算法 native 版本
+- random_feasible(≈1.0)/edf_min_load(0.816)/urgency(0.667)/MILP(0.545) 统一降级为「参考标尺(reference)」，仅标注绝对水平，**不再作对比基线**
+- 铁律: env 必须 `order_mode="random"`；native/dimred 同 MDP 成对对比；最终报告用 best checkpoint 不用 final
+- 算法集: PPO/SAC/DDQN/TD3（TD3 新增，2026-09-06，用连续松弛桥接替代 DDQN 的因子化 Q）
+
+## ✅ dimred 学不动的真正根因 + 正解（2026-09-06 关键突破）
+- **根因**：不是算法选型，而是「**价值函数被降维**」。SAC/DDQN dimred 用因子化 Q `Q(a)=Σ q_bit[i]·bit[i]` 强制 Q 是 7 bit 线性组合；TD3 用 sigmoid 也隐含 bit 独立性假设。link/slot 强耦合 → 假设失效 → 全卡 1.0 学不动。
+- **正解 = 策略降维 + 完整 critic**：actor 保持 7 维 Bernoulli（降维卖点），critic 输出完整 96 维 cell Q（价值函数无损）。7 位概率诱导 96 cell 分布 `π(c|s) ∝ Π p_i^{b_i(c)}(1-p_i)^{1-b_i(c)}`，mask 无效 cell 后 softmax 归一化。buffer 统一存 cell index(int)，critic gather 与 native 完全一致。
+- **已实现**：`tsn_sim/sac.py` 已修复（`_cell_bits` 编码矩阵 + `cell_to_bits` + 重写 `_update_dimred`/`select_action`）；`train_sac.py` 训练循环适配 cell index
+- **短训验证（seed42, 600ep, simple, γ=0.5）**：native best=0.9487 vs dimred best=0.9444 → **dimred 不再卡 1.0，追近 native（差 0.004）**
+- **待办**：SAC dimred 加长到 2000ep 正式训练（3 seed）确认能否稳定逼近 native 0.68；TD3 是否也改用「策略降维+完整 critic」重写
+
+## ✅ TD3 同样修复成功（2026-09-06）
+- **`tsn_sim/td3.py` 已重写**：critic 输入统一 96 维 cell 分布（不再吃 7 维 sigmoid），actor 7 维 logits→sigmoid→乘积诱导 96 cell 分布；`select_action` 返回 `(a_exec, a_cont)` 且 a_cont 恒 96 维；新增 `_cell_bits`/`cell_to_bits`
+- **`train_td3.py`**：warmup 改随机 cell→96 维 one-hot；agent 传 n_links/n_slots
+- **短训（seed42, 600ep, simple, γ=0.9）**：TD3 native best=**0.8095** vs dimred best=**0.7656** → **dimred 反超 native（低 0.044），实现真实性能优化**
+- 这是用户核心目标「降维优化负载」的首个成功案例
+- **待办**：TD3 正式训练 native/dimred 各 3 seed（2000ep/早停），出论文级对比 + std 带
 
 ## ⚠️ 训练脚本默认参数坑（关键，2026-07-20 确认）
 - `train_ppo.py`: `--order-mode` 默认 **edf**（必须强制 random）, `--period-mode` 默认 **cyclic**, `--reward-mode` 默认 load_balance, `--gamma` 默认 0.99

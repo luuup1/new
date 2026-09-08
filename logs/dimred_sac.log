@@ -1,0 +1,290 @@
+[Device] cpu
+============================================================
+SAC Training for 5G-TSN Scheduling
+============================================================
+  Obs dim:       199
+  Action dim:    7 (dimred)
+  Episodes:      800
+  Warmup steps:  1000
+  Batch size:    128
+  Buffer size:   50000
+  LR:            0.0003
+  Gamma:         0.5
+  Tau:           0.005
+  Alpha init:    0.1
+  Target H ratio:0.1
+  Hidden dims:   [256, 256]
+  Step shaping:  False
+  Reward mode:   load_balance
+  Obs mode:      full (dim=199)
+  Seed:          42
+  Multi-scenario: False
+  Early stop:    OFF
+============================================================
+Ep    10/800  R=-273.267  eff_peak=1.0405  drop=0.041  a=0.100  H=1.049  Q= -0.318  buf=  3160  (1.8s)
+Ep    20/800  R=-275.293  eff_peak=1.0589  drop=0.059  a=0.100  H=0.878  Q= -0.212  buf=  6320  (1.8s)
+Ep    30/800  R=-275.516  eff_peak=1.0592  drop=0.059  a=0.100  H=0.695  Q= -0.131  buf=  9480  (1.9s)
+Ep    40/800  R=-279.685  eff_peak=1.0582  drop=0.058  a=0.100  H=0.609  Q= -0.097  buf= 12640  (1.9s)
+Ep    50/800  R=-280.395  eff_peak=1.0601  drop=0.060  a=0.100  H=0.556  Q= -0.078  buf= 15800  (1.9s)
+  >>> New best! eff_peak=1.0633  saved to checkpoints_sac_dimred_seed42/sac_best.pth
+  [EVAL] ep=50  eff_peak=1.0633 +/- 0.0000  peak=1.0000  drop=0.063  no_improve=0/9999
+Ep    60/800  R=-277.136  eff_peak=1.0592  drop=0.059  a=0.100  H=0.530  Q= -0.065  buf= 18960  (1.9s)
+Ep    70/800  R=-275.808  eff_peak=1.0598  drop=0.060  a=0.100  H=0.503  Q= -0.057  buf= 22120  (2.0s)
+Ep    80/800  R=-279.199  eff_peak=1.0598  drop=0.060  a=0.100  H=0.481  Q= -0.050  buf= 25280  (2.0s)
+Ep    90/800  R=-277.919  eff_peak=1.0589  drop=0.059  a=0.100  H=0.473  Q= -0.045  buf= 28440  (2.0s)
+Ep   100/800  R=-278.518  eff_peak=1.0579  drop=0.058  a=0.100  H=0.462  Q= -0.042  buf= 31600  (2.0s)
+  [EVAL] ep=100  eff_peak=1.0633 +/- 0.0000  peak=1.0000  drop=0.063  no_improve=1/9999
+Ep   110/800  R=-280.677  eff_peak=1.0585  drop=0.059  a=0.100  H=0.448  Q= -0.039  buf= 34760  (2.1s)
+Ep   120/800  R=-278.072  eff_peak=1.0598  drop=0.060  a=0.100  H=0.432  Q= -0.036  buf= 37920  (2.1s)
+Ep   130/800  R=-273.253  eff_peak=1.0560  drop=0.056  a=0.100  H=0.433  Q= -0.034  buf= 41080  (2.1s)
+Ep   140/800  R=-277.031  eff_peak=1.0585  drop=0.059  a=0.100  H=0.432  Q= -0.033  buf= 44240  (2.1s)
+Ep   150/800  R=-274.066  eff_peak=1.0563  drop=0.056  a=0.100  H=0.426  Q= -0.031  buf= 47400  (2.1s)
+  [EVAL] ep=150  eff_peak=1.0633 +/- 0.0000  peak=1.0000  drop=0.063  no_improve=2/9999
+Ep   160/800  R=-277.397  eff_peak=1.0592  drop=0.059  a=0.100  H=0.422  Q= -0.029  buf= 50000  (2.1s)
+Ep   170/800  R=-279.178  eff_peak=1.0614  drop=0.061  a=0.100  H=0.377  Q= -0.013  buf= 50000  (2.1s)
+Ep   180/800  R=-280.231  eff_peak=1.0611  drop=0.061  a=0.100  H=0.369  Q= -0.011  buf= 50000  (2.1s)
+Ep   190/800  R=-278.159  eff_peak=1.0585  drop=0.059  a=0.100  H=0.365  Q= -0.011  buf= 50000  (2.2s)
+Ep   200/800  R=-277.556  eff_peak=1.0604  drop=0.060  a=0.100  H=0.361  Q= -0.010  buf= 50000  (2.1s)
+  >>> New best! eff_peak=1.0601  saved to checkpoints_sac_dimred_seed42/sac_best.pth
+  [EVAL] ep=200  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=0/9999
+Ep   210/800  R=-277.897  eff_peak=1.0614  drop=0.061  a=0.100  H=0.354  Q= -0.010  buf= 50000  (2.1s)
+Ep   220/800  R=-278.707  eff_peak=1.0589  drop=0.059  a=0.100  H=0.354  Q= -0.010  buf= 50000  (2.1s)
+Ep   230/800  R=-279.646  eff_peak=1.0604  drop=0.060  a=0.100  H=0.350  Q= -0.010  buf= 50000  (2.1s)
+Ep   240/800  R=-278.047  eff_peak=1.0601  drop=0.060  a=0.100  H=0.353  Q= -0.010  buf= 50000  (2.1s)
+Ep   250/800  R=-275.191  eff_peak=1.0608  drop=0.061  a=0.100  H=0.350  Q= -0.010  buf= 50000  (2.1s)
+  [EVAL] ep=250  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=1/9999
+Ep   260/800  R=-278.383  eff_peak=1.0589  drop=0.059  a=0.100  H=0.346  Q= -0.009  buf= 50000  (2.2s)
+Ep   270/800  R=-277.564  eff_peak=1.0595  drop=0.059  a=0.100  H=0.345  Q= -0.010  buf= 50000  (1.7s)
+Ep   280/800  R=-278.354  eff_peak=1.0595  drop=0.059  a=0.100  H=0.350  Q= -0.010  buf= 50000  (1.7s)
+Ep   290/800  R=-278.282  eff_peak=1.0592  drop=0.059  a=0.100  H=0.343  Q= -0.010  buf= 50000  (1.7s)
+Ep   300/800  R=-280.081  eff_peak=1.0604  drop=0.060  a=0.100  H=0.337  Q= -0.009  buf= 50000  (1.7s)
+  [EVAL] ep=300  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=2/9999
+Ep   310/800  R=-275.636  eff_peak=1.0604  drop=0.060  a=0.100  H=0.328  Q= -0.009  buf= 50000  (1.7s)
+Ep   320/800  R=-277.037  eff_peak=1.0604  drop=0.060  a=0.100  H=0.326  Q= -0.009  buf= 50000  (1.7s)
+Ep   330/800  R=-279.188  eff_peak=1.0601  drop=0.060  a=0.100  H=0.328  Q= -0.008  buf= 50000  (1.7s)
+Ep   340/800  R=-276.726  eff_peak=1.0614  drop=0.061  a=0.100  H=0.325  Q= -0.008  buf= 50000  (1.7s)
+Ep   350/800  R=-278.257  eff_peak=1.0604  drop=0.060  a=0.100  H=0.322  Q= -0.008  buf= 50000  (1.7s)
+  [EVAL] ep=350  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=3/9999
+Ep   360/800  R=-277.655  eff_peak=1.0611  drop=0.061  a=0.100  H=0.322  Q= -0.008  buf= 50000  (1.7s)
+Ep   370/800  R=-277.014  eff_peak=1.0595  drop=0.059  a=0.100  H=0.318  Q= -0.008  buf= 50000  (1.7s)
+Ep   380/800  R=-279.769  eff_peak=1.0604  drop=0.060  a=0.100  H=0.320  Q= -0.007  buf= 50000  (1.7s)
+Ep   390/800  R=-278.325  eff_peak=1.0614  drop=0.061  a=0.100  H=0.318  Q= -0.007  buf= 50000  (1.7s)
+Ep   400/800  R=-278.479  eff_peak=1.0598  drop=0.060  a=0.100  H=0.315  Q= -0.007  buf= 50000  (1.7s)
+  [EVAL] ep=400  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=4/9999
+Ep   410/800  R=-279.184  eff_peak=1.0598  drop=0.060  a=0.100  H=0.313  Q= -0.007  buf= 50000  (1.7s)
+Ep   420/800  R=-280.384  eff_peak=1.0592  drop=0.059  a=0.100  H=0.309  Q= -0.007  buf= 50000  (1.7s)
+Ep   430/800  R=-278.849  eff_peak=1.0614  drop=0.061  a=0.100  H=0.309  Q= -0.007  buf= 50000  (1.7s)
+Ep   440/800  R=-279.626  eff_peak=1.0604  drop=0.060  a=0.100  H=0.306  Q= -0.007  buf= 50000  (1.7s)
+Ep   450/800  R=-277.266  eff_peak=1.0585  drop=0.059  a=0.100  H=0.306  Q= -0.007  buf= 50000  (1.7s)
+  [EVAL] ep=450  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=5/9999
+Ep   460/800  R=-278.784  eff_peak=1.0608  drop=0.061  a=0.100  H=0.306  Q= -0.007  buf= 50000  (1.7s)
+Ep   470/800  R=-275.540  eff_peak=1.0611  drop=0.061  a=0.100  H=0.302  Q= -0.007  buf= 50000  (1.7s)
+Ep   480/800  R=-280.495  eff_peak=1.0608  drop=0.061  a=0.100  H=0.303  Q= -0.006  buf= 50000  (1.7s)
+Ep   490/800  R=-277.511  eff_peak=1.0608  drop=0.061  a=0.100  H=0.302  Q= -0.006  buf= 50000  (1.7s)
+Ep   500/800  R=-278.317  eff_peak=1.0604  drop=0.060  a=0.100  H=0.303  Q= -0.006  buf= 50000  (1.7s)
+  [EVAL] ep=500  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=6/9999
+Ep   510/800  R=-279.412  eff_peak=1.0620  drop=0.062  a=0.100  H=0.303  Q= -0.006  buf= 50000  (1.7s)
+Ep   520/800  R=-279.725  eff_peak=1.0614  drop=0.061  a=0.100  H=0.303  Q= -0.006  buf= 50000  (1.7s)
+Ep   530/800  R=-278.830  eff_peak=1.0617  drop=0.062  a=0.100  H=0.300  Q= -0.006  buf= 50000  (1.7s)
+Ep   540/800  R=-277.816  eff_peak=1.0601  drop=0.060  a=0.100  H=0.303  Q= -0.006  buf= 50000  (1.7s)
+Ep   550/800  R=-280.695  eff_peak=1.0617  drop=0.062  a=0.100  H=0.301  Q= -0.006  buf= 50000  (1.7s)
+  [EVAL] ep=550  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=7/9999
+Ep   560/800  R=-278.299  eff_peak=1.0623  drop=0.062  a=0.100  H=0.302  Q= -0.006  buf= 50000  (1.7s)
+Ep   570/800  R=-276.096  eff_peak=1.0608  drop=0.061  a=0.100  H=0.300  Q= -0.006  buf= 50000  (1.8s)
+Ep   580/800  R=-280.342  eff_peak=1.0614  drop=0.061  a=0.100  H=0.300  Q= -0.006  buf= 50000  (1.8s)
+Ep   590/800  R=-281.379  eff_peak=1.0608  drop=0.061  a=0.100  H=0.300  Q= -0.006  buf= 50000  (1.8s)
+Ep   600/800  R=-279.258  eff_peak=1.0627  drop=0.063  a=0.100  H=0.295  Q= -0.005  buf= 50000  (1.8s)
+  [EVAL] ep=600  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=8/9999
+Ep   610/800  R=-281.266  eff_peak=1.0604  drop=0.060  a=0.100  H=0.298  Q= -0.005  buf= 50000  (1.8s)
+Ep   620/800  R=-278.886  eff_peak=1.0604  drop=0.060  a=0.100  H=0.298  Q= -0.005  buf= 50000  (1.8s)
+Ep   630/800  R=-275.285  eff_peak=1.0598  drop=0.060  a=0.100  H=0.293  Q= -0.005  buf= 50000  (1.8s)
+Ep   640/800  R=-279.035  eff_peak=1.0611  drop=0.061  a=0.100  H=0.300  Q= -0.005  buf= 50000  (1.8s)
+Ep   650/800  R=-281.383  eff_peak=1.0608  drop=0.061  a=0.100  H=0.296  Q= -0.005  buf= 50000  (1.7s)
+  [EVAL] ep=650  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=9/9999
+Ep   660/800  R=-281.394  eff_peak=1.0614  drop=0.061  a=0.100  H=0.294  Q= -0.006  buf= 50000  (1.8s)
+Ep   670/800  R=-280.429  eff_peak=1.0601  drop=0.060  a=0.100  H=0.295  Q= -0.005  buf= 50000  (1.8s)
+Ep   680/800  R=-274.505  eff_peak=1.0595  drop=0.059  a=0.100  H=0.291  Q= -0.005  buf= 50000  (1.8s)
+Ep   690/800  R=-277.569  eff_peak=1.0614  drop=0.061  a=0.100  H=0.294  Q= -0.005  buf= 50000  (1.8s)
+Ep   700/800  R=-279.295  eff_peak=1.0608  drop=0.061  a=0.100  H=0.292  Q= -0.006  buf= 50000  (1.8s)
+  [EVAL] ep=700  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=10/9999
+Ep   710/800  R=-279.167  eff_peak=1.0614  drop=0.061  a=0.100  H=0.291  Q= -0.005  buf= 50000  (1.8s)
+Ep   720/800  R=-279.874  eff_peak=1.0595  drop=0.059  a=0.100  H=0.291  Q= -0.006  buf= 50000  (1.8s)
+Ep   730/800  R=-277.644  eff_peak=1.0608  drop=0.061  a=0.100  H=0.286  Q= -0.005  buf= 50000  (1.8s)
+Ep   740/800  R=-279.518  eff_peak=1.0604  drop=0.060  a=0.100  H=0.293  Q= -0.006  buf= 50000  (2.0s)
+Ep   750/800  R=-274.782  eff_peak=1.0598  drop=0.060  a=0.100  H=0.295  Q= -0.006  buf= 50000  (1.8s)
+  [EVAL] ep=750  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=11/9999
+Ep   760/800  R=-279.227  eff_peak=1.0617  drop=0.062  a=0.100  H=0.297  Q= -0.006  buf= 50000  (1.8s)
+Ep   770/800  R=-276.159  eff_peak=1.0604  drop=0.060  a=0.100  H=0.292  Q= -0.006  buf= 50000  (1.8s)
+Ep   780/800  R=-279.844  eff_peak=1.0611  drop=0.061  a=0.100  H=0.295  Q= -0.006  buf= 50000  (1.8s)
+Ep   790/800  R=-279.980  eff_peak=1.0598  drop=0.060  a=0.100  H=0.294  Q= -0.006  buf= 50000  (1.8s)
+Ep   800/800  R=-279.845  eff_peak=1.0601  drop=0.060  a=0.100  H=0.292  Q= -0.006  buf= 50000  (1.8s)
+  [EVAL] ep=800  eff_peak=1.0601 +/- 0.0000  peak=1.0000  drop=0.060  no_improve=12/9999
+
+Training completed at ep=800/800
+Final model saved to checkpoints_sac_dimred_seed42/sac_checkpoint.pth
+Best eval eff_peak: 1.0601
+
+Training curves saved to checkpoints_sac_dimred_seed42/training_curves.json
+
+============================================================
+Final Evaluation (20 episodes, greedy policy)
+============================================================
+     eff_peak_mean: 1.0601
+      eff_peak_std: 0.0000
+         peak_mean: 1.0000
+          peak_std: 0.0000
+         drop_mean: 0.0601
+        delay_mean: 1.6229
+       reward_mean: -279.1399
+
+============================================================
+Comparison (same scenario, same seed)
+============================================================
+  Baseline (random_feasible):  eff_peak = 1.0000
+  SAC (greedy, 20 ep):         eff_peak = 1.0601
+  Improvement vs baseline:     -6.01%
+[Device] cpu
+============================================================
+SAC Training for 5G-TSN Scheduling
+============================================================
+  Obs dim:       199
+  Action dim:    7 (dimred)
+  Episodes:      800
+  Warmup steps:  1000
+  Batch size:    128
+  Buffer size:   50000
+  LR:            0.0003
+  Gamma:         0.5
+  Tau:           0.005
+  Alpha init:    0.1
+  Target H ratio:0.1
+  Hidden dims:   [256, 256]
+  Step shaping:  False
+  Reward mode:   load_balance
+  Obs mode:      full (dim=199)
+  Seed:          123
+  Multi-scenario: False
+  Early stop:    OFF
+============================================================
+Ep    10/800  R=-254.198  eff_peak=1.0144  drop=0.014  a=0.100  H=1.080  Q= -0.338  buf=  2920  (1.6s)
+Ep    20/800  R=-259.542  eff_peak=1.0226  drop=0.023  a=0.100  H=0.873  Q= -0.227  buf=  5840  (1.6s)
+Ep    30/800  R=-257.370  eff_peak=1.0205  drop=0.021  a=0.100  H=0.695  Q= -0.140  buf=  8760  (1.7s)
+Ep    40/800  R=-255.593  eff_peak=1.0216  drop=0.022  a=0.100  H=0.626  Q= -0.101  buf= 11680  (1.4s)
+Ep    50/800  R=-257.681  eff_peak=1.0212  drop=0.021  a=0.100  H=0.586  Q= -0.080  buf= 14600  (1.4s)
+  >>> New best! eff_peak=1.0274  saved to checkpoints_sac_dimred_seed123/sac_best.pth
+  [EVAL] ep=50  eff_peak=1.0274 +/- 0.0000  peak=1.0000  drop=0.027  no_improve=0/9999
+Ep    60/800  R=-256.094  eff_peak=1.0223  drop=0.022  a=0.100  H=0.561  Q= -0.067  buf= 17520  (1.7s)
+Ep    70/800  R=-258.033  eff_peak=1.0226  drop=0.023  a=0.100  H=0.543  Q= -0.057  buf= 20440  (1.2s)
+Ep    80/800  R=-261.037  eff_peak=1.0236  drop=0.024  a=0.100  H=0.526  Q= -0.052  buf= 23360  (1.1s)
+Ep    90/800  R=-259.384  eff_peak=1.0223  drop=0.022  a=0.100  H=0.511  Q= -0.047  buf= 26280  (1.1s)
+Ep   100/800  R=-258.426  eff_peak=1.0233  drop=0.023  a=0.100  H=0.502  Q= -0.043  buf= 29200  (1.1s)
+  >>> New best! eff_peak=1.0205  saved to checkpoints_sac_dimred_seed123/sac_best.pth
+  [EVAL] ep=100  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=0/9999
+Ep   110/800  R=-260.348  eff_peak=1.0236  drop=0.024  a=0.100  H=0.490  Q= -0.040  buf= 32120  (1.1s)
+Ep   120/800  R=-257.099  eff_peak=1.0226  drop=0.023  a=0.100  H=0.484  Q= -0.037  buf= 35040  (1.1s)
+Ep   130/800  R=-258.736  eff_peak=1.0219  drop=0.022  a=0.100  H=0.477  Q= -0.034  buf= 37960  (1.1s)
+Ep   140/800  R=-261.044  eff_peak=1.0233  drop=0.023  a=0.100  H=0.469  Q= -0.032  buf= 40880  (1.1s)
+Ep   150/800  R=-261.124  eff_peak=1.0233  drop=0.023  a=0.100  H=0.467  Q= -0.030  buf= 43800  (1.1s)
+  [EVAL] ep=150  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=1/9999
+Ep   160/800  R=-261.825  eff_peak=1.0236  drop=0.024  a=0.100  H=0.457  Q= -0.029  buf= 46720  (1.1s)
+Ep   170/800  R=-264.365  eff_peak=1.0247  drop=0.025  a=0.100  H=0.446  Q= -0.027  buf= 49640  (1.1s)
+Ep   180/800  R=-257.619  eff_peak=1.0229  drop=0.023  a=0.100  H=0.417  Q= -0.015  buf= 50000  (1.1s)
+Ep   190/800  R=-256.142  eff_peak=1.0219  drop=0.022  a=0.100  H=0.402  Q= -0.008  buf= 50000  (1.1s)
+Ep   200/800  R=-258.162  eff_peak=1.0223  drop=0.022  a=0.100  H=0.401  Q= -0.008  buf= 50000  (1.1s)
+  [EVAL] ep=200  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=2/9999
+Ep   210/800  R=-260.269  eff_peak=1.0229  drop=0.023  a=0.100  H=0.397  Q= -0.008  buf= 50000  (1.1s)
+Ep   220/800  R=-258.047  eff_peak=1.0219  drop=0.022  a=0.100  H=0.392  Q= -0.007  buf= 50000  (1.1s)
+Ep   230/800  R=-259.598  eff_peak=1.0219  drop=0.022  a=0.100  H=0.391  Q= -0.007  buf= 50000  (1.1s)
+Ep   240/800  R=-260.127  eff_peak=1.0233  drop=0.023  a=0.100  H=0.383  Q= -0.007  buf= 50000  (1.1s)
+Ep   250/800  R=-259.591  eff_peak=1.0226  drop=0.023  a=0.100  H=0.386  Q= -0.006  buf= 50000  (1.2s)
+  [EVAL] ep=250  eff_peak=1.0240 +/- 0.0000  peak=1.0000  drop=0.024  no_improve=3/9999
+Ep   260/800  R=-260.614  eff_peak=1.0226  drop=0.023  a=0.100  H=0.384  Q= -0.006  buf= 50000  (1.2s)
+Ep   270/800  R=-263.884  eff_peak=1.0229  drop=0.023  a=0.100  H=0.384  Q= -0.005  buf= 50000  (1.2s)
+Ep   280/800  R=-259.644  eff_peak=1.0226  drop=0.023  a=0.100  H=0.378  Q= -0.005  buf= 50000  (1.2s)
+Ep   290/800  R=-258.953  eff_peak=1.0236  drop=0.024  a=0.100  H=0.373  Q= -0.005  buf= 50000  (1.2s)
+Ep   300/800  R=-258.825  eff_peak=1.0229  drop=0.023  a=0.100  H=0.370  Q= -0.005  buf= 50000  (1.1s)
+  [EVAL] ep=300  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=4/9999
+Ep   310/800  R=-261.393  eff_peak=1.0247  drop=0.025  a=0.100  H=0.370  Q= -0.005  buf= 50000  (1.1s)
+Ep   320/800  R=-257.525  eff_peak=1.0229  drop=0.023  a=0.100  H=0.370  Q= -0.005  buf= 50000  (1.1s)
+Ep   330/800  R=-257.920  eff_peak=1.0233  drop=0.023  a=0.100  H=0.372  Q= -0.005  buf= 50000  (1.2s)
+Ep   340/800  R=-262.521  eff_peak=1.0240  drop=0.024  a=0.100  H=0.371  Q= -0.005  buf= 50000  (1.1s)
+Ep   350/800  R=-258.471  eff_peak=1.0229  drop=0.023  a=0.100  H=0.371  Q= -0.004  buf= 50000  (1.1s)
+  [EVAL] ep=350  eff_peak=1.0240 +/- 0.0000  peak=1.0000  drop=0.024  no_improve=5/9999
+Ep   360/800  R=-255.576  eff_peak=1.0226  drop=0.023  a=0.100  H=0.370  Q= -0.004  buf= 50000  (1.1s)
+Ep   370/800  R=-258.961  eff_peak=1.0233  drop=0.023  a=0.100  H=0.364  Q= -0.004  buf= 50000  (1.1s)
+Ep   380/800  R=-257.696  eff_peak=1.0240  drop=0.024  a=0.100  H=0.365  Q= -0.004  buf= 50000  (1.1s)
+Ep   390/800  R=-262.717  eff_peak=1.0233  drop=0.023  a=0.100  H=0.363  Q= -0.005  buf= 50000  (1.1s)
+Ep   400/800  R=-257.535  eff_peak=1.0236  drop=0.024  a=0.100  H=0.362  Q= -0.004  buf= 50000  (1.1s)
+  [EVAL] ep=400  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=6/9999
+Ep   410/800  R=-256.242  eff_peak=1.0223  drop=0.022  a=0.100  H=0.359  Q= -0.004  buf= 50000  (1.1s)
+Ep   420/800  R=-259.676  eff_peak=1.0233  drop=0.023  a=0.100  H=0.365  Q= -0.004  buf= 50000  (1.1s)
+Ep   430/800  R=-258.432  eff_peak=1.0240  drop=0.024  a=0.100  H=0.367  Q= -0.004  buf= 50000  (1.1s)
+Ep   440/800  R=-259.556  eff_peak=1.0240  drop=0.024  a=0.100  H=0.363  Q= -0.004  buf= 50000  (1.1s)
+Ep   450/800  R=-258.687  eff_peak=1.0229  drop=0.023  a=0.100  H=0.368  Q= -0.004  buf= 50000  (1.1s)
+  [EVAL] ep=450  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=7/9999
+Ep   460/800  R=-259.923  eff_peak=1.0240  drop=0.024  a=0.100  H=0.366  Q= -0.004  buf= 50000  (1.1s)
+Ep   470/800  R=-259.297  eff_peak=1.0236  drop=0.024  a=0.100  H=0.368  Q= -0.004  buf= 50000  (1.4s)
+Ep   480/800  R=-257.195  eff_peak=1.0229  drop=0.023  a=0.100  H=0.369  Q= -0.003  buf= 50000  (1.4s)
+Ep   490/800  R=-257.370  eff_peak=1.0219  drop=0.022  a=0.100  H=0.372  Q= -0.003  buf= 50000  (1.4s)
+Ep   500/800  R=-260.290  eff_peak=1.0233  drop=0.023  a=0.100  H=0.371  Q= -0.003  buf= 50000  (1.2s)
+  [EVAL] ep=500  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=8/9999
+Ep   510/800  R=-261.856  eff_peak=1.0236  drop=0.024  a=0.100  H=0.367  Q= -0.003  buf= 50000  (1.2s)
+Ep   520/800  R=-260.917  eff_peak=1.0247  drop=0.025  a=0.100  H=0.364  Q= -0.003  buf= 50000  (1.1s)
+Ep   530/800  R=-257.370  eff_peak=1.0223  drop=0.022  a=0.100  H=0.364  Q= -0.003  buf= 50000  (1.1s)
+Ep   540/800  R=-258.966  eff_peak=1.0226  drop=0.023  a=0.100  H=0.363  Q= -0.003  buf= 50000  (1.1s)
+Ep   550/800  R=-257.848  eff_peak=1.0219  drop=0.022  a=0.100  H=0.370  Q= -0.003  buf= 50000  (1.1s)
+  [EVAL] ep=550  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=9/9999
+Ep   560/800  R=-257.814  eff_peak=1.0229  drop=0.023  a=0.100  H=0.365  Q= -0.003  buf= 50000  (1.1s)
+Ep   570/800  R=-258.406  eff_peak=1.0226  drop=0.023  a=0.100  H=0.366  Q= -0.003  buf= 50000  (1.1s)
+Ep   580/800  R=-260.707  eff_peak=1.0229  drop=0.023  a=0.100  H=0.366  Q= -0.003  buf= 50000  (1.1s)
+Ep   590/800  R=-259.206  eff_peak=1.0223  drop=0.022  a=0.100  H=0.367  Q= -0.003  buf= 50000  (1.1s)
+Ep   600/800  R=-259.792  eff_peak=1.0236  drop=0.024  a=0.100  H=0.361  Q= -0.003  buf= 50000  (1.2s)
+  [EVAL] ep=600  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=10/9999
+Ep   610/800  R=-258.717  eff_peak=1.0223  drop=0.022  a=0.100  H=0.363  Q= -0.003  buf= 50000  (1.1s)
+Ep   620/800  R=-258.762  eff_peak=1.0229  drop=0.023  a=0.100  H=0.358  Q= -0.003  buf= 50000  (1.1s)
+Ep   630/800  R=-262.454  eff_peak=1.0243  drop=0.024  a=0.100  H=0.357  Q= -0.003  buf= 50000  (1.1s)
+Ep   640/800  R=-257.448  eff_peak=1.0223  drop=0.022  a=0.100  H=0.358  Q= -0.003  buf= 50000  (1.1s)
+Ep   650/800  R=-260.811  eff_peak=1.0226  drop=0.023  a=0.100  H=0.358  Q= -0.003  buf= 50000  (1.1s)
+  [EVAL] ep=650  eff_peak=1.0240 +/- 0.0000  peak=1.0000  drop=0.024  no_improve=11/9999
+Ep   660/800  R=-257.421  eff_peak=1.0219  drop=0.022  a=0.100  H=0.356  Q= -0.003  buf= 50000  (1.1s)
+Ep   670/800  R=-263.881  eff_peak=1.0253  drop=0.025  a=0.100  H=0.349  Q= -0.003  buf= 50000  (1.1s)
+Ep   680/800  R=-261.650  eff_peak=1.0233  drop=0.023  a=0.100  H=0.353  Q= -0.004  buf= 50000  (1.1s)
+Ep   690/800  R=-257.577  eff_peak=1.0223  drop=0.022  a=0.100  H=0.355  Q= -0.004  buf= 50000  (1.1s)
+Ep   700/800  R=-262.297  eff_peak=1.0243  drop=0.024  a=0.100  H=0.352  Q= -0.003  buf= 50000  (1.1s)
+  [EVAL] ep=700  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=12/9999
+Ep   710/800  R=-259.713  eff_peak=1.0233  drop=0.023  a=0.100  H=0.349  Q= -0.003  buf= 50000  (1.1s)
+Ep   720/800  R=-259.710  eff_peak=1.0236  drop=0.024  a=0.100  H=0.349  Q= -0.003  buf= 50000  (1.1s)
+Ep   730/800  R=-257.883  eff_peak=1.0236  drop=0.024  a=0.100  H=0.352  Q= -0.003  buf= 50000  (1.1s)
+Ep   740/800  R=-259.871  eff_peak=1.0223  drop=0.022  a=0.100  H=0.349  Q= -0.003  buf= 50000  (1.1s)
+Ep   750/800  R=-256.235  eff_peak=1.0233  drop=0.023  a=0.100  H=0.347  Q= -0.004  buf= 50000  (1.1s)
+  [EVAL] ep=750  eff_peak=1.0240 +/- 0.0000  peak=1.0000  drop=0.024  no_improve=13/9999
+Ep   760/800  R=-260.588  eff_peak=1.0229  drop=0.023  a=0.100  H=0.344  Q= -0.003  buf= 50000  (1.1s)
+Ep   770/800  R=-260.725  eff_peak=1.0233  drop=0.023  a=0.100  H=0.341  Q= -0.003  buf= 50000  (1.1s)
+Ep   780/800  R=-260.463  eff_peak=1.0233  drop=0.023  a=0.100  H=0.341  Q= -0.003  buf= 50000  (1.1s)
+Ep   790/800  R=-256.879  eff_peak=1.0229  drop=0.023  a=0.100  H=0.341  Q= -0.003  buf= 50000  (1.1s)
+Ep   800/800  R=-256.322  eff_peak=1.0233  drop=0.023  a=0.100  H=0.346  Q= -0.003  buf= 50000  (1.1s)
+  [EVAL] ep=800  eff_peak=1.0205 +/- 0.0000  peak=1.0000  drop=0.021  no_improve=14/9999
+
+Training completed at ep=800/800
+Final model saved to checkpoints_sac_dimred_seed123/sac_checkpoint.pth
+Best eval eff_peak: 1.0205
+
+Training curves saved to checkpoints_sac_dimred_seed123/training_curves.json
+
+============================================================
+Final Evaluation (20 episodes, greedy policy)
+============================================================
+     eff_peak_mean: 1.0205
+      eff_peak_std: 0.0000
+         peak_mean: 1.0000
+          peak_std: 0.0000
+         drop_mean: 0.0205
+        delay_mean: 1.6294
+       reward_mean: -255.5877
+
+============================================================
+Comparison (same scenario, same seed)
+============================================================
+  Baseline (random_feasible):  eff_peak = 1.0034
+  SAC (greedy, 20 ep):         eff_peak = 1.0205
+  Improvement vs baseline:     -1.71%

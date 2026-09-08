@@ -113,7 +113,7 @@ result["methods"]["random_feasible"] = {
     "per_seed": [float(x) for x in base_vals],
     "base_draws_per_seed": BASE_DRAWS,
     "n_eval_seeds": N_SEEDS,
-    "note": "朴素基线：随机顺序 + 随机放置（DRL 唯一合法对比对象）",
+    "note": "参考标尺：随机顺序 + 随机放置（绝对水平下界，非对比基线）",
 }
 print(f"    baseline 20-seed: mean={base_vals.mean():.4f} +/- {base_vals.std():.4f}")
 
@@ -209,7 +209,7 @@ result["derived"] = {
         "note": "论文建议口径（20 场景稳健均值 ± std）",
     },
     "verdict": (
-        "两种口径下 PPO+BC 均显著优于随机基线且填 MILP 差距 >50%；"
+        "两种口径下 PPO+BC 均显著优于 random_feasible 参考标尺且填 MILP 差距 >50%；"
         "但 20 种子均值(0.7339)与 random 顺序 min-load teacher(0.7073) 在噪声内持平，"
         "论文若对比非RL贪心需谨慎措辞"
     ),

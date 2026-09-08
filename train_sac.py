@@ -92,20 +92,22 @@ def train(
         ep_update_count = 0
 
         while True:
-            # --- Action selection ---
+            # --- Action selection (returns a CELL index in both modes) ---
             if total_steps < warmup_steps:
-                if agent._action_mode == "dimred":
-                    action = np.random.randint(0, 2, size=env.n_actions).astype(int)
+                # Warmup: random valid cell (mask is always the 96-cell mask).
+                valid = np.where(mask)[0]
+                if len(valid) > 0:
+                    cell = int(np.random.choice(valid))
                 else:
-                    # Warmup: random valid action
-                    valid = np.where(mask)[0]
-                    if len(valid) > 0:
-                        action = int(np.random.choice(valid))
-                    else:
-                        action = 0
+                    cell = 0
             else:
-                out = agent.select_action(state, mask, deterministic=False)
-                action = out[0] if isinstance(out, tuple) else out
+                cell = agent.select_action(state, mask, deterministic=False)
+
+            # env.step expects 7 bits in dimred mode, cell index in native.
+            if agent._action_mode == "dimred":
+                action = agent.cell_to_bits(cell)
+            else:
+                action = cell
 
             # --- Step ---
             next_state, reward, done, truncated, next_info = env.step(action)
@@ -114,12 +116,12 @@ def train(
             ep_steps += 1
             total_steps += 1
 
-            if not isinstance(action, np.ndarray) and action == 0 and not mask.any():
+            if cell == 0 and not mask.any():
                 dropped += 1
 
-            # --- Store transition ---
+            # --- Store transition (buffer always stores the cell index) ---
             buffer.push(_make_transition(
-                state, action, reward, next_state, done, mask, next_mask,
+                state, cell, reward, next_state, done, mask, next_mask,
             ))
 
             # --- Gradient update ---
@@ -286,8 +288,8 @@ def evaluate(
         ep_reward = 0.0
 
         while True:
-            out = agent.select_action(state, mask, deterministic=True)
-            action = out[0] if isinstance(out, tuple) else out
+            cell = agent.select_action(state, mask, deterministic=True)
+            action = agent.cell_to_bits(cell) if agent._action_mode == "dimred" else cell
             state, reward, done, _, info = env.step(action)
             mask = env.action_masks()
             ep_reward += reward
@@ -381,10 +383,10 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--period-mode", type=str, default="cyclic",
                         choices=["cyclic", "simple", "random"],
-                        help="cyclic=历史基线复现; simple=Simple集(2固定周期); random=Random集")
+                        help="cyclic=历史复现; simple=Simple集(2固定周期); random=Random集")
     parser.add_argument("--order-mode", type=str, default="random",
                         choices=["edf", "random"],
-                        help="edf=固定EDF顺序(历史); random=随机顺序(在基线上进行,默认)")
+                        help="edf=固定EDF顺序(历史); random=随机顺序(native/dimred统一口径,默认)")
     parser.add_argument("--action-mode", type=str, default="native",
                         choices=["native", "dimred"],
                         help="native=Discrete(96)动作; dimred=结构化7位二值动作(动作空间降维)")
@@ -516,13 +518,12 @@ def main():
     for k, v in eval_metrics.items():
         print(f"  {k:>16s}: {v:.4f}")
 
-    # --- Compare with the TRUE naive baseline (random_feasible) ---
-    # NOTE: the real baseline is random_feasible (random order + random
-    # placement), NOT the handcrafted min-load heuristic. When the env uses
-    # order_mode='random', DRL is evaluated "on the baseline" and its gain is
-    # attributable to RL, not to a hand-picked EDF ordering.
+    # --- Reference scale: random_feasible (random lower bound) ---
+    # NOTE: the comparison baseline for the dimred method is the native
+    # (non-reduced) version of the SAME algorithm. random_feasible is only a
+    # reference scale to mark the absolute level.
     print(f"\n{'='*60}")
-    print("Comparison (same scenario, same seed)")
+    print("Reference scale (same scenario, same seed)")
     print(f"{'='*60}")
     from tsn_sim.heuristics import schedule_with_heuristic
     from tsn_sim.config import HeuristicConfig
@@ -534,9 +535,9 @@ def main():
     base_peak = base.metrics["effective_peak_load"]
     sac_peak = eval_metrics["eff_peak_mean"]
     improvement = (base_peak - sac_peak) / base_peak * 100
-    print(f"  Baseline (random_feasible):  eff_peak = {base_peak:.4f}")
+    print(f"  Reference (random_feasible): eff_peak = {base_peak:.4f}")
     print(f"  SAC (greedy, 20 ep):         eff_peak = {sac_peak:.4f}")
-    print(f"  Improvement vs baseline:     {improvement:+.2f}%")
+    print(f"  Gain vs random reference:    {improvement:+.2f}%")
 
 
 def build_scenario_safe(sim_config):

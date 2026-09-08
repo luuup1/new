@@ -50,7 +50,7 @@
 | 推理时间 / 训练时间 | 单场景求解耗时 | Time Cost |
 | reward 曲线 | 训练收敛过程 | Fig.8 / Fig.9 |
 
-> **基线定义（沿用你的纠正）**：朴素 baseline = `random_feasible`（随机顺序+随机放置）；EDF/urgency 是"对随机的启发式改进"；MILP 是最优上界。论文中没有显式 random baseline，我们用 `random_feasible` 补上，使"RL 是否优于随机"这一叙事完整。
+> **基线定义（2026-09-06 更新）**：**对比基线 = native（未降维）同算法**。降维（dimred）方法的唯一合法对比对象是「同一算法在 `action_mode="native"` 下的结果」，用于回答"动作空间 96→7 维降维的代价/收益"。`random_feasible`（随机顺序+随机放置）、EDF/urgency 启发式、MILP 最优统一作为**参考标尺（reference）**，仅标注绝对水平，不进对比。
 
 ### 2.3 算法对比矩阵（离散原生三方）
 
@@ -58,18 +58,17 @@
 
 | 类别 | 算法 | 动作范式 | 状态 |
 |---|---|---|---|
-| 朴素基线 | `random_feasible` | — | ✅ 已有 |
-| 启发式 | `edf_min_load`, `urgency_lexicographic` | — | ✅ 已有 |
-| RL | **PPO**（categorical） | on-policy 策略梯度 | ❌ 待实现 |
-| RL | **SAC**（离散） | off-policy 最大熵策略梯度 | ✅ 已有（load_balance+γ=0.5+固定α=0.1） |
-| RL | **Double-DQN** | 价值法（Q-learning） | ❌ 待实现 |
-| 最优参考 | **MILP**（scipy） | — | ✅ 已有（≤50 流） |
+| 降维对比基线 | native 版本（PPO/SAC/DDQN/TD3） | Discrete(96) | ✅ 已有 |
+| 降维方法 | dimred 版本（PPO/SAC/DDQN/TD3） | MultiBinary(7) | ✅ 已有（TD3 新增） |
+| 参考标尺 | `random_feasible`（随机下界） | — | ✅ 已有 |
+| 参考标尺 | `edf_min_load`, `urgency_lexicographic`（启发式） | — | ✅ 已有 |
+| 参考标尺 | **MILP**（scipy 最优） | — | ✅ 已有（≤50 流） |
 
 **为什么不用 DDPG（针对当前离散 agent）**：DDPG 是**连续控制-only**算法（确定性策略 μ(s)+噪声），原论文用它是因为其 MDP 是连续的（每流输出连续 link+offset）。在我们 96 维离散 + mask 的 MDP 上，DDPG 必须靠 Gumbel-Softmax 松弛硬套、mask 也不自然，对比不公平且结论易被"松弛质量"而非算法本身干扰。故**第一阶段剔除 DDPG**，用离散原生的 **Double-DQN** 替代，使三方恰好覆盖三种不同范式（策略梯度 / 最大熵策略梯度 / 价值法），RQ3 升级为"哪类范式最适配本场景"。
 
 > 若后续要**复刻论文的 SAC/PPO/DDPG 三方对比**，需先把 env 改为**连续映射 MDP**（Plan B：每流输出连续 link+offset），DDPG 才原生——列为可选升级，不在第一阶段。
 
-- **公平性原则**：PPO / 离散 SAC / Double-DQN 全部在**同一 env、同一状态表示、同一奖励**下训练对比；mask 统一以"不可行动作 logits/Q 置 -inf"实现；启发式为确定性结果直接比较；MILP 作为最优下界。
+- **公平性原则**：每个算法的 native 与 dimred 版本在**同一 env、同一状态表示、同一奖励**下训练对比；mask 统一以"不可行动作 logits/Q 置 -inf"实现；`random_feasible`/启发式/MILP 作为参考标尺，仅标注绝对水平。
 - **不预设谁最优**：论文结论是 SAC 最优，但本场景（包级、离散放置、RB 硬约束）可能不同，三方需实跑后综合给结论（尤其关注 Double-DQN 在大动作空间+mask 下是否稳定）。
 
 ### 2.4 MDP / 动作空间一致性
@@ -118,10 +117,10 @@
 
 ## 4. 论文章节对应的研究问题（RQ）
 
-- **RQ1（规模扩展性）**：流数增大时，各算法的峰值/接受率/耗时如何变化？RL 相对启发式的优势是否随规模扩大？
+- **RQ1（规模扩展性）**：流数增大时，各算法的峰值/接受率/耗时如何变化？native 相对参考标尺（random/启发式）的水平如何随规模扩大？
 - **RQ2（周期复杂度鲁棒性）**：Simple vs Random 集下，各算法指标差异多大？哪种算法在 Random 集（高复杂度）上最稳健？
 - **RQ3（RL 算法选型）**：**PPO（策略梯度）/ 离散 SAC（最大熵策略梯度）/ Double-DQN（价值法）**，哪类范式最适配本场景的离散+mask 决策？是否 SAC（最大熵）最优，还是本场景下 PPO/DQN 反超？（**不预设，实证**）
-- **RQ4（与最优的差距）**：RL 相对 MILP 最优的 gap 多大？相对朴素 random baseline 提升多少？时间开销权衡如何？
+- **RQ4（与最优的差距）**：native/dimred 相对 MILP 最优的 gap 多大？相对 random 标尺（1.0）的水平如何？时间开销权衡如何？
 
 ---
 

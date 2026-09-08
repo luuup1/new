@@ -3,59 +3,65 @@
 > 本文件记录本项目**已踩过的所有坑**、**正确的实验设定**、以及**实验设计思路**。
 > **每次开始执行任何相关任务前，先读本文件。** 读完后，回复开头先发「泥嚎」再继续输出。
 >
-> 最后更新：2026-07-15
+> 最后更新：2026-09-06
 
 ---
 
 ## 0. 一句话总纲
 
-**DRL 必须"在基线上进行"**：使用随机顺序 env（`order_mode="random"`），对比对象**只能**是真实朴素基线 `random_feasible`（≈1.0），**绝不能**和 EDF 顺序的启发式（0.667 / 0.816）比，也**绝不能用**固定 EDF 顺序的 env 作训练或对比。
+**降维（dimred）方法的对比基线是「未降维（native）版本」**：论文的创新点是「动作空间降维」，因此要回答的唯一问题是——降维后（96 → 7 维动作）能否在**大幅缩小动作空间**的同时，保持/逼近 native 的调度质量。
+
+- **对比基线 = native（未降维）**：PPO/SAC/DDQN 各自的 native 版本，是 dimred 版本的唯一合法对比对象。
+- **`random_feasible`（≈1.0）/ `edf_min_load`（0.816）/ `urgency_lexicographic`（0.667）/ MILP（0.545）只是「性能参考标尺」**，用于标注绝对水平，**不是对比基线**。
+- 训练与评估统一 `order_mode="random"`（随机顺序 + 学放置），保证 native / dimred 在同一 MDP 上公平对比。
 
 ---
 
 ## 1. 核心基线定义（最重要，曾在这里栽过）
 
-| 角色 | 方法 | eff_peak（seed 参考） | 说明 |
+| 角色 | 方法 | eff_peak（参考） | 说明 |
 |---|---|---|---|
-| **朴素基线** | `random_feasible` | **≈1.0**（单次 1.000，20 种子均值 1.0049） | 随机顺序 + 随机放置，DRL 唯一合法对比对象 |
-| 启发式改进 | `edf_min_load` | 0.816 | EDF 顺序 + 每步选最空格 |
-| 最佳启发式 | `urgency_lexicographic` | 0.667 | EDF 顺序 + 字典序评分 |
-| **DRL（本次 best）** | PPO | **0.9722** | 随机顺序 + 学放置，相对基线 +3% |
-| 最优下界 | MILP | 0.545 | ≤50 流可用，作上限参考 |
+| **降维对比基线** | native（未降维）三算法 | PPO 0.976 / SAC 0.681 / DDQN 0.754 | dimred 的唯一合法对比对象 |
+| 降维方法 | dimred 三算法 | PPO 0.968 / SAC 1.040 / DDQN 1.032 | 论文创新点，与 native 成对对比 |
+| 性能标尺（随机下界） | `random_feasible` | ≈1.0 | 随机顺序 + 随机放置，仅作绝对水平参考 |
+| 性能标尺（启发式） | `edf_min_load` / `urgency_lexicographic` | 0.816 / 0.667 | 仅作参考，非基线 |
+| 性能标尺（最优） | MILP | 0.545 | ≤50 流最优参考，非训练目标 |
 
-- `edf_min_load` / `urgency_lexicographic` 是**启发式改进，不是基线**。
-- MILP 是**最优下界参考**，不是训练目标。
-- **DRL 在"基线上进行" = 随机顺序 + 学放置**，对比 随机顺序 + 随机放置（同顺序、只有放置策略不同 → 公平）。
+- **「基线」一词在本项目专指 native（未降维）版本**。
+- `random_feasible` / 启发式 / MILP 统一改称「**参考标尺（reference）**」，用于标注绝对水平。
+- **降维对比 = 同一算法 native vs dimred**（PPO native↔PPO dimred 成对），同顺序、同 env、同奖励，只有动作空间维度不同 → 公平。
 
 ---
 
 ## 2. 所有错误要点（踩坑清单，执行前逐条自查）
 
-1. ❌ **env 把 EDF 顺序硬编码** → DRL 白拿顺序增益（这部分不是 RL 学的），对比不公平。
-   ✅ 已修：`SimulationConfig` 增 `order_mode`(edf/random)；`env._build_episode_data` 支持 `random`（用场景 seed 复现 `random_feasible` 顺序）。
+1. ❌ **env 把 EDF 顺序硬编码** → 对比不公平（顺序增益不是 RL 学的）。
+   ✅ 已修：`SimulationConfig` 增 `order_mode`(edf/random)；`env._build_episode_data` 支持 `random`。
 
-2. ❌ **对比对象错**：把 PPO 和 `edf_min_load`(0.667) 比，得出"PPO 崩了 / 冷启动学不动"。
-   ✅ 正确：PPO(随机顺序) vs `random_feasible`(1.0)。
+2. ❌ **对比对象错**：曾把 PPO 和 `edf_min_load`(0.667) 比，得出"PPO 崩了"。
+   ✅ 正确：降维对比应聚焦 **native vs dimred**；启发式只作参考标尺。
 
-3. ❌ **错比法数字 "-27%"**：EDF 顺序上训练的 DRL(0.727) vs 随机基线(1.0)，苹果比橘子，**该数字无效**。
-   ✅ 正确：随机顺序 DRL(0.9722) vs 随机基线(1.0) ≈ **+3%**（真实但偏小）。
+3. ❌ **错比法数字 "-27%"**：EDF 顺序上训练的 DRL vs random_feasible 标尺，苹果比橘子，无效。
+   ✅ 正确：native / dimred 都必须在 `order_mode="random"` 的同一 env 上跑，成对对比。
 
-4. ❌ **A/B 路线在错误 MDP 上验证**：γ↑0.99+n-step / mixed 对准峰值，是在**固定 EDF env** 上跑的，结论不能平移到正确 MDP。
+4. ❌ **A/B 路线在错误 MDP 上验证**：γ↑0.99+n-step / mixed 对准峰值，是在固定 EDF env 上跑的，结论不能平移。
    ✅ 修正：在 `order_mode="random"` 的 env 上重做才有效。
 
 5. ❌ **train_ppo.py 对比段默认用 `urgency_lexicographic` 且错标 "EDF+MinLoad"**。
-   ✅ 已修：对比段显式传 `strategy="random_feasible"`。
+   ✅ 已修：对比段不再把启发式当基线；参考标尺仅作绝对水平标注。
 
-6. ❌ **最终评估用 final 模型**（训练不稳定会回退到 1.0）而非 best checkpoint。
-   ✅ 已修：最终评估 / eval-only 加载 `ppo_best.pth`。
+6. ❌ **最终评估用 final 模型**（训练不稳定会回退）而非 best checkpoint。
+   ✅ 已修：最终评估 / eval-only 加载 best checkpoint。
 
 7. ❌ **diag_greedy / diag_flow / diag_reward 在 EDF-env 上诊断**，非主线，仅供对照，不能据此下结论。
 
 8. ❌ **γ=0.99 让回报量级暴涨 → critic 学崩**（valL 800~1284），polL≈0 策略几乎不更新。
    ✅ 修正后：`mixed` + `γ=0.9` + `gae_lambda=0.95` + `n_steps=4`，critic 稳定（valL~4）。
 
-9. ❌ **A 路线（信用分配 / γ）误诊为根因**：critic 稳住后 PPO 仍=1.0，说明真因是"冷启动学不动贪婪策略"，并非 γ/信用分配。
-   ✅ 真因：2 层 MLP 需从 199 维 obs 学会"对 96 个 mask 动作做 argmin(post-load)"的关系型操作，且逐格奖励差仅 ~0.18 量级，400 episode 不足以收敛 → 策略停留在接近随机。
+9. ❌ **A 路线（信用分配 / γ）误诊为根因**：critic 稳住后 PPO 仍≈1.0，说明真因是"冷启动学不动贪婪策略"，并非 γ/信用分配。
+
+10. ❌ **dimred 在 off-policy 算法上直接用「因子化 Q」**（SAC/DDQN 的 `Q(a)=Σ q_bit[i]·bit[i]`）：link/slot 位强耦合下分解假设失效，学不动（SAC 1.040 / DDQN 1.032 反恶化）。
+    ✅ 方向：TD3 用「连续松弛（softmax/sigmoid）+ 阈值化」桥接，避免因子化假设（见 `tsn_sim/td3.py`）。
 
 ---
 
@@ -63,20 +69,18 @@
 
 **步骤 1：确认 env 设定**
 - 构造 `SimulationConfig(order_mode="random")`，env 传 `order_mode="random"`。
-- 绝不默认 `edf`（除非明确在"复现历史基线"语境下）。
+- 绝不默认 `edf`（除非明确在"复现历史"语境下）。
 
-**步骤 2：计算真实朴素基线**
-- 在随机顺序 env 上，用随机策略（或 `schedule_with_heuristic(random_feasible)`）跑 20+ 随机种子。
-- 记录 `eff_peak` 均值（当前 ≈1.0049）。这是 DRL 唯一合法对比锚点。
+**步骤 2：跑 native 基线（降维的对比对象）**
+- 对每个算法（PPO/SAC/DDQN/TD3），用 `action_mode="native"` 训练，记录 best `eff_peak`。
+- 这是 dimred 版本的**唯一合法对比基线**。
 
-**步骤 3：训练 DRL**
-- 推荐配置：`reward_mode=mixed`（直接惩罚峰值）、`γ=0.9`、`gae_lambda=0.95`、`n_steps=4`、`lr=1e-4`、`epochs=8`。
-- 按 eval `eff_peak` 选最优，保存 `ppo_best.pth`。
+**步骤 3：跑 dimred 方法（论文创新点）**
+- 用 `action_mode="dimred"` 训练同一算法，记录 best `eff_peak`。
+- 对比：`dimred_eff_peak` vs `native_eff_peak`（同算法成对），计算降维的性能代价 / 收益。
 
-**步骤 4：评估（必须加载 best）**
-- `evaluate` 20 episodes，加载 `ppo_best.pth`。
-- 对比：`PPO_best_eff_peak` vs `random_feasible` 基线 → 计算改进 %。
-- 若 final 模型回退到 1.0，以 best 为准，不要报告 final。
+**步骤 4：可选标注参考标尺**
+- `random_feasible`（随机下界）、启发式（0.816/0.667）、MILP（0.545）仅作绝对水平标注，不进对比。
 
 **步骤 5：记录到记忆**
 - 把本次配置 + 结果追加到 `.workbuddy/memory/YYYY-MM-DD.md`。
@@ -88,48 +92,48 @@
 
 - **数据集**：多规模 `flow_count ∈ {10,20,50,100,200}` × `Simple 集`（2 固定周期） / `Random 集`（全周期随机）
   - 目的：测试算法对不同**周期复杂度**的鲁棒性（复刻论文 Fig.10 的 simple vs random 对比）。
-- **算法对比（离散原生三方）**：PPO + 离散 SAC + Double-DQN + 3 种启发式 + MILP(≤50 流)
-  - DDPG（连续-only）已剔除；不预设谁最优，实证。
+- **算法对比（native 三/四算法 + dimred 对应版本）**：PPO + 离散 SAC + Double-DQN + TD3，各自 native 与 dimred 成对对比。
+  - 启发式（3 种）与 MILP（≤50 流）作参考标尺，不进对比基线。
 - **指标**：`effective_peak_load`(=Max Slot Occupation) / `scheduling_success_rate`(=Acceptance Rate) / 时间开销。
-- **MDP 决策**：保持离散顺序 env（96 离散 + mask），对 PPO / 离散 SAC / Double-DQN 均为原生正确选择。
-- **论文 RQ**：RQ1 规模扩展性 / RQ2 周期复杂度鲁棒性 / RQ3 RL 选型 / RQ4 与 MILP 差距。
+- **MDP 决策**：离散顺序 env（96 离散 + mask 原生；dimred 为 7-bit 结构化降维）。
+- **论文 RQ**：RQ1 规模扩展性 / RQ2 周期复杂度鲁棒性 / RQ3 算法选型（native）/ RQ4 降维代价（dimred vs native）/ RQ5 与 MILP 差距。
 - **当前瓶颈与下一步**：
-  - 冷启动仅学到 min-load 贪婪的 22%，训练不稳定 → 增益仅 ~3%。
-  - 要论文级增益：
-    - **C（IL/BC 暖启动）**：用 `edf_min_load` 的 (obs, 最格动作) 演示预训练 actor，先学会 min-load 贪婪再 RL 微调；
-    - **Plan B（让 agent 学包顺序）**：顺序才是大杠杆（EDF+min-load 能到 0.667 主要靠顺序），让 DRL 同时学顺序+放置，可能直接大幅压低峰值。
+  - dimred 在 off-policy 上因子化 Q 学不动 → 用 TD3 连续松弛桥接（已写 `td3.py`）。
+  - native 冷启动增益偏小（PPO 贴 random）→ 可探索 BC 暖启动 / Plan B（学顺序）。
 
 ---
 
 ## 5. 关键数字速查
 
-| 方法 | 顺序 | eff_peak | 说明 |
+| 方法 | 动作空间 | eff_peak | 角色 |
 |---|---|---|---|
-| random_feasible | 随机 | **1.0049** | 朴素基线（单次 1.000） |
-| edf_min_load | EDF | 0.816 | 启发式 |
-| urgency_lexicographic | EDF | 0.667 | 最佳启发式 |
-| PPO（本次 best） | 随机 | **0.9722** | DRL 在基线上，+3% vs 基线 |
-| MILP | - | 0.545 | 最优下界（≤50 流） |
+| PPO native | Discrete(96) | 0.976 | dimred 基线 |
+| PPO dimred | MultiBinary(7) | 0.968 | 降维方法（打平） |
+| SAC native | Discrete(96) | 0.681 | dimred 基线 |
+| SAC dimred | MultiBinary(7) | 1.040 | 降维方法（恶化，因子化Q问题） |
+| DDQN native | Discrete(96) | 0.754 | dimred 基线 |
+| DDQN dimred | MultiBinary(7) | 1.032 | 降维方法（恶化，因子化Q问题） |
+| random_feasible | — | 1.005 | 参考标尺（随机下界） |
+| edf_min_load / urgency | — | 0.816 / 0.667 | 参考标尺（启发式） |
+| MILP | — | 0.545 | 参考标尺（最优） |
 
 ---
 
 ## 6. 文件索引
 
 - **协议/规范**：本文件 `EXPERIMENT_PROTOCOL.md`（根目录）
-- **env**：`tsn_sim/env.py`（`order_mode` 支持）
-- **PPO**：`tsn_sim/ppo.py`（γ / n_steps）
-- **训练入口**：`train_ppo.py`（`--order-mode` / `--reward-mode` / `--eval-only` / `--n-steps`）
+- **env**：`tsn_sim/env.py`（`order_mode` / `action_mode` 支持）
+- **算法**：`tsn_sim/ppo.py`、`tsn_sim/sac.py`、`tsn_sim/ddqn.py`、`tsn_sim/td3.py`（TD3 连续松弛桥接）
+- **训练入口**：`train_ppo.py` / `train_sac.py` / `train_ddqn.py` / `train_td3.py`
 - **基线计算**：`baseline_random.py`
-- **验证配对**：`verify_order_mode.py`
-- **旧诊断（EDF-env，仅供对照，非主线）**：`diag_greedy.py` / `diag_flow.py` / `diag_reward.py`
 - **长期记忆**：`.workbuddy/memory/MEMORY.md`、`2026-07-15.md`
 
 ---
 
 ## 7. 铁律（违反任意一条 = 实验作废）
 
-1. env 必须用 `order_mode="random"`，DRL 在"基线上进行"。
-2. 对比对象只能是 `random_feasible`（≈1.0），绝不和启发式(0.667/0.816) 比。
-3. 绝不用 EDF 顺序 env 训练出的 DRL 去对比随机基线（错比法）。
+1. env 必须用 `order_mode="random"`，native / dimred 在同一 MDP 上公平对比。
+2. **降维对比基线只能是 native（未降维）同算法**，绝不拿 dimred 和启发式/random 比作为"改进"。
+3. `random_feasible` / 启发式 / MILP 是**参考标尺**，用于标注绝对水平，不是对比基线。
 4. 最终报告用 best checkpoint，不用回退的 final 模型。
 5. 任何涉及基线/对比口径的结论变更，先读本文件再动手。

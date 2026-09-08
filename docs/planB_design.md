@@ -13,7 +13,7 @@
 
 **已验证的局限**
 - 全局峰值是 **episode 级统计量**，单步放置几乎不改变它。
-- 任何**局部**奖励都只能把 agent 引导到"局部 min_load"——而这正好等于启发式 baseline 本身。
+- 任何**局部**奖励都只能把 agent 引导到"局部 min_load"——而这正好等于固定顺序启发式本身。
 - 实测：DRL（仅放置）eff_peak=0.727 vs `urgency_lexicographic`=0.704，仅差 **-3.57%**，无法超越。
 - MILP 最优 peak=**0.545**（gap 49.6%）——MILP 同时优化"顺序+放置"，这就是 DRL 缺的那块自由度。
 
@@ -115,7 +115,7 @@ Decoder:
 - 优点：最贴近"学习调度策略"的叙事，泛化好，是论文核心卖点。
 - 缺点：实现量最大（需改 SAC 接受序列 obs + attention actor），约 1 周。
 
-**建议路线**：先用 **B1** 低成本验证"学顺序能超越 baseline"这一假设（证伪/证实都只需 1~2 天）；确认有效后，再投入 **B3** 做论文级实现。
+**建议路线**：先用 **B1** 低成本验证"学顺序能超越固定顺序启发式"这一假设（证伪/证实都只需 1~2 天）；确认有效后，再投入 **B3** 做论文级实现。
 
 ---
 
@@ -124,7 +124,7 @@ Decoder:
 - action_space 维度、obs 接口按所选方案调整。
 - Actor/Critic 网络按 B1/B2/B3 重写（主要在 `sac.py` 的 Actor/Critic 类）。
 - **沿用已验证的稳定配置**：固定 `alpha=0.1`、`gamma=0.5`、`load_balance` 奖励、action masking。
-- 评估：固定 seed=7 场景 + 开 `multi_scenario` 各训一轮，报告 eff_peak、丢弃率、与 baseline/MILP 的 gap。
+- 评估：固定 seed=7 场景 + 开 `multi_scenario` 各训一轮，报告 eff_peak、丢弃率、与固定顺序启发式/MILP 的 gap。
 - 保留 best/last checkpoint、H/Q 诊断日志。
 
 ---
@@ -142,7 +142,7 @@ Decoder:
 
 | 对比对象 | 说明 | 期望 |
 |---|---|---|
-| `edf_min_load` / `urgency_lexicographic` | 固定顺序启发式（当前 baseline） | DRL-B 应**明显超越** |
+| `edf_min_load` / `urgency_lexicographic` | 固定顺序启发式（参考标尺） | DRL-B 应**明显超越** |
 | **MILP optimal (peak=0.545)** | 上限（同享顺序+放置自由度） | DRL-B 的目标天花板 |
 | DRL-A（仅放置，固定 EDF） | 自身消融 | 证明"学顺序"带来的增益 |
 

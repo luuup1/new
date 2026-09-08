@@ -9,8 +9,9 @@ Usage:
     python train_ddqn.py --eval-only --model ddqn_best.pth
 
 Protocol compliance (see EXPERIMENT_PROTOCOL.md):
-    - default order_mode="random"  (DRL evaluated "on the baseline")
-    - comparison is against random_feasible (~1.0), never the heuristics
+    - default order_mode="random"
+    - the comparison baseline for dimred is the native (non-reduced) version;
+      random_feasible (~1.0) is only a reference scale.
     - loads best checkpoint for final reporting
 """
 
@@ -87,8 +88,11 @@ def train(
         while True:
             # --- Action selection ---
             if total_steps < warmup_steps:
-                valid = np.where(mask)[0]
-                action = int(np.random.choice(valid)) if len(valid) > 0 else 0
+                if agent._action_mode == "dimred":
+                    action = np.random.randint(0, 2, size=env.n_actions).astype(int)
+                else:
+                    valid = np.where(mask)[0]
+                    action = int(np.random.choice(valid)) if len(valid) > 0 else 0
             else:
                 action = agent.select_action(state, mask, deterministic=False)
 
@@ -266,7 +270,7 @@ def evaluate(
 def _make_transition(state, action, reward, next_state, done, mask, next_mask):
     return Transition(
         state=state.astype(np.float32),
-        action=int(action),
+        action=action if isinstance(action, np.ndarray) else int(action),
         reward=float(reward),
         next_state=next_state.astype(np.float32),
         done=bool(done),
@@ -315,7 +319,10 @@ def main():
                         choices=["cyclic", "simple", "random"])
     parser.add_argument("--order-mode", type=str, default="random",
                         choices=["edf", "random"],
-                        help="edf=固定EDF顺序(历史); random=随机顺序(在基线上进行,默认)")
+                        help="edf=固定EDF顺序(历史); random=随机顺序(native/dimred统一口径,默认)")
+    parser.add_argument("--action-mode", type=str, default="native",
+                        choices=["native", "dimred"],
+                        help="native=Discrete(96)动作; dimred=结构化7位二值动作(动作空间降维)")
     parser.add_argument("--bc-pretrain", action="store_true",
                         help="BC暖启动：用随机顺序min-load teacher预训练Q-net，再DQN微调")
     parser.add_argument("--bc-episodes", type=int, default=150)
@@ -350,13 +357,14 @@ def main():
         reward_delta=args.reward_delta,
         reward_zeta=args.reward_zeta,
         order_mode=args.order_mode,
+        action_mode=args.action_mode,
     )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[Device] {device}" + (f" ({torch.cuda.get_device_name(0)})" if device == "cuda" else ""))
     agent = DDQNAgent(
         obs_dim=env.observation_space.shape[0],
-        n_actions=env.action_space.n,
+        n_actions=env.n_actions,
         hidden_dims=tuple(args.hidden_dims),
         lr=args.lr,
         gamma=args.gamma,
@@ -366,13 +374,14 @@ def main():
         epsilon_decay_steps=args.eps_decay_steps,
         target_update_freq=args.target_update_freq,
         device=device,
+        action_mode=args.action_mode,
     )
 
     print(f"{'='*60}")
     print(f"Double-DQN Training for 5G-TSN Scheduling (period_mode={period_mode})")
     print(f"{'='*60}")
     print(f"  Obs dim:        {env.observation_space.shape[0]}")
-    print(f"  Action dim:     {env.action_space.n}")
+    print(f"  Action dim:     {env.n_actions} ({env.action_mode})")
     print(f"  Episodes:       {args.episodes}")
     print(f"  Warmup steps:   {args.warmup}")
     print(f"  Batch size:     {args.batch_size}")
@@ -460,9 +469,13 @@ def main():
 
 
 def _compare_with_baseline(sim_config, em):
-    """Compare DQN result against the TRUE naive baseline (random_feasible)."""
+    """Reference scale: random_feasible (random lower bound).
+
+    The comparison baseline for the dimred method is the native (non-reduced)
+    version of the SAME algorithm. random_feasible is only a reference scale.
+    """
     print(f"\n{'='*60}")
-    print("Comparison (same scenario, same seed)")
+    print("Reference scale (same scenario, same seed)")
     print(f"{'='*60}")
     from tsn_sim.heuristics import schedule_with_heuristic
     from tsn_sim.config import HeuristicConfig
@@ -474,9 +487,9 @@ def _compare_with_baseline(sim_config, em):
     base_peak = base.metrics["effective_peak_load"]
     dqn_peak = em["eff_peak_mean"]
     improvement = (base_peak - dqn_peak) / base_peak * 100
-    print(f"  Baseline (random_feasible):  eff_peak = {base_peak:.4f}")
+    print(f"  Reference (random_feasible): eff_peak = {base_peak:.4f}")
     print(f"  DQN (greedy, 20 ep):         eff_peak = {dqn_peak:.4f}")
-    print(f"  Improvement vs baseline:     {improvement:+.2f}%")
+    print(f"  Gain vs random reference:    {improvement:+.2f}%")
 
 
 if __name__ == "__main__":

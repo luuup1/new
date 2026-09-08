@@ -1,0 +1,871 @@
+[Device] cpu
+============================================================
+PPO Training for 5G-TSN Scheduling (period_mode=simple)
+============================================================
+  Obs dim:       199
+  Action dim:    7 (dimred)
+  Episodes:      2000 (rollout=10 ep/update)
+  PPO epochs:    4  minibatch=256
+  LR:            0.0003
+  Gamma:         0.99  GAE-lambda=0.97  n-steps=5
+  Clip-eps:      0.2  Ent-coef=0.01
+  Reward mode:   load_balance
+  Seed:          42
+  Early stop:    OFF
+  BC pretrain:   OFF
+============================================================
+Ep    10/2000  R=-263.663  eff_peak=1.0060  drop=0.008  polL=0.002  valL=9420.385  H=4.734
+Ep    20/2000  R=-261.727  eff_peak=1.0041  drop=0.004  polL=-0.003  valL=8405.102  H=4.744
+Ep    30/2000  R=-261.230  eff_peak=1.0051  drop=0.005  polL=-0.004  valL=7804.795  H=4.755
+Ep    40/2000  R=-260.418  eff_peak=1.0039  drop=0.006  polL=0.002  valL=7223.721  H=4.733
+Ep    50/2000  R=-263.492  eff_peak=1.0012  drop=0.006  polL=-0.001  valL=6999.897  H=4.736
+  >>> New best! eff_peak=1.0000  saved to checkpoints_ppo_cold_dimred_seed42/ppo_best.pth
+  [EVAL] ep=50  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=0/9999
+Ep    60/2000  R=-263.423  eff_peak=1.0035  drop=0.003  polL=-0.001  valL=6439.168  H=4.757
+Ep    70/2000  R=-256.932  eff_peak=1.0038  drop=0.004  polL=-0.001  valL=5648.890  H=4.718
+Ep    80/2000  R=-262.815  eff_peak=1.0035  drop=0.003  polL=-0.011  valL=5445.667  H=4.700
+Ep    90/2000  R=-257.874  eff_peak=1.0028  drop=0.003  polL=-0.002  valL=4820.349  H=4.664
+Ep   100/2000  R=-254.990  eff_peak=1.0009  drop=0.003  polL=-0.006  valL=4232.921  H=4.630
+  [EVAL] ep=100  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=1/9999
+Ep   110/2000  R=-259.748  eff_peak=0.9996  drop=0.002  polL=-0.004  valL=4061.651  H=4.599
+Ep   120/2000  R=-261.400  eff_peak=1.0051  drop=0.005  polL=-0.000  valL=3749.986  H=4.631
+Ep   130/2000  R=-263.485  eff_peak=1.0041  drop=0.004  polL=-0.006  valL=3674.177  H=4.640
+Ep   140/2000  R=-260.349  eff_peak=1.0034  drop=0.006  polL=-0.001  valL=3294.958  H=4.617
+Ep   150/2000  R=-259.900  eff_peak=1.0051  drop=0.005  polL=0.003  valL=3240.320  H=4.637
+  [EVAL] ep=150  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=2/9999
+Ep   160/2000  R=-261.168  eff_peak=1.0063  drop=0.006  polL=0.000  valL=1951.999  H=4.638
+Ep   170/2000  R=-254.503  eff_peak=1.0044  drop=0.004  polL=-0.001  valL=1560.651  H=4.652
+Ep   180/2000  R=-253.837  eff_peak=1.0043  drop=0.007  polL=0.002  valL=1992.323  H=4.662
+Ep   190/2000  R=-259.010  eff_peak=1.0054  drop=0.005  polL=-0.002  valL=1559.580  H=4.635
+Ep   200/2000  R=-256.294  eff_peak=1.0022  drop=0.004  polL=-0.003  valL=1049.640  H=4.633
+  [EVAL] ep=200  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=3/9999
+Ep   210/2000  R=-265.223  eff_peak=1.0016  drop=0.002  polL=-0.006  valL=1348.007  H=4.605
+Ep   220/2000  R=-255.753  eff_peak=1.0025  drop=0.003  polL=0.003  valL=1695.803  H=4.637
+Ep   230/2000  R=-256.042  eff_peak=1.0051  drop=0.005  polL=-0.002  valL=600.103  H=4.662
+Ep   240/2000  R=-258.904  eff_peak=1.0014  drop=0.004  polL=-0.002  valL=1479.960  H=4.668
+Ep   250/2000  R=-260.815  eff_peak=1.0005  drop=0.003  polL=-0.003  valL=1650.636  H=4.717
+  [EVAL] ep=250  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=4/9999
+Ep   260/2000  R=-256.079  eff_peak=1.0013  drop=0.001  polL=-0.001  valL=1305.315  H=4.738
+Ep   270/2000  R=-259.965  eff_peak=1.0035  drop=0.003  polL=-0.000  valL=1358.124  H=4.719
+Ep   280/2000  R=-256.654  eff_peak=1.0028  drop=0.003  polL=-0.001  valL=1633.809  H=4.721
+Ep   290/2000  R=-254.207  eff_peak=1.0025  drop=0.003  polL=0.001  valL=1224.762  H=4.703
+Ep   300/2000  R=-260.738  eff_peak=1.0028  drop=0.003  polL=-0.001  valL=1811.921  H=4.661
+  [EVAL] ep=300  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=5/9999
+Ep   310/2000  R=-252.742  eff_peak=1.0003  drop=0.000  polL=0.002  valL=1372.453  H=4.713
+Ep   320/2000  R=-255.555  eff_peak=0.9974  drop=0.002  polL=-0.007  valL=1273.843  H=4.726
+Ep   330/2000  R=-262.637  eff_peak=1.0028  drop=0.003  polL=-0.004  valL=1436.167  H=4.693
+Ep   340/2000  R=-258.113  eff_peak=1.0044  drop=0.004  polL=-0.002  valL=278.872  H=4.715
+Ep   350/2000  R=-258.973  eff_peak=1.0028  drop=0.003  polL=-0.000  valL=1030.309  H=4.684
+  [EVAL] ep=350  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=6/9999
+Ep   360/2000  R=-253.354  eff_peak=1.0025  drop=0.003  polL=0.000  valL=877.747  H=4.672
+Ep   370/2000  R=-254.452  eff_peak=1.0032  drop=0.003  polL=-0.004  valL=901.701  H=4.644
+Ep   380/2000  R=-257.174  eff_peak=0.9983  drop=0.001  polL=-0.004  valL=1142.763  H=4.652
+Ep   390/2000  R=-254.014  eff_peak=1.0022  drop=0.002  polL=-0.003  valL=1559.566  H=4.594
+Ep   400/2000  R=-254.617  eff_peak=1.0022  drop=0.002  polL=-0.008  valL=1780.354  H=4.576
+  [EVAL] ep=400  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=7/9999
+Ep   410/2000  R=-256.082  eff_peak=1.0019  drop=0.002  polL=-0.000  valL=402.542  H=4.579
+Ep   420/2000  R=-260.242  eff_peak=1.0015  drop=0.004  polL=0.001  valL=635.731  H=4.544
+Ep   430/2000  R=-256.276  eff_peak=1.0019  drop=0.002  polL=-0.003  valL=980.037  H=4.572
+Ep   440/2000  R=-257.083  eff_peak=1.0032  drop=0.003  polL=-0.007  valL=928.332  H=4.555
+Ep   450/2000  R=-258.686  eff_peak=1.0019  drop=0.002  polL=-0.003  valL=1150.134  H=4.516
+  [EVAL] ep=450  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=8/9999
+Ep   460/2000  R=-249.345  eff_peak=1.0009  drop=0.001  polL=-0.003  valL=1300.376  H=4.551
+Ep   470/2000  R=-255.635  eff_peak=1.0025  drop=0.003  polL=0.000  valL=628.834  H=4.524
+Ep   480/2000  R=-256.274  eff_peak=1.0012  drop=0.003  polL=-0.007  valL=1257.693  H=4.510
+Ep   490/2000  R=-260.790  eff_peak=1.0016  drop=0.002  polL=0.000  valL=1267.676  H=4.479
+Ep   500/2000  R=-259.212  eff_peak=0.9989  drop=0.001  polL=-0.006  valL=1025.436  H=4.506
+  [EVAL] ep=500  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=9/9999
+Ep   510/2000  R=-252.880  eff_peak=1.0016  drop=0.002  polL=0.001  valL=2553.557  H=4.541
+Ep   520/2000  R=-255.055  eff_peak=0.9998  drop=0.002  polL=-0.001  valL=1618.853  H=4.554
+Ep   530/2000  R=-256.421  eff_peak=1.0019  drop=0.002  polL=-0.009  valL=531.397  H=4.536
+Ep   540/2000  R=-255.274  eff_peak=0.9929  drop=0.003  polL=-0.006  valL=1470.541  H=4.588
+Ep   550/2000  R=-252.368  eff_peak=1.0014  drop=0.004  polL=-0.006  valL=2018.448  H=4.609
+  [EVAL] ep=550  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=10/9999
+Ep   560/2000  R=-255.032  eff_peak=1.0028  drop=0.003  polL=-0.006  valL=975.091  H=4.569
+Ep   570/2000  R=-259.268  eff_peak=1.0008  drop=0.003  polL=-0.000  valL=945.771  H=4.602
+Ep   580/2000  R=-257.490  eff_peak=1.0022  drop=0.002  polL=-0.003  valL=874.013  H=4.635
+Ep   590/2000  R=-259.853  eff_peak=1.0035  drop=0.003  polL=-0.004  valL=1254.664  H=4.630
+Ep   600/2000  R=-251.419  eff_peak=1.0028  drop=0.003  polL=-0.002  valL=1109.655  H=4.670
+  [EVAL] ep=600  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=11/9999
+Ep   610/2000  R=-250.760  eff_peak=1.0035  drop=0.003  polL=-0.003  valL=1586.253  H=4.645
+Ep   620/2000  R=-258.544  eff_peak=1.0009  drop=0.003  polL=-0.002  valL=2667.264  H=4.654
+Ep   630/2000  R=-257.049  eff_peak=1.0013  drop=0.001  polL=-0.003  valL=2655.085  H=4.637
+Ep   640/2000  R=-264.106  eff_peak=1.0041  drop=0.004  polL=-0.005  valL=1004.739  H=4.648
+Ep   650/2000  R=-263.019  eff_peak=1.0018  drop=0.004  polL=0.001  valL=278.047  H=4.658
+  [EVAL] ep=650  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=12/9999
+Ep   660/2000  R=-255.029  eff_peak=0.9983  drop=0.003  polL=-0.004  valL=262.657  H=4.660
+Ep   670/2000  R=-262.088  eff_peak=1.0032  drop=0.003  polL=-0.004  valL=702.815  H=4.617
+Ep   680/2000  R=-257.837  eff_peak=1.0012  drop=0.003  polL=-0.006  valL=1101.567  H=4.628
+Ep   690/2000  R=-258.557  eff_peak=1.0019  drop=0.002  polL=-0.005  valL=497.597  H=4.610
+Ep   700/2000  R=-261.355  eff_peak=1.0022  drop=0.002  polL=-0.007  valL=381.775  H=4.625
+  [EVAL] ep=700  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=13/9999
+Ep   710/2000  R=-254.761  eff_peak=0.9996  drop=0.002  polL=0.003  valL=1779.474  H=4.579
+Ep   720/2000  R=-258.499  eff_peak=1.0016  drop=0.002  polL=-0.007  valL=1630.370  H=4.560
+Ep   730/2000  R=-252.284  eff_peak=0.9977  drop=0.003  polL=-0.006  valL=699.024  H=4.563
+Ep   740/2000  R=-260.104  eff_peak=1.0025  drop=0.003  polL=-0.006  valL=1243.158  H=4.556
+Ep   750/2000  R=-255.242  eff_peak=1.0013  drop=0.001  polL=-0.005  valL=1708.921  H=4.544
+  [EVAL] ep=750  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=14/9999
+Ep   760/2000  R=-254.314  eff_peak=1.0032  drop=0.003  polL=-0.003  valL=516.411  H=4.577
+Ep   770/2000  R=-256.447  eff_peak=1.0028  drop=0.003  polL=-0.006  valL=1000.878  H=4.582
+Ep   780/2000  R=-256.538  eff_peak=0.9999  drop=0.002  polL=-0.001  valL=380.643  H=4.622
+Ep   790/2000  R=-251.009  eff_peak=0.9991  drop=0.004  polL=-0.005  valL=372.285  H=4.657
+Ep   800/2000  R=-254.230  eff_peak=0.9990  drop=0.004  polL=-0.005  valL=1064.310  H=4.662
+  [EVAL] ep=800  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=15/9999
+Ep   810/2000  R=-256.792  eff_peak=1.0028  drop=0.003  polL=-0.001  valL=113.162  H=4.691
+Ep   820/2000  R=-255.703  eff_peak=1.0076  drop=0.008  polL=-0.001  valL=152.455  H=4.682
+Ep   830/2000  R=-251.409  eff_peak=1.0054  drop=0.005  polL=-0.001  valL=215.213  H=4.687
+Ep   840/2000  R=-256.280  eff_peak=1.0041  drop=0.004  polL=-0.004  valL=560.662  H=4.669
+Ep   850/2000  R=-255.365  eff_peak=1.0006  drop=0.003  polL=-0.005  valL=491.975  H=4.685
+  [EVAL] ep=850  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=16/9999
+Ep   860/2000  R=-251.953  eff_peak=1.0022  drop=0.002  polL=0.002  valL=1054.318  H=4.677
+Ep   870/2000  R=-259.076  eff_peak=1.0047  drop=0.005  polL=0.004  valL=1009.523  H=4.659
+Ep   880/2000  R=-254.282  eff_peak=1.0041  drop=0.004  polL=0.000  valL=1657.056  H=4.644
+Ep   890/2000  R=-258.684  eff_peak=1.0032  drop=0.003  polL=-0.004  valL=2363.943  H=4.640
+Ep   900/2000  R=-252.536  eff_peak=1.0060  drop=0.006  polL=-0.006  valL=1858.416  H=4.626
+  [EVAL] ep=900  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=17/9999
+Ep   910/2000  R=-252.953  eff_peak=1.0028  drop=0.003  polL=-0.001  valL=488.520  H=4.620
+Ep   920/2000  R=-251.694  eff_peak=1.0008  drop=0.003  polL=-0.010  valL=872.576  H=4.629
+Ep   930/2000  R=-256.094  eff_peak=1.0025  drop=0.003  polL=-0.003  valL=572.374  H=4.662
+Ep   940/2000  R=-251.710  eff_peak=1.0003  drop=0.000  polL=-0.002  valL=2012.287  H=4.662
+Ep   950/2000  R=-256.745  eff_peak=1.0035  drop=0.003  polL=-0.001  valL=1017.036  H=4.683
+  [EVAL] ep=950  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=18/9999
+Ep   960/2000  R=-260.161  eff_peak=0.9985  drop=0.003  polL=-0.003  valL=2416.272  H=4.679
+Ep   970/2000  R=-253.389  eff_peak=1.0018  drop=0.004  polL=-0.002  valL=257.261  H=4.694
+Ep   980/2000  R=-261.068  eff_peak=1.0035  drop=0.003  polL=-0.001  valL=143.191  H=4.692
+Ep   990/2000  R=-251.226  eff_peak=1.0022  drop=0.002  polL=-0.005  valL=228.089  H=4.688
+Ep  1000/2000  R=-254.394  eff_peak=1.0051  drop=0.005  polL=-0.007  valL=106.055  H=4.683
+  [EVAL] ep=1000  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=19/9999
+Ep  1010/2000  R=-257.702  eff_peak=1.0063  drop=0.006  polL=-0.013  valL=145.188  H=4.659
+Ep  1020/2000  R=-260.901  eff_peak=1.0035  drop=0.003  polL=-0.005  valL=118.762  H=4.663
+Ep  1030/2000  R=-254.111  eff_peak=1.0044  drop=0.004  polL=-0.004  valL=211.766  H=4.647
+Ep  1040/2000  R=-259.487  eff_peak=1.0060  drop=0.006  polL=-0.004  valL=448.892  H=4.636
+Ep  1050/2000  R=-259.756  eff_peak=1.0044  drop=0.004  polL=0.003  valL=936.077  H=4.662
+  [EVAL] ep=1050  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=20/9999
+Ep  1060/2000  R=-255.987  eff_peak=1.0066  drop=0.007  polL=-0.002  valL=1749.178  H=4.652
+Ep  1070/2000  R=-256.466  eff_peak=1.0037  drop=0.006  polL=-0.004  valL=475.120  H=4.675
+Ep  1080/2000  R=-256.789  eff_peak=1.0038  drop=0.004  polL=-0.004  valL=563.099  H=4.669
+Ep  1090/2000  R=-252.024  eff_peak=1.0014  drop=0.004  polL=-0.007  valL=920.459  H=4.669
+Ep  1100/2000  R=-258.338  eff_peak=1.0070  drop=0.007  polL=-0.002  valL=351.206  H=4.651
+  [EVAL] ep=1100  eff_peak=1.0063 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=21/9999
+Ep  1110/2000  R=-260.914  eff_peak=1.0051  drop=0.005  polL=0.002  valL=378.970  H=4.617
+Ep  1120/2000  R=-261.648  eff_peak=1.0051  drop=0.005  polL=-0.006  valL=505.505  H=4.626
+Ep  1130/2000  R=-258.281  eff_peak=1.0030  drop=0.005  polL=-0.005  valL=162.546  H=4.619
+Ep  1140/2000  R=-254.881  eff_peak=1.0047  drop=0.005  polL=-0.005  valL=343.511  H=4.632
+Ep  1150/2000  R=-259.117  eff_peak=1.0041  drop=0.004  polL=0.005  valL=1000.604  H=4.632
+  [EVAL] ep=1150  eff_peak=1.0127 +/- 0.0000  peak=1.0000  drop=0.013  no_improve=22/9999
+Ep  1160/2000  R=-258.094  eff_peak=1.0060  drop=0.006  polL=0.001  valL=85.777  H=4.640
+Ep  1170/2000  R=-252.493  eff_peak=1.0018  drop=0.004  polL=-0.003  valL=92.567  H=4.621
+Ep  1180/2000  R=-252.098  eff_peak=1.0032  drop=0.003  polL=0.001  valL=152.939  H=4.643
+Ep  1190/2000  R=-252.193  eff_peak=1.0001  drop=0.003  polL=-0.005  valL=322.845  H=4.625
+Ep  1200/2000  R=-256.841  eff_peak=1.0016  drop=0.002  polL=-0.002  valL=145.390  H=4.620
+  [EVAL] ep=1200  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=23/9999
+Ep  1210/2000  R=-250.180  eff_peak=0.9963  drop=0.003  polL=0.001  valL=239.394  H=4.640
+Ep  1220/2000  R=-256.912  eff_peak=1.0025  drop=0.003  polL=-0.004  valL=175.626  H=4.636
+Ep  1230/2000  R=-261.139  eff_peak=1.0019  drop=0.002  polL=0.004  valL=351.204  H=4.621
+Ep  1240/2000  R=-257.188  eff_peak=1.0028  drop=0.003  polL=-0.004  valL=920.051  H=4.609
+Ep  1250/2000  R=-257.562  eff_peak=0.9995  drop=0.002  polL=-0.001  valL=1205.655  H=4.583
+  [EVAL] ep=1250  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=24/9999
+Ep  1260/2000  R=-256.042  eff_peak=1.0038  drop=0.004  polL=0.000  valL=2379.785  H=4.571
+Ep  1270/2000  R=-255.180  eff_peak=1.0038  drop=0.004  polL=-0.007  valL=581.608  H=4.628
+Ep  1280/2000  R=-253.643  eff_peak=1.0038  drop=0.004  polL=0.005  valL=894.112  H=4.612
+Ep  1290/2000  R=-250.379  eff_peak=1.0032  drop=0.003  polL=-0.002  valL=1759.412  H=4.618
+Ep  1300/2000  R=-256.122  eff_peak=0.9996  drop=0.002  polL=0.000  valL=607.612  H=4.628
+  [EVAL] ep=1300  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=25/9999
+Ep  1310/2000  R=-260.601  eff_peak=1.0044  drop=0.004  polL=-0.001  valL=232.231  H=4.625
+Ep  1320/2000  R=-251.169  eff_peak=1.0016  drop=0.002  polL=-0.000  valL=642.833  H=4.590
+Ep  1330/2000  R=-253.567  eff_peak=1.0010  drop=0.003  polL=0.003  valL=461.726  H=4.596
+Ep  1340/2000  R=-257.508  eff_peak=1.0016  drop=0.002  polL=-0.006  valL=489.098  H=4.622
+Ep  1350/2000  R=-258.492  eff_peak=1.0017  drop=0.004  polL=-0.004  valL=520.839  H=4.631
+  [EVAL] ep=1350  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=26/9999
+Ep  1360/2000  R=-255.979  eff_peak=1.0041  drop=0.004  polL=0.001  valL=83.429  H=4.621
+Ep  1370/2000  R=-248.697  eff_peak=1.0047  drop=0.005  polL=-0.005  valL=195.346  H=4.559
+Ep  1380/2000  R=-255.956  eff_peak=1.0028  drop=0.003  polL=-0.007  valL=742.131  H=4.550
+Ep  1390/2000  R=-256.398  eff_peak=1.0047  drop=0.005  polL=-0.006  valL=83.949  H=4.552
+Ep  1400/2000  R=-259.817  eff_peak=1.0031  drop=0.005  polL=-0.002  valL=66.008  H=4.577
+  [EVAL] ep=1400  eff_peak=1.0063 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=27/9999
+Ep  1410/2000  R=-255.005  eff_peak=1.0073  drop=0.007  polL=0.001  valL=198.584  H=4.599
+Ep  1420/2000  R=-255.322  eff_peak=1.0038  drop=0.004  polL=-0.002  valL=347.498  H=4.601
+Ep  1430/2000  R=-255.323  eff_peak=1.0060  drop=0.006  polL=-0.007  valL=190.641  H=4.613
+Ep  1440/2000  R=-256.021  eff_peak=1.0041  drop=0.004  polL=-0.005  valL=239.335  H=4.605
+Ep  1450/2000  R=-255.001  eff_peak=1.0012  drop=0.003  polL=-0.005  valL=472.269  H=4.556
+  [EVAL] ep=1450  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=28/9999
+Ep  1460/2000  R=-259.707  eff_peak=1.0009  drop=0.003  polL=-0.004  valL=369.473  H=4.528
+Ep  1470/2000  R=-256.226  eff_peak=1.0013  drop=0.001  polL=-0.003  valL=109.865  H=4.528
+Ep  1480/2000  R=-258.256  eff_peak=1.0025  drop=0.003  polL=-0.002  valL=172.444  H=4.531
+Ep  1490/2000  R=-259.312  eff_peak=1.0022  drop=0.002  polL=0.001  valL=522.096  H=4.542
+Ep  1500/2000  R=-258.173  eff_peak=1.0016  drop=0.002  polL=-0.001  valL=267.461  H=4.603
+  >>> New best! eff_peak=0.9744  saved to checkpoints_ppo_cold_dimred_seed42/ppo_best.pth
+  [EVAL] ep=1500  eff_peak=0.9744 +/- 0.0000  peak=0.9744  drop=0.000  no_improve=0/9999
+Ep  1510/2000  R=-264.043  eff_peak=0.9998  drop=0.002  polL=-0.001  valL=259.750  H=4.597
+Ep  1520/2000  R=-252.374  eff_peak=1.0003  drop=0.000  polL=-0.007  valL=200.495  H=4.591
+Ep  1530/2000  R=-257.045  eff_peak=1.0022  drop=0.002  polL=-0.005  valL=719.715  H=4.564
+Ep  1540/2000  R=-256.273  eff_peak=1.0019  drop=0.002  polL=-0.008  valL=411.555  H=4.568
+Ep  1550/2000  R=-252.522  eff_peak=1.0025  drop=0.003  polL=-0.004  valL=293.675  H=4.525
+  [EVAL] ep=1550  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=1/9999
+Ep  1560/2000  R=-251.649  eff_peak=0.9989  drop=0.001  polL=-0.002  valL=201.372  H=4.523
+Ep  1570/2000  R=-252.985  eff_peak=0.9998  drop=0.002  polL=-0.005  valL=191.104  H=4.547
+Ep  1580/2000  R=-255.574  eff_peak=1.0041  drop=0.004  polL=-0.007  valL=407.270  H=4.512
+Ep  1590/2000  R=-250.568  eff_peak=1.0019  drop=0.002  polL=-0.005  valL=615.142  H=4.524
+Ep  1600/2000  R=-252.473  eff_peak=1.0019  drop=0.002  polL=-0.005  valL=181.325  H=4.500
+  [EVAL] ep=1600  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=2/9999
+Ep  1610/2000  R=-255.415  eff_peak=1.0003  drop=0.003  polL=-0.000  valL=165.700  H=4.486
+Ep  1620/2000  R=-250.550  eff_peak=1.0022  drop=0.002  polL=-0.006  valL=132.586  H=4.502
+Ep  1630/2000  R=-255.325  eff_peak=0.9993  drop=0.002  polL=-0.005  valL=126.396  H=4.485
+Ep  1640/2000  R=-244.718  eff_peak=1.0005  drop=0.003  polL=-0.000  valL=76.618  H=4.462
+Ep  1650/2000  R=-250.126  eff_peak=1.0019  drop=0.002  polL=-0.004  valL=194.469  H=4.463
+  [EVAL] ep=1650  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=3/9999
+Ep  1660/2000  R=-257.332  eff_peak=1.0035  drop=0.003  polL=-0.002  valL=119.300  H=4.468
+Ep  1670/2000  R=-252.917  eff_peak=1.0028  drop=0.003  polL=0.000  valL=47.515  H=4.482
+Ep  1680/2000  R=-253.689  eff_peak=0.9973  drop=0.002  polL=-0.001  valL=79.449  H=4.508
+Ep  1690/2000  R=-252.321  eff_peak=0.9998  drop=0.002  polL=0.001  valL=449.995  H=4.498
+Ep  1700/2000  R=-260.661  eff_peak=0.9986  drop=0.001  polL=-0.007  valL=425.699  H=4.520
+  [EVAL] ep=1700  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=4/9999
+Ep  1710/2000  R=-254.491  eff_peak=1.0016  drop=0.002  polL=-0.002  valL=202.667  H=4.534
+Ep  1720/2000  R=-253.811  eff_peak=0.9992  drop=0.002  polL=-0.002  valL=84.716  H=4.545
+Ep  1730/2000  R=-255.768  eff_peak=0.9986  drop=0.003  polL=-0.001  valL=92.465  H=4.516
+Ep  1740/2000  R=-247.390  eff_peak=1.0028  drop=0.003  polL=-0.003  valL=71.845  H=4.556
+Ep  1750/2000  R=-250.336  eff_peak=1.0019  drop=0.002  polL=0.000  valL=217.581  H=4.555
+  [EVAL] ep=1750  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=5/9999
+Ep  1760/2000  R=-245.488  eff_peak=1.0041  drop=0.004  polL=-0.003  valL=755.077  H=4.537
+Ep  1770/2000  R=-253.044  eff_peak=1.0035  drop=0.003  polL=0.001  valL=154.872  H=4.509
+Ep  1780/2000  R=-259.101  eff_peak=1.0025  drop=0.003  polL=-0.003  valL=133.769  H=4.531
+Ep  1790/2000  R=-249.297  eff_peak=1.0041  drop=0.004  polL=-0.007  valL=327.027  H=4.522
+Ep  1800/2000  R=-250.959  eff_peak=1.0028  drop=0.003  polL=-0.002  valL=589.439  H=4.504
+  [EVAL] ep=1800  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=6/9999
+Ep  1810/2000  R=-249.768  eff_peak=1.0016  drop=0.002  polL=-0.008  valL=155.223  H=4.494
+Ep  1820/2000  R=-247.231  eff_peak=1.0038  drop=0.004  polL=-0.003  valL=169.657  H=4.508
+Ep  1830/2000  R=-246.027  eff_peak=0.9993  drop=0.002  polL=-0.000  valL=87.034  H=4.512
+Ep  1840/2000  R=-249.188  eff_peak=1.0016  drop=0.002  polL=0.000  valL=209.006  H=4.538
+Ep  1850/2000  R=-256.478  eff_peak=0.9995  drop=0.002  polL=-0.003  valL=496.455  H=4.545
+  [EVAL] ep=1850  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=7/9999
+Ep  1860/2000  R=-248.974  eff_peak=1.0019  drop=0.002  polL=-0.004  valL=266.405  H=4.511
+Ep  1870/2000  R=-245.917  eff_peak=0.9990  drop=0.001  polL=-0.007  valL=348.110  H=4.503
+Ep  1880/2000  R=-249.568  eff_peak=1.0006  drop=0.001  polL=-0.009  valL=58.635  H=4.450
+Ep  1890/2000  R=-247.500  eff_peak=1.0013  drop=0.001  polL=-0.007  valL=217.808  H=4.422
+Ep  1900/2000  R=-254.973  eff_peak=1.0051  drop=0.005  polL=0.002  valL=376.293  H=4.447
+  [EVAL] ep=1900  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=8/9999
+Ep  1910/2000  R=-248.218  eff_peak=1.0013  drop=0.001  polL=-0.005  valL=290.687  H=4.441
+Ep  1920/2000  R=-254.441  eff_peak=1.0006  drop=0.003  polL=-0.006  valL=193.348  H=4.469
+Ep  1930/2000  R=-253.325  eff_peak=0.9990  drop=0.001  polL=-0.006  valL=97.460  H=4.472
+Ep  1940/2000  R=-250.008  eff_peak=0.9989  drop=0.001  polL=-0.001  valL=176.107  H=4.506
+Ep  1950/2000  R=-250.810  eff_peak=1.0028  drop=0.003  polL=0.000  valL=392.140  H=4.550
+  [EVAL] ep=1950  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=9/9999
+Ep  1960/2000  R=-257.520  eff_peak=1.0022  drop=0.002  polL=-0.005  valL=255.941  H=4.559
+Ep  1970/2000  R=-252.718  eff_peak=1.0028  drop=0.003  polL=0.003  valL=188.797  H=4.559
+Ep  1980/2000  R=-256.463  eff_peak=1.0015  drop=0.004  polL=-0.001  valL=173.971  H=4.509
+Ep  1990/2000  R=-246.896  eff_peak=1.0025  drop=0.003  polL=-0.005  valL=453.483  H=4.488
+Ep  2000/2000  R=-252.915  eff_peak=0.9984  drop=0.001  polL=-0.006  valL=474.170  H=4.507
+  [EVAL] ep=2000  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=10/9999
+
+Training completed at ep=2000/2000
+Final model saved to checkpoints_ppo_cold_dimred_seed42/ppo_checkpoint.pth
+Best eval eff_peak: 0.9744
+
+Training curves saved to checkpoints_ppo_cold_dimred_seed42/training_curves.json
+
+============================================================
+Final Evaluation (20 episodes, BEST checkpoint, greedy policy)
+============================================================
+  Loaded best checkpoint from checkpoints_ppo_cold_dimred_seed42/ppo_best.pth
+     eff_peak_mean: 0.9744
+      eff_peak_std: 0.0000
+         peak_mean: 0.9744
+          peak_std: 0.0000
+         drop_mean: 0.0000
+        delay_mean: 2.0190
+       reward_mean: -260.5800
+
+============================================================
+Comparison (same scenario, same seed)
+============================================================
+  Baseline (random_feasible):  eff_peak = 1.0000
+  PPO (greedy, 20 ep):         eff_peak = 0.9744
+  Improvement vs baseline:     +2.56%
+[Device] cpu
+============================================================
+PPO Training for 5G-TSN Scheduling (period_mode=simple)
+============================================================
+  Obs dim:       199
+  Action dim:    7 (dimred)
+  Episodes:      2000 (rollout=10 ep/update)
+  PPO epochs:    4  minibatch=256
+  LR:            0.0003
+  Gamma:         0.99  GAE-lambda=0.97  n-steps=5
+  Clip-eps:      0.2  Ent-coef=0.01
+  Reward mode:   load_balance
+  Seed:          123
+  Early stop:    OFF
+  BC pretrain:   OFF
+============================================================
+Ep    10/2000  R=-233.334  eff_peak=1.0072  drop=0.007  polL=0.002  valL=8816.814  H=4.718
+Ep    20/2000  R=-245.138  eff_peak=1.0089  drop=0.009  polL=-0.004  valL=8669.131  H=4.680
+Ep    30/2000  R=-236.737  eff_peak=1.0075  drop=0.008  polL=0.001  valL=7676.670  H=4.690
+Ep    40/2000  R=-246.118  eff_peak=1.0075  drop=0.008  polL=-0.002  valL=7693.916  H=4.632
+Ep    50/2000  R=-241.215  eff_peak=1.0092  drop=0.009  polL=-0.002  valL=6995.940  H=4.625
+  >>> New best! eff_peak=1.0171  saved to checkpoints_ppo_cold_dimred_seed123/ppo_best.pth
+  [EVAL] ep=50  eff_peak=1.0171 +/- 0.0000  peak=1.0000  drop=0.017  no_improve=0/9999
+Ep    60/2000  R=-239.345  eff_peak=1.0106  drop=0.011  polL=-0.006  valL=6376.138  H=4.657
+Ep    70/2000  R=-242.572  eff_peak=1.0086  drop=0.009  polL=0.001  valL=6090.286  H=4.668
+Ep    80/2000  R=-239.704  eff_peak=1.0099  drop=0.010  polL=-0.001  valL=5453.313  H=4.692
+Ep    90/2000  R=-240.794  eff_peak=1.0079  drop=0.008  polL=-0.002  valL=5089.901  H=4.697
+Ep   100/2000  R=-241.208  eff_peak=1.0035  drop=0.006  polL=-0.001  valL=4674.186  H=4.722
+  >>> New best! eff_peak=1.0034  saved to checkpoints_ppo_cold_dimred_seed123/ppo_best.pth
+  [EVAL] ep=100  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=0/9999
+Ep   110/2000  R=-233.857  eff_peak=1.0086  drop=0.009  polL=0.002  valL=4115.331  H=4.707
+Ep   120/2000  R=-230.872  eff_peak=1.0045  drop=0.004  polL=-0.001  valL=3591.183  H=4.715
+Ep   130/2000  R=-228.126  eff_peak=1.0038  drop=0.004  polL=0.001  valL=3196.600  H=4.700
+Ep   140/2000  R=-231.800  eff_peak=1.0068  drop=0.007  polL=-0.005  valL=3201.243  H=4.690
+Ep   150/2000  R=-241.639  eff_peak=1.0051  drop=0.005  polL=-0.002  valL=3185.889  H=4.640
+  [EVAL] ep=150  eff_peak=1.0103 +/- 0.0000  peak=1.0000  drop=0.010  no_improve=1/9999
+Ep   160/2000  R=-237.527  eff_peak=1.0041  drop=0.004  polL=-0.002  valL=1398.259  H=4.684
+Ep   170/2000  R=-235.535  eff_peak=1.0075  drop=0.008  polL=-0.002  valL=2458.499  H=4.698
+Ep   180/2000  R=-232.603  eff_peak=1.0042  drop=0.007  polL=-0.006  valL=1342.678  H=4.667
+Ep   190/2000  R=-233.219  eff_peak=1.0041  drop=0.004  polL=-0.000  valL=2387.924  H=4.709
+Ep   200/2000  R=-230.810  eff_peak=1.0051  drop=0.005  polL=0.002  valL=1317.878  H=4.679
+  [EVAL] ep=200  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=2/9999
+Ep   210/2000  R=-229.378  eff_peak=1.0045  drop=0.004  polL=-0.003  valL=859.546  H=4.705
+Ep   220/2000  R=-230.026  eff_peak=1.0051  drop=0.005  polL=0.001  valL=1188.049  H=4.693
+Ep   230/2000  R=-225.116  eff_peak=1.0045  drop=0.004  polL=-0.001  valL=331.784  H=4.688
+Ep   240/2000  R=-223.555  eff_peak=1.0001  drop=0.002  polL=0.000  valL=450.000  H=4.661
+Ep   250/2000  R=-223.948  eff_peak=1.0055  drop=0.005  polL=-0.006  valL=615.767  H=4.694
+  >>> New best! eff_peak=1.0000  saved to checkpoints_ppo_cold_dimred_seed123/ppo_best.pth
+  [EVAL] ep=250  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=0/9999
+Ep   260/2000  R=-231.026  eff_peak=1.0006  drop=0.005  polL=-0.005  valL=976.359  H=4.719
+Ep   270/2000  R=-231.469  eff_peak=1.0045  drop=0.004  polL=0.001  valL=1657.891  H=4.722
+Ep   280/2000  R=-227.958  eff_peak=1.0041  drop=0.004  polL=-0.003  valL=351.610  H=4.717
+Ep   290/2000  R=-231.049  eff_peak=1.0025  drop=0.005  polL=-0.003  valL=1150.224  H=4.726
+Ep   300/2000  R=-223.757  eff_peak=1.0006  drop=0.003  polL=-0.004  valL=657.046  H=4.697
+  [EVAL] ep=300  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=1/9999
+Ep   310/2000  R=-224.684  eff_peak=1.0005  drop=0.003  polL=-0.001  valL=1199.783  H=4.701
+Ep   320/2000  R=-229.700  eff_peak=1.0004  drop=0.003  polL=-0.001  valL=1605.999  H=4.704
+Ep   330/2000  R=-223.675  eff_peak=1.0045  drop=0.004  polL=-0.003  valL=818.076  H=4.695
+Ep   340/2000  R=-225.279  eff_peak=1.0027  drop=0.003  polL=0.001  valL=1164.768  H=4.717
+Ep   350/2000  R=-226.418  eff_peak=1.0027  drop=0.003  polL=-0.003  valL=1292.771  H=4.707
+  [EVAL] ep=350  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=2/9999
+Ep   360/2000  R=-222.775  eff_peak=1.0006  drop=0.003  polL=0.001  valL=2633.445  H=4.707
+Ep   370/2000  R=-226.435  eff_peak=0.9999  drop=0.002  polL=-0.005  valL=910.424  H=4.669
+Ep   380/2000  R=-217.144  eff_peak=1.0017  drop=0.002  polL=-0.005  valL=481.832  H=4.684
+Ep   390/2000  R=-219.264  eff_peak=1.0004  drop=0.003  polL=-0.004  valL=1679.957  H=4.673
+Ep   400/2000  R=-226.297  eff_peak=0.9972  drop=0.004  polL=0.001  valL=1322.320  H=4.680
+  [EVAL] ep=400  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=3/9999
+Ep   410/2000  R=-222.632  eff_peak=0.9995  drop=0.004  polL=-0.003  valL=572.132  H=4.687
+Ep   420/2000  R=-217.388  eff_peak=0.9975  drop=0.002  polL=-0.002  valL=1063.258  H=4.666
+Ep   430/2000  R=-210.307  eff_peak=0.9984  drop=0.001  polL=-0.003  valL=939.306  H=4.692
+Ep   440/2000  R=-228.231  eff_peak=1.0024  drop=0.002  polL=-0.003  valL=771.682  H=4.722
+Ep   450/2000  R=-220.999  eff_peak=1.0024  drop=0.002  polL=-0.002  valL=761.338  H=4.715
+  [EVAL] ep=450  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=4/9999
+Ep   460/2000  R=-221.079  eff_peak=0.9978  drop=0.002  polL=-0.005  valL=1644.620  H=4.737
+Ep   470/2000  R=-225.855  eff_peak=0.9924  drop=0.002  polL=0.002  valL=1056.484  H=4.744
+Ep   480/2000  R=-222.086  eff_peak=1.0010  drop=0.001  polL=-0.006  valL=1792.568  H=4.750
+Ep   490/2000  R=-222.897  eff_peak=0.9975  drop=0.002  polL=-0.002  valL=1882.004  H=4.747
+Ep   500/2000  R=-221.240  eff_peak=1.0004  drop=0.003  polL=-0.006  valL=907.139  H=4.761
+  [EVAL] ep=500  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=5/9999
+Ep   510/2000  R=-230.438  eff_peak=1.0051  drop=0.005  polL=0.001  valL=462.230  H=4.771
+Ep   520/2000  R=-218.251  eff_peak=0.9940  drop=0.001  polL=0.001  valL=1415.526  H=4.750
+Ep   530/2000  R=-222.947  eff_peak=0.9963  drop=0.003  polL=-0.004  valL=748.255  H=4.755
+Ep   540/2000  R=-225.264  eff_peak=1.0017  drop=0.002  polL=-0.006  valL=462.179  H=4.760
+Ep   550/2000  R=-217.535  eff_peak=1.0021  drop=0.002  polL=0.001  valL=505.270  H=4.740
+  [EVAL] ep=550  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=6/9999
+Ep   560/2000  R=-218.805  eff_peak=1.0001  drop=0.002  polL=-0.014  valL=808.941  H=4.735
+Ep   570/2000  R=-216.166  eff_peak=0.9993  drop=0.002  polL=-0.001  valL=1755.229  H=4.766
+Ep   580/2000  R=-216.373  eff_peak=0.9972  drop=0.002  polL=-0.005  valL=1664.025  H=4.754
+Ep   590/2000  R=-225.897  eff_peak=1.0024  drop=0.002  polL=-0.008  valL=1183.364  H=4.725
+Ep   600/2000  R=-212.469  eff_peak=0.9991  drop=0.001  polL=-0.004  valL=617.962  H=4.724
+  [EVAL] ep=600  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=7/9999
+Ep   610/2000  R=-221.671  eff_peak=1.0017  drop=0.002  polL=-0.002  valL=723.898  H=4.741
+Ep   620/2000  R=-213.800  eff_peak=0.9937  drop=0.001  polL=-0.003  valL=462.291  H=4.744
+Ep   630/2000  R=-210.507  eff_peak=1.0003  drop=0.000  polL=-0.005  valL=1791.510  H=4.768
+Ep   640/2000  R=-221.693  eff_peak=0.9998  drop=0.002  polL=-0.006  valL=1825.456  H=4.758
+Ep   650/2000  R=-216.951  eff_peak=1.0001  drop=0.002  polL=-0.003  valL=736.349  H=4.761
+  [EVAL] ep=650  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=8/9999
+Ep   660/2000  R=-212.450  eff_peak=1.0017  drop=0.002  polL=-0.002  valL=342.609  H=4.746
+Ep   670/2000  R=-215.116  eff_peak=0.9926  drop=0.002  polL=-0.003  valL=441.477  H=4.748
+Ep   680/2000  R=-220.239  eff_peak=0.9920  drop=0.001  polL=-0.002  valL=418.871  H=4.761
+Ep   690/2000  R=-216.496  eff_peak=0.9964  drop=0.001  polL=-0.001  valL=1950.260  H=4.751
+Ep   700/2000  R=-215.309  eff_peak=1.0017  drop=0.002  polL=-0.005  valL=1279.028  H=4.752
+  [EVAL] ep=700  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=9/9999
+Ep   710/2000  R=-227.586  eff_peak=0.9999  drop=0.004  polL=-0.001  valL=1010.241  H=4.751
+Ep   720/2000  R=-212.245  eff_peak=0.9946  drop=0.001  polL=-0.004  valL=729.742  H=4.758
+Ep   730/2000  R=-215.419  eff_peak=1.0024  drop=0.002  polL=0.001  valL=1129.698  H=4.739
+Ep   740/2000  R=-215.526  eff_peak=0.9942  drop=0.001  polL=0.001  valL=1578.711  H=4.723
+Ep   750/2000  R=-216.381  eff_peak=1.0024  drop=0.002  polL=0.000  valL=625.339  H=4.733
+  [EVAL] ep=750  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=10/9999
+Ep   760/2000  R=-216.011  eff_peak=1.0021  drop=0.002  polL=-0.001  valL=2031.849  H=4.727
+Ep   770/2000  R=-221.579  eff_peak=1.0027  drop=0.003  polL=0.004  valL=1840.918  H=4.710
+Ep   780/2000  R=-218.709  eff_peak=1.0021  drop=0.002  polL=-0.003  valL=644.921  H=4.720
+Ep   790/2000  R=-213.315  eff_peak=1.0014  drop=0.001  polL=0.001  valL=281.701  H=4.721
+Ep   800/2000  R=-212.407  eff_peak=1.0027  drop=0.003  polL=-0.002  valL=933.679  H=4.726
+  [EVAL] ep=800  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=11/9999
+Ep   810/2000  R=-228.558  eff_peak=1.0015  drop=0.004  polL=-0.003  valL=762.207  H=4.733
+Ep   820/2000  R=-218.723  eff_peak=1.0024  drop=0.002  polL=-0.003  valL=832.432  H=4.744
+Ep   830/2000  R=-221.675  eff_peak=1.0038  drop=0.004  polL=-0.001  valL=876.186  H=4.752
+Ep   840/2000  R=-221.016  eff_peak=1.0001  drop=0.002  polL=-0.001  valL=565.241  H=4.740
+Ep   850/2000  R=-223.657  eff_peak=0.9982  drop=0.003  polL=-0.005  valL=202.743  H=4.704
+  [EVAL] ep=850  eff_peak=1.0103 +/- 0.0000  peak=1.0000  drop=0.010  no_improve=12/9999
+Ep   860/2000  R=-219.991  eff_peak=1.0001  drop=0.002  polL=-0.002  valL=663.250  H=4.687
+Ep   870/2000  R=-216.910  eff_peak=0.9981  drop=0.000  polL=-0.009  valL=360.103  H=4.702
+Ep   880/2000  R=-224.045  eff_peak=1.0015  drop=0.004  polL=-0.004  valL=412.389  H=4.702
+Ep   890/2000  R=-224.456  eff_peak=1.0031  drop=0.003  polL=-0.003  valL=980.089  H=4.696
+Ep   900/2000  R=-217.571  eff_peak=1.0017  drop=0.002  polL=-0.001  valL=274.159  H=4.697
+  [EVAL] ep=900  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=13/9999
+Ep   910/2000  R=-222.142  eff_peak=0.9975  drop=0.002  polL=-0.001  valL=362.170  H=4.691
+Ep   920/2000  R=-211.286  eff_peak=1.0008  drop=0.003  polL=-0.007  valL=637.508  H=4.673
+Ep   930/2000  R=-211.383  eff_peak=1.0008  drop=0.003  polL=-0.009  valL=603.912  H=4.681
+Ep   940/2000  R=-209.659  eff_peak=1.0017  drop=0.002  polL=0.000  valL=801.158  H=4.662
+Ep   950/2000  R=-222.294  eff_peak=0.9975  drop=0.002  polL=-0.011  valL=1902.952  H=4.664
+  [EVAL] ep=950  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=14/9999
+Ep   960/2000  R=-214.654  eff_peak=0.9991  drop=0.001  polL=-0.003  valL=172.987  H=4.677
+Ep   970/2000  R=-208.887  eff_peak=1.0010  drop=0.001  polL=-0.003  valL=107.017  H=4.683
+Ep   980/2000  R=-218.666  eff_peak=1.0001  drop=0.002  polL=-0.005  valL=114.834  H=4.684
+Ep   990/2000  R=-209.058  eff_peak=0.9965  drop=0.001  polL=-0.004  valL=172.451  H=4.671
+Ep  1000/2000  R=-206.530  eff_peak=0.9900  drop=0.001  polL=-0.000  valL=365.622  H=4.680
+  [EVAL] ep=1000  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=15/9999
+Ep  1010/2000  R=-208.780  eff_peak=0.9966  drop=0.001  polL=0.000  valL=728.810  H=4.663
+Ep  1020/2000  R=-209.669  eff_peak=1.0010  drop=0.001  polL=-0.000  valL=1527.773  H=4.665
+Ep  1030/2000  R=-206.583  eff_peak=1.0010  drop=0.001  polL=-0.002  valL=1533.149  H=4.681
+Ep  1040/2000  R=-200.974  eff_peak=0.9984  drop=0.001  polL=-0.007  valL=1894.313  H=4.681
+Ep  1050/2000  R=-213.956  eff_peak=1.0010  drop=0.001  polL=-0.010  valL=539.907  H=4.692
+  [EVAL] ep=1050  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=16/9999
+Ep  1060/2000  R=-217.996  eff_peak=1.0014  drop=0.001  polL=-0.002  valL=314.778  H=4.693
+Ep  1070/2000  R=-208.066  eff_peak=1.0021  drop=0.002  polL=-0.002  valL=446.323  H=4.678
+Ep  1080/2000  R=-212.242  eff_peak=1.0014  drop=0.001  polL=0.001  valL=1365.028  H=4.670
+Ep  1090/2000  R=-208.431  eff_peak=0.9912  drop=0.001  polL=-0.007  valL=1005.075  H=4.668
+Ep  1100/2000  R=-217.778  eff_peak=0.9984  drop=0.001  polL=-0.008  valL=401.077  H=4.655
+  [EVAL] ep=1100  eff_peak=1.0034 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=17/9999
+Ep  1110/2000  R=-203.919  eff_peak=0.9977  drop=0.000  polL=0.002  valL=341.499  H=4.655
+Ep  1120/2000  R=-208.050  eff_peak=0.9981  drop=0.001  polL=-0.007  valL=806.907  H=4.624
+Ep  1130/2000  R=-211.519  eff_peak=0.9981  drop=0.000  polL=-0.008  valL=1165.342  H=4.616
+Ep  1140/2000  R=-204.915  eff_peak=1.0010  drop=0.001  polL=-0.006  valL=388.400  H=4.613
+Ep  1150/2000  R=-203.559  eff_peak=1.0010  drop=0.001  polL=-0.001  valL=272.746  H=4.580
+  >>> New best! eff_peak=0.9756  saved to checkpoints_ppo_cold_dimred_seed123/ppo_best.pth
+  [EVAL] ep=1150  eff_peak=0.9756 +/- 0.0000  peak=0.9756  drop=0.000  no_improve=0/9999
+Ep  1160/2000  R=-204.726  eff_peak=1.0000  drop=0.000  polL=-0.010  valL=292.887  H=4.577
+Ep  1170/2000  R=-206.645  eff_peak=0.9959  drop=0.001  polL=-0.005  valL=327.397  H=4.586
+Ep  1180/2000  R=-202.926  eff_peak=0.9989  drop=0.001  polL=-0.001  valL=459.861  H=4.575
+Ep  1190/2000  R=-201.409  eff_peak=0.9942  drop=0.001  polL=-0.002  valL=467.781  H=4.547
+Ep  1200/2000  R=-195.845  eff_peak=1.0000  drop=0.000  polL=-0.002  valL=442.029  H=4.564
+  [EVAL] ep=1200  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=1/9999
+Ep  1210/2000  R=-200.204  eff_peak=0.9916  drop=0.001  polL=-0.002  valL=1028.259  H=4.527
+Ep  1220/2000  R=-199.161  eff_peak=0.9984  drop=0.001  polL=-0.002  valL=203.953  H=4.522
+Ep  1230/2000  R=-199.030  eff_peak=0.9910  drop=0.000  polL=-0.001  valL=197.419  H=4.511
+Ep  1240/2000  R=-202.285  eff_peak=0.9978  drop=0.000  polL=-0.007  valL=181.519  H=4.484
+Ep  1250/2000  R=-199.705  eff_peak=0.9884  drop=0.000  polL=-0.002  valL=474.280  H=4.505
+  [EVAL] ep=1250  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=2/9999
+Ep  1260/2000  R=-200.772  eff_peak=0.9935  drop=0.000  polL=-0.003  valL=1354.313  H=4.504
+Ep  1270/2000  R=-198.285  eff_peak=1.0000  drop=0.000  polL=-0.003  valL=509.570  H=4.531
+Ep  1280/2000  R=-195.602  eff_peak=0.9902  drop=0.000  polL=-0.008  valL=212.683  H=4.577
+Ep  1290/2000  R=-194.341  eff_peak=0.9909  drop=0.000  polL=-0.003  valL=625.044  H=4.532
+Ep  1300/2000  R=-197.627  eff_peak=0.9905  drop=0.000  polL=-0.002  valL=314.247  H=4.544
+  [EVAL] ep=1300  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=3/9999
+Ep  1310/2000  R=-200.919  eff_peak=0.9925  drop=0.000  polL=-0.006  valL=846.116  H=4.552
+Ep  1320/2000  R=-203.769  eff_peak=0.9854  drop=0.000  polL=-0.001  valL=1312.514  H=4.550
+Ep  1330/2000  R=-201.929  eff_peak=0.9981  drop=0.000  polL=-0.006  valL=379.158  H=4.536
+Ep  1340/2000  R=-199.130  eff_peak=0.9866  drop=0.000  polL=-0.005  valL=228.091  H=4.521
+Ep  1350/2000  R=-189.133  eff_peak=0.9885  drop=0.000  polL=-0.003  valL=191.036  H=4.533
+  [EVAL] ep=1350  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=4/9999
+Ep  1360/2000  R=-199.703  eff_peak=0.9956  drop=0.001  polL=-0.003  valL=587.674  H=4.521
+Ep  1370/2000  R=-208.955  eff_peak=0.9737  drop=0.000  polL=-0.006  valL=410.811  H=4.524
+Ep  1380/2000  R=-210.389  eff_peak=0.9886  drop=0.000  polL=-0.006  valL=1362.191  H=4.472
+Ep  1390/2000  R=-195.487  eff_peak=0.9884  drop=0.001  polL=0.001  valL=181.123  H=4.482
+Ep  1400/2000  R=-204.632  eff_peak=0.9867  drop=0.001  polL=-0.003  valL=90.524  H=4.409
+  [EVAL] ep=1400  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=5/9999
+Ep  1410/2000  R=-201.645  eff_peak=0.9979  drop=0.001  polL=-0.003  valL=196.243  H=4.413
+Ep  1420/2000  R=-191.144  eff_peak=0.9881  drop=0.000  polL=-0.003  valL=632.549  H=4.438
+Ep  1430/2000  R=-196.851  eff_peak=0.9926  drop=0.000  polL=-0.004  valL=249.646  H=4.435
+Ep  1440/2000  R=-200.647  eff_peak=0.9808  drop=0.000  polL=-0.011  valL=435.523  H=4.480
+Ep  1450/2000  R=-194.573  eff_peak=0.9781  drop=0.000  polL=-0.000  valL=642.771  H=4.484
+  [EVAL] ep=1450  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=6/9999
+Ep  1460/2000  R=-202.112  eff_peak=0.9827  drop=0.000  polL=-0.002  valL=1536.210  H=4.493
+Ep  1470/2000  R=-201.269  eff_peak=0.9855  drop=0.000  polL=-0.004  valL=930.932  H=4.491
+Ep  1480/2000  R=-199.708  eff_peak=0.9931  drop=0.000  polL=-0.005  valL=227.447  H=4.476
+Ep  1490/2000  R=-199.864  eff_peak=0.9858  drop=0.000  polL=0.001  valL=320.058  H=4.448
+Ep  1500/2000  R=-202.707  eff_peak=0.9857  drop=0.000  polL=-0.003  valL=263.922  H=4.472
+  [EVAL] ep=1500  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=7/9999
+Ep  1510/2000  R=-198.765  eff_peak=0.9871  drop=0.000  polL=-0.002  valL=437.827  H=4.460
+Ep  1520/2000  R=-200.478  eff_peak=0.9861  drop=0.001  polL=-0.007  valL=607.532  H=4.464
+Ep  1530/2000  R=-197.734  eff_peak=0.9785  drop=0.000  polL=-0.001  valL=178.936  H=4.466
+Ep  1540/2000  R=-192.445  eff_peak=0.9824  drop=0.000  polL=-0.004  valL=153.698  H=4.447
+Ep  1550/2000  R=-198.088  eff_peak=0.9878  drop=0.000  polL=-0.002  valL=595.279  H=4.442
+  [EVAL] ep=1550  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=8/9999
+Ep  1560/2000  R=-199.071  eff_peak=0.9865  drop=0.000  polL=-0.001  valL=78.782  H=4.437
+Ep  1570/2000  R=-201.403  eff_peak=0.9853  drop=0.000  polL=-0.000  valL=137.430  H=4.456
+Ep  1580/2000  R=-201.661  eff_peak=0.9929  drop=0.000  polL=-0.000  valL=412.297  H=4.448
+Ep  1590/2000  R=-198.739  eff_peak=0.9739  drop=0.000  polL=-0.001  valL=177.306  H=4.486
+Ep  1600/2000  R=-208.090  eff_peak=0.9881  drop=0.000  polL=-0.007  valL=604.129  H=4.506
+  [EVAL] ep=1600  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=9/9999
+Ep  1610/2000  R=-204.809  eff_peak=0.9823  drop=0.001  polL=-0.003  valL=836.254  H=4.525
+Ep  1620/2000  R=-204.709  eff_peak=0.9851  drop=0.000  polL=-0.000  valL=355.236  H=4.496
+Ep  1630/2000  R=-210.543  eff_peak=0.9926  drop=0.001  polL=-0.002  valL=414.841  H=4.499
+Ep  1640/2000  R=-208.689  eff_peak=0.9938  drop=0.001  polL=-0.006  valL=954.998  H=4.526
+Ep  1650/2000  R=-204.389  eff_peak=0.9870  drop=0.001  polL=-0.004  valL=1043.810  H=4.526
+  [EVAL] ep=1650  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=10/9999
+Ep  1660/2000  R=-196.252  eff_peak=0.9750  drop=0.000  polL=-0.003  valL=179.265  H=4.520
+Ep  1670/2000  R=-207.041  eff_peak=0.9866  drop=0.001  polL=-0.000  valL=295.280  H=4.515
+Ep  1680/2000  R=-195.547  eff_peak=0.9785  drop=0.000  polL=-0.005  valL=113.949  H=4.540
+Ep  1690/2000  R=-205.516  eff_peak=0.9976  drop=0.000  polL=-0.001  valL=140.106  H=4.563
+Ep  1700/2000  R=-206.189  eff_peak=0.9890  drop=0.001  polL=-0.001  valL=459.553  H=4.532
+  [EVAL] ep=1700  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=11/9999
+Ep  1710/2000  R=-195.717  eff_peak=0.9984  drop=0.001  polL=-0.004  valL=156.735  H=4.552
+Ep  1720/2000  R=-201.436  eff_peak=0.9903  drop=0.000  polL=-0.001  valL=180.489  H=4.579
+Ep  1730/2000  R=-202.581  eff_peak=0.9935  drop=0.000  polL=-0.001  valL=169.124  H=4.550
+Ep  1740/2000  R=-202.861  eff_peak=0.9935  drop=0.000  polL=-0.003  valL=175.810  H=4.577
+Ep  1750/2000  R=-207.115  eff_peak=0.9922  drop=0.000  polL=-0.005  valL=448.071  H=4.565
+  [EVAL] ep=1750  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=12/9999
+Ep  1760/2000  R=-215.939  eff_peak=0.9958  drop=0.000  polL=-0.005  valL=289.318  H=4.580
+Ep  1770/2000  R=-206.575  eff_peak=0.9910  drop=0.001  polL=-0.004  valL=564.361  H=4.618
+Ep  1780/2000  R=-208.585  eff_peak=0.9870  drop=0.000  polL=0.002  valL=850.810  H=4.580
+Ep  1790/2000  R=-205.219  eff_peak=0.9976  drop=0.000  polL=-0.004  valL=182.049  H=4.560
+Ep  1800/2000  R=-204.828  eff_peak=0.9930  drop=0.000  polL=-0.004  valL=81.296  H=4.573
+  [EVAL] ep=1800  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=13/9999
+Ep  1810/2000  R=-201.154  eff_peak=0.9977  drop=0.000  polL=-0.002  valL=88.187  H=4.594
+Ep  1820/2000  R=-206.203  eff_peak=0.9821  drop=0.001  polL=-0.003  valL=128.505  H=4.576
+Ep  1830/2000  R=-201.394  eff_peak=0.9906  drop=0.000  polL=-0.001  valL=181.808  H=4.593
+Ep  1840/2000  R=-206.047  eff_peak=0.9981  drop=0.000  polL=0.001  valL=234.352  H=4.581
+Ep  1850/2000  R=-206.425  eff_peak=0.9888  drop=0.001  polL=-0.005  valL=440.129  H=4.527
+  [EVAL] ep=1850  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=14/9999
+Ep  1860/2000  R=-196.685  eff_peak=0.9869  drop=0.001  polL=-0.003  valL=216.519  H=4.524
+Ep  1870/2000  R=-206.133  eff_peak=0.9953  drop=0.000  polL=0.001  valL=295.581  H=4.531
+Ep  1880/2000  R=-204.086  eff_peak=0.9829  drop=0.000  polL=-0.005  valL=670.931  H=4.565
+Ep  1890/2000  R=-211.791  eff_peak=0.9882  drop=0.000  polL=-0.006  valL=192.623  H=4.570
+Ep  1900/2000  R=-195.735  eff_peak=0.9957  drop=0.000  polL=-0.004  valL=312.510  H=4.559
+  [EVAL] ep=1900  eff_peak=0.9756 +/- 0.0000  peak=0.9722  drop=0.003  no_improve=15/9999
+Ep  1910/2000  R=-200.187  eff_peak=0.9952  drop=0.000  polL=-0.003  valL=387.732  H=4.541
+Ep  1920/2000  R=-202.612  eff_peak=0.9888  drop=0.001  polL=0.001  valL=354.247  H=4.546
+Ep  1930/2000  R=-194.835  eff_peak=0.9862  drop=0.000  polL=-0.000  valL=240.703  H=4.547
+Ep  1940/2000  R=-203.432  eff_peak=0.9954  drop=0.000  polL=-0.005  valL=460.193  H=4.553
+Ep  1950/2000  R=-198.228  eff_peak=0.9925  drop=0.000  polL=-0.002  valL=350.133  H=4.545
+  [EVAL] ep=1950  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=16/9999
+Ep  1960/2000  R=-197.640  eff_peak=0.9874  drop=0.001  polL=-0.005  valL=595.815  H=4.562
+Ep  1970/2000  R=-198.835  eff_peak=0.9952  drop=0.000  polL=-0.008  valL=891.025  H=4.557
+Ep  1980/2000  R=-196.196  eff_peak=0.9935  drop=0.000  polL=-0.008  valL=224.026  H=4.549
+Ep  1990/2000  R=-203.965  eff_peak=0.9903  drop=0.000  polL=-0.003  valL=169.549  H=4.553
+Ep  2000/2000  R=-194.345  eff_peak=0.9881  drop=0.000  polL=-0.002  valL=169.164  H=4.551
+  [EVAL] ep=2000  eff_peak=0.9821 +/- 0.0000  peak=0.9821  drop=0.000  no_improve=17/9999
+
+Training completed at ep=2000/2000
+Final model saved to checkpoints_ppo_cold_dimred_seed123/ppo_checkpoint.pth
+Best eval eff_peak: 0.9756
+
+Training curves saved to checkpoints_ppo_cold_dimred_seed123/training_curves.json
+
+============================================================
+Final Evaluation (20 episodes, BEST checkpoint, greedy policy)
+============================================================
+  Loaded best checkpoint from checkpoints_ppo_cold_dimred_seed123/ppo_best.pth
+     eff_peak_mean: 0.9756
+      eff_peak_std: 0.0000
+         peak_mean: 0.9756
+          peak_std: 0.0000
+         drop_mean: 0.0000
+        delay_mean: 1.9144
+       reward_mean: -203.3651
+
+============================================================
+Comparison (same scenario, same seed)
+============================================================
+  Baseline (random_feasible):  eff_peak = 1.0034
+  PPO (greedy, 20 ep):         eff_peak = 0.9756
+  Improvement vs baseline:     +2.77%
+[Device] cpu
+============================================================
+PPO Training for 5G-TSN Scheduling (period_mode=simple)
+============================================================
+  Obs dim:       199
+  Action dim:    7 (dimred)
+  Episodes:      2000 (rollout=10 ep/update)
+  PPO epochs:    4  minibatch=256
+  LR:            0.0003
+  Gamma:         0.99  GAE-lambda=0.97  n-steps=5
+  Clip-eps:      0.2  Ent-coef=0.01
+  Reward mode:   load_balance
+  Seed:          2024
+  Early stop:    OFF
+  BC pretrain:   OFF
+============================================================
+Ep    10/2000  R=-258.295  eff_peak=1.0087  drop=0.009  polL=-0.004  valL=9351.234  H=4.694
+Ep    20/2000  R=-259.325  eff_peak=1.0093  drop=0.009  polL=-0.002  valL=8478.470  H=4.654
+Ep    30/2000  R=-248.305  eff_peak=1.0080  drop=0.008  polL=-0.004  valL=7392.791  H=4.654
+Ep    40/2000  R=-250.964  eff_peak=1.0083  drop=0.008  polL=-0.002  valL=7019.220  H=4.642
+Ep    50/2000  R=-256.297  eff_peak=1.0087  drop=0.009  polL=-0.008  valL=6748.473  H=4.589
+  >>> New best! eff_peak=1.0064  saved to checkpoints_ppo_cold_dimred_seed2024/ppo_best.pth
+  [EVAL] ep=50  eff_peak=1.0064 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=0/9999
+Ep    60/2000  R=-264.715  eff_peak=1.0080  drop=0.008  polL=0.000  valL=6760.370  H=4.568
+Ep    70/2000  R=-251.243  eff_peak=1.0061  drop=0.006  polL=-0.000  valL=5576.993  H=4.622
+Ep    80/2000  R=-254.214  eff_peak=1.0018  drop=0.009  polL=0.007  valL=5209.780  H=4.601
+Ep    90/2000  R=-255.962  eff_peak=1.0077  drop=0.008  polL=0.004  valL=4897.312  H=4.559
+Ep   100/2000  R=-248.500  eff_peak=1.0071  drop=0.007  polL=0.008  valL=4088.104  H=4.555
+  [EVAL] ep=100  eff_peak=1.0064 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=1/9999
+Ep   110/2000  R=-250.203  eff_peak=1.0067  drop=0.007  polL=-0.010  valL=3872.065  H=4.605
+Ep   120/2000  R=-246.806  eff_peak=1.0067  drop=0.007  polL=-0.013  valL=3397.617  H=4.598
+Ep   130/2000  R=-252.638  eff_peak=1.0080  drop=0.008  polL=0.001  valL=3370.077  H=4.583
+Ep   140/2000  R=-240.669  eff_peak=1.0067  drop=0.007  polL=-0.014  valL=2799.313  H=4.648
+Ep   150/2000  R=-253.324  eff_peak=1.0074  drop=0.007  polL=-0.001  valL=3039.849  H=4.592
+  [EVAL] ep=150  eff_peak=1.0064 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=2/9999
+Ep   160/2000  R=-252.191  eff_peak=1.0071  drop=0.007  polL=-0.004  valL=2296.251  H=4.634
+Ep   170/2000  R=-251.369  eff_peak=1.0096  drop=0.010  polL=-0.000  valL=1363.541  H=4.658
+Ep   180/2000  R=-248.687  eff_peak=1.0071  drop=0.007  polL=0.005  valL=2218.596  H=4.692
+Ep   190/2000  R=-248.103  eff_peak=1.0051  drop=0.007  polL=-0.008  valL=1332.874  H=4.663
+Ep   200/2000  R=-253.831  eff_peak=1.0077  drop=0.008  polL=0.008  valL=933.758  H=4.669
+  [EVAL] ep=200  eff_peak=1.0064 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=3/9999
+Ep   210/2000  R=-244.639  eff_peak=1.0074  drop=0.007  polL=-0.001  valL=1144.735  H=4.702
+Ep   220/2000  R=-241.012  eff_peak=1.0054  drop=0.008  polL=-0.001  valL=789.846  H=4.679
+Ep   230/2000  R=-240.585  eff_peak=1.0040  drop=0.007  polL=-0.000  valL=571.430  H=4.614
+Ep   240/2000  R=-240.095  eff_peak=1.0061  drop=0.006  polL=0.000  valL=1182.584  H=4.629
+Ep   250/2000  R=-240.634  eff_peak=1.0030  drop=0.008  polL=-0.014  valL=462.418  H=4.600
+  >>> New best! eff_peak=1.0032  saved to checkpoints_ppo_cold_dimred_seed2024/ppo_best.pth
+  [EVAL] ep=250  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=0/9999
+Ep   260/2000  R=-246.389  eff_peak=1.0090  drop=0.009  polL=-0.009  valL=1402.536  H=4.572
+Ep   270/2000  R=-247.658  eff_peak=1.0041  drop=0.006  polL=-0.003  valL=1731.567  H=4.558
+Ep   280/2000  R=-243.042  eff_peak=1.0083  drop=0.008  polL=-0.008  valL=1521.053  H=4.579
+Ep   290/2000  R=-243.505  eff_peak=1.0096  drop=0.010  polL=-0.003  valL=1290.480  H=4.579
+Ep   300/2000  R=-245.236  eff_peak=1.0064  drop=0.009  polL=-0.005  valL=1001.883  H=4.543
+  [EVAL] ep=300  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=1/9999
+Ep   310/2000  R=-244.252  eff_peak=1.0032  drop=0.008  polL=-0.003  valL=814.146  H=4.574
+Ep   320/2000  R=-239.209  eff_peak=1.0067  drop=0.007  polL=-0.001  valL=1553.927  H=4.511
+Ep   330/2000  R=-237.201  eff_peak=1.0041  drop=0.006  polL=-0.003  valL=987.636  H=4.524
+Ep   340/2000  R=-251.919  eff_peak=1.0018  drop=0.006  polL=-0.006  valL=945.626  H=4.508
+Ep   350/2000  R=-239.595  eff_peak=1.0045  drop=0.007  polL=-0.009  valL=1777.303  H=4.553
+  [EVAL] ep=350  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=2/9999
+Ep   360/2000  R=-239.036  eff_peak=1.0061  drop=0.006  polL=0.002  valL=2136.556  H=4.558
+Ep   370/2000  R=-236.497  eff_peak=1.0061  drop=0.006  polL=0.002  valL=292.848  H=4.539
+Ep   380/2000  R=-244.161  eff_peak=1.0072  drop=0.010  polL=-0.006  valL=575.448  H=4.569
+Ep   390/2000  R=-237.919  eff_peak=1.0064  drop=0.006  polL=-0.001  valL=368.116  H=4.622
+Ep   400/2000  R=-255.840  eff_peak=1.0077  drop=0.010  polL=-0.006  valL=936.196  H=4.622
+  [EVAL] ep=400  eff_peak=1.0096 +/- 0.0000  peak=1.0000  drop=0.010  no_improve=3/9999
+Ep   410/2000  R=-255.764  eff_peak=1.0103  drop=0.010  polL=0.003  valL=769.764  H=4.611
+Ep   420/2000  R=-254.548  eff_peak=1.0064  drop=0.009  polL=-0.003  valL=735.281  H=4.599
+Ep   430/2000  R=-251.504  eff_peak=1.0086  drop=0.011  polL=-0.004  valL=700.208  H=4.616
+Ep   440/2000  R=-245.143  eff_peak=1.0087  drop=0.009  polL=-0.002  valL=1376.737  H=4.640
+Ep   450/2000  R=-255.934  eff_peak=1.0086  drop=0.011  polL=0.002  valL=1549.964  H=4.670
+  [EVAL] ep=450  eff_peak=1.0096 +/- 0.0000  peak=1.0000  drop=0.010  no_improve=4/9999
+Ep   460/2000  R=-252.080  eff_peak=1.0093  drop=0.009  polL=-0.009  valL=393.055  H=4.663
+Ep   470/2000  R=-241.242  eff_peak=1.0061  drop=0.008  polL=-0.005  valL=1473.999  H=4.634
+Ep   480/2000  R=-244.801  eff_peak=1.0083  drop=0.008  polL=-0.009  valL=1881.465  H=4.639
+Ep   490/2000  R=-246.761  eff_peak=1.0087  drop=0.009  polL=-0.009  valL=2395.637  H=4.654
+Ep   500/2000  R=-251.220  eff_peak=1.0099  drop=0.010  polL=-0.006  valL=909.116  H=4.629
+  [EVAL] ep=500  eff_peak=1.0096 +/- 0.0000  peak=1.0000  drop=0.010  no_improve=5/9999
+Ep   510/2000  R=-237.217  eff_peak=1.0073  drop=0.010  polL=-0.003  valL=957.111  H=4.646
+Ep   520/2000  R=-245.073  eff_peak=1.0106  drop=0.011  polL=0.002  valL=499.105  H=4.649
+Ep   530/2000  R=-253.622  eff_peak=1.0093  drop=0.009  polL=-0.001  valL=1493.696  H=4.660
+Ep   540/2000  R=-248.670  eff_peak=1.0106  drop=0.011  polL=-0.003  valL=2352.326  H=4.659
+Ep   550/2000  R=-252.437  eff_peak=1.0077  drop=0.010  polL=0.005  valL=2460.492  H=4.622
+  [EVAL] ep=550  eff_peak=1.0064 +/- 0.0000  peak=1.0000  drop=0.006  no_improve=6/9999
+Ep   560/2000  R=-249.829  eff_peak=1.0080  drop=0.010  polL=0.006  valL=455.001  H=4.640
+Ep   570/2000  R=-247.432  eff_peak=1.0071  drop=0.007  polL=-0.003  valL=664.752  H=4.644
+Ep   580/2000  R=-249.306  eff_peak=1.0071  drop=0.007  polL=-0.005  valL=658.129  H=4.668
+Ep   590/2000  R=-238.961  eff_peak=1.0051  drop=0.007  polL=0.003  valL=778.871  H=4.666
+Ep   600/2000  R=-235.216  eff_peak=1.0067  drop=0.007  polL=-0.004  valL=1429.851  H=4.655
+  [EVAL] ep=600  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=7/9999
+Ep   610/2000  R=-240.295  eff_peak=1.0045  drop=0.004  polL=-0.014  valL=1674.263  H=4.638
+Ep   620/2000  R=-241.607  eff_peak=1.0022  drop=0.004  polL=-0.003  valL=458.392  H=4.614
+Ep   630/2000  R=-242.404  eff_peak=1.0083  drop=0.008  polL=-0.001  valL=1014.638  H=4.574
+Ep   640/2000  R=-250.118  eff_peak=1.0067  drop=0.007  polL=-0.005  valL=1931.731  H=4.555
+Ep   650/2000  R=-239.952  eff_peak=1.0041  drop=0.006  polL=-0.007  valL=2955.605  H=4.555
+  [EVAL] ep=650  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=8/9999
+Ep   660/2000  R=-243.341  eff_peak=1.0021  drop=0.007  polL=0.001  valL=713.840  H=4.581
+Ep   670/2000  R=-243.883  eff_peak=0.9978  drop=0.005  polL=-0.004  valL=344.286  H=4.586
+Ep   680/2000  R=-242.859  eff_peak=1.0067  drop=0.007  polL=-0.014  valL=941.026  H=4.536
+Ep   690/2000  R=-240.894  eff_peak=1.0048  drop=0.007  polL=0.005  valL=1738.296  H=4.506
+Ep   700/2000  R=-238.894  eff_peak=1.0054  drop=0.005  polL=0.004  valL=2498.887  H=4.534
+  >>> New best! eff_peak=1.0000  saved to checkpoints_ppo_cold_dimred_seed2024/ppo_best.pth
+  [EVAL] ep=700  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=0/9999
+Ep   710/2000  R=-232.808  eff_peak=1.0011  drop=0.004  polL=-0.017  valL=1391.970  H=4.594
+Ep   720/2000  R=-242.051  eff_peak=1.0061  drop=0.006  polL=-0.003  valL=220.723  H=4.531
+Ep   730/2000  R=-237.984  eff_peak=1.0025  drop=0.005  polL=-0.001  valL=215.861  H=4.603
+Ep   740/2000  R=-234.437  eff_peak=1.0009  drop=0.003  polL=-0.010  valL=794.246  H=4.635
+Ep   750/2000  R=-235.009  eff_peak=1.0064  drop=0.006  polL=-0.001  valL=846.124  H=4.625
+  [EVAL] ep=750  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=1/9999
+Ep   760/2000  R=-240.758  eff_peak=1.0041  drop=0.006  polL=-0.001  valL=978.183  H=4.592
+Ep   770/2000  R=-230.241  eff_peak=1.0000  drop=0.005  polL=-0.005  valL=1071.914  H=4.566
+Ep   780/2000  R=-241.592  eff_peak=1.0051  drop=0.007  polL=0.002  valL=1524.055  H=4.589
+Ep   790/2000  R=-244.289  eff_peak=1.0080  drop=0.008  polL=0.006  valL=617.419  H=4.600
+Ep   800/2000  R=-243.238  eff_peak=1.0061  drop=0.008  polL=-0.002  valL=905.707  H=4.584
+  [EVAL] ep=800  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=2/9999
+Ep   810/2000  R=-242.524  eff_peak=1.0077  drop=0.008  polL=-0.001  valL=1103.531  H=4.594
+Ep   820/2000  R=-248.608  eff_peak=1.0077  drop=0.008  polL=0.003  valL=1230.125  H=4.589
+Ep   830/2000  R=-241.893  eff_peak=1.0067  drop=0.009  polL=0.006  valL=1685.503  H=4.602
+Ep   840/2000  R=-247.573  eff_peak=1.0080  drop=0.008  polL=-0.001  valL=1014.408  H=4.549
+Ep   850/2000  R=-241.377  eff_peak=1.0093  drop=0.009  polL=-0.008  valL=889.130  H=4.522
+  [EVAL] ep=850  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=3/9999
+Ep   860/2000  R=-243.677  eff_peak=1.0032  drop=0.006  polL=-0.001  valL=1343.978  H=4.513
+Ep   870/2000  R=-239.767  eff_peak=1.0077  drop=0.008  polL=0.000  valL=2157.466  H=4.550
+Ep   880/2000  R=-247.301  eff_peak=1.0074  drop=0.007  polL=-0.004  valL=602.897  H=4.577
+Ep   890/2000  R=-236.844  eff_peak=0.9992  drop=0.006  polL=-0.002  valL=303.201  H=4.553
+Ep   900/2000  R=-240.904  eff_peak=1.0041  drop=0.006  polL=-0.004  valL=481.675  H=4.584
+  [EVAL] ep=900  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=4/9999
+Ep   910/2000  R=-237.294  eff_peak=1.0040  drop=0.006  polL=0.002  valL=1132.054  H=4.585
+Ep   920/2000  R=-242.566  eff_peak=1.0064  drop=0.006  polL=-0.015  valL=358.763  H=4.533
+Ep   930/2000  R=-241.768  eff_peak=1.0058  drop=0.006  polL=0.002  valL=781.486  H=4.456
+Ep   940/2000  R=-242.123  eff_peak=1.0035  drop=0.006  polL=-0.006  valL=1235.713  H=4.476
+Ep   950/2000  R=-238.288  eff_peak=1.0035  drop=0.006  polL=-0.011  valL=788.845  H=4.491
+  [EVAL] ep=950  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=5/9999
+Ep   960/2000  R=-239.940  eff_peak=1.0045  drop=0.004  polL=0.000  valL=500.184  H=4.517
+Ep   970/2000  R=-236.617  eff_peak=1.0064  drop=0.006  polL=-0.003  valL=870.887  H=4.565
+Ep   980/2000  R=-233.602  eff_peak=1.0048  drop=0.007  polL=-0.007  valL=238.502  H=4.567
+Ep   990/2000  R=-235.499  eff_peak=1.0067  drop=0.007  polL=-0.002  valL=235.378  H=4.587
+Ep  1000/2000  R=-228.134  eff_peak=1.0003  drop=0.003  polL=0.002  valL=802.317  H=4.605
+  [EVAL] ep=1000  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=6/9999
+Ep  1010/2000  R=-231.310  eff_peak=1.0054  drop=0.005  polL=0.003  valL=274.875  H=4.586
+Ep  1020/2000  R=-233.394  eff_peak=0.9975  drop=0.005  polL=-0.003  valL=415.245  H=4.640
+Ep  1030/2000  R=-227.578  eff_peak=0.9982  drop=0.004  polL=-0.008  valL=655.142  H=4.656
+Ep  1040/2000  R=-232.238  eff_peak=1.0042  drop=0.004  polL=-0.004  valL=164.531  H=4.630
+Ep  1050/2000  R=-234.487  eff_peak=0.9967  drop=0.006  polL=0.001  valL=362.085  H=4.622
+  [EVAL] ep=1050  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=7/9999
+Ep  1060/2000  R=-232.672  eff_peak=1.0025  drop=0.007  polL=0.004  valL=823.475  H=4.631
+Ep  1070/2000  R=-228.816  eff_peak=0.9937  drop=0.004  polL=-0.008  valL=227.829  H=4.626
+Ep  1080/2000  R=-226.847  eff_peak=1.0019  drop=0.004  polL=-0.003  valL=350.215  H=4.637
+Ep  1090/2000  R=-237.102  eff_peak=1.0004  drop=0.005  polL=-0.009  valL=205.593  H=4.627
+Ep  1100/2000  R=-225.174  eff_peak=0.9945  drop=0.004  polL=0.006  valL=350.148  H=4.607
+  [EVAL] ep=1100  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=8/9999
+Ep  1110/2000  R=-228.024  eff_peak=1.0034  drop=0.006  polL=-0.001  valL=680.915  H=4.642
+Ep  1120/2000  R=-231.714  eff_peak=1.0029  drop=0.005  polL=-0.006  valL=143.306  H=4.654
+Ep  1130/2000  R=-230.509  eff_peak=0.9977  drop=0.004  polL=0.001  valL=192.132  H=4.630
+Ep  1140/2000  R=-232.591  eff_peak=0.9946  drop=0.004  polL=0.004  valL=393.769  H=4.592
+Ep  1150/2000  R=-220.948  eff_peak=1.0011  drop=0.004  polL=-0.009  valL=612.627  H=4.620
+  [EVAL] ep=1150  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=9/9999
+Ep  1160/2000  R=-238.177  eff_peak=0.9985  drop=0.004  polL=-0.001  valL=307.024  H=4.584
+Ep  1170/2000  R=-237.553  eff_peak=0.9987  drop=0.004  polL=-0.005  valL=282.375  H=4.621
+Ep  1180/2000  R=-223.141  eff_peak=0.9977  drop=0.002  polL=0.001  valL=459.244  H=4.617
+Ep  1190/2000  R=-242.840  eff_peak=1.0006  drop=0.005  polL=0.002  valL=1063.944  H=4.638
+Ep  1200/2000  R=-237.440  eff_peak=1.0030  drop=0.006  polL=0.005  valL=240.967  H=4.662
+  [EVAL] ep=1200  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=10/9999
+Ep  1210/2000  R=-228.899  eff_peak=1.0022  drop=0.004  polL=-0.006  valL=264.698  H=4.665
+Ep  1220/2000  R=-226.753  eff_peak=0.9973  drop=0.002  polL=0.001  valL=328.964  H=4.654
+Ep  1230/2000  R=-229.787  eff_peak=1.0026  drop=0.003  polL=0.002  valL=213.464  H=4.657
+Ep  1240/2000  R=-233.479  eff_peak=0.9977  drop=0.002  polL=-0.002  valL=389.547  H=4.705
+Ep  1250/2000  R=-239.519  eff_peak=1.0012  drop=0.004  polL=0.001  valL=335.648  H=4.674
+  [EVAL] ep=1250  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=11/9999
+Ep  1260/2000  R=-238.560  eff_peak=0.9989  drop=0.004  polL=-0.002  valL=267.774  H=4.672
+Ep  1270/2000  R=-230.018  eff_peak=1.0025  drop=0.005  polL=-0.008  valL=590.175  H=4.673
+Ep  1280/2000  R=-237.951  eff_peak=0.9947  drop=0.006  polL=0.004  valL=356.936  H=4.682
+Ep  1290/2000  R=-229.775  eff_peak=0.9980  drop=0.005  polL=-0.009  valL=97.790  H=4.645
+Ep  1300/2000  R=-229.613  eff_peak=0.9967  drop=0.004  polL=-0.004  valL=154.638  H=4.616
+  [EVAL] ep=1300  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=12/9999
+Ep  1310/2000  R=-229.514  eff_peak=1.0019  drop=0.004  polL=-0.000  valL=336.141  H=4.644
+Ep  1320/2000  R=-234.518  eff_peak=0.9934  drop=0.003  polL=0.003  valL=595.486  H=4.604
+Ep  1330/2000  R=-232.967  eff_peak=0.9902  drop=0.003  polL=-0.001  valL=385.297  H=4.617
+Ep  1340/2000  R=-228.537  eff_peak=1.0016  drop=0.004  polL=0.001  valL=872.807  H=4.581
+Ep  1350/2000  R=-231.169  eff_peak=1.0025  drop=0.005  polL=-0.000  valL=427.620  H=4.564
+  [EVAL] ep=1350  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=13/9999
+Ep  1360/2000  R=-217.696  eff_peak=0.9996  drop=0.004  polL=-0.004  valL=586.432  H=4.539
+Ep  1370/2000  R=-232.089  eff_peak=1.0025  drop=0.005  polL=0.004  valL=1389.764  H=4.510
+Ep  1380/2000  R=-230.815  eff_peak=0.9972  drop=0.003  polL=0.002  valL=384.852  H=4.510
+Ep  1390/2000  R=-225.646  eff_peak=0.9940  drop=0.002  polL=0.007  valL=150.219  H=4.477
+Ep  1400/2000  R=-224.775  eff_peak=0.9898  drop=0.003  polL=0.000  valL=349.660  H=4.475
+  [EVAL] ep=1400  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=14/9999
+Ep  1410/2000  R=-224.921  eff_peak=0.9996  drop=0.004  polL=0.006  valL=117.893  H=4.440
+Ep  1420/2000  R=-230.211  eff_peak=1.0019  drop=0.004  polL=-0.007  valL=201.694  H=4.485
+Ep  1430/2000  R=-221.447  eff_peak=0.9850  drop=0.002  polL=-0.003  valL=260.173  H=4.457
+Ep  1440/2000  R=-228.890  eff_peak=0.9985  drop=0.004  polL=0.002  valL=245.461  H=4.526
+Ep  1450/2000  R=-227.002  eff_peak=0.9962  drop=0.004  polL=-0.000  valL=457.403  H=4.507
+  [EVAL] ep=1450  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=15/9999
+Ep  1460/2000  R=-232.679  eff_peak=0.9880  drop=0.003  polL=0.000  valL=360.674  H=4.482
+Ep  1470/2000  R=-232.549  eff_peak=0.9938  drop=0.004  polL=-0.009  valL=982.499  H=4.491
+Ep  1480/2000  R=-230.663  eff_peak=0.9990  drop=0.004  polL=-0.001  valL=736.944  H=4.526
+Ep  1490/2000  R=-227.664  eff_peak=0.9982  drop=0.003  polL=-0.012  valL=1084.562  H=4.496
+Ep  1500/2000  R=-221.739  eff_peak=0.9913  drop=0.003  polL=0.001  valL=1019.882  H=4.514
+  [EVAL] ep=1500  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=16/9999
+Ep  1510/2000  R=-226.725  eff_peak=0.9938  drop=0.003  polL=-0.000  valL=344.252  H=4.503
+Ep  1520/2000  R=-224.425  eff_peak=0.9955  drop=0.003  polL=-0.001  valL=376.018  H=4.481
+Ep  1530/2000  R=-215.963  eff_peak=0.9954  drop=0.004  polL=-0.010  valL=802.897  H=4.493
+Ep  1540/2000  R=-222.264  eff_peak=0.9904  drop=0.003  polL=-0.005  valL=471.848  H=4.554
+Ep  1550/2000  R=-228.763  eff_peak=0.9980  drop=0.003  polL=-0.014  valL=499.975  H=4.566
+  [EVAL] ep=1550  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=17/9999
+Ep  1560/2000  R=-231.123  eff_peak=1.0022  drop=0.005  polL=0.003  valL=1218.148  H=4.588
+Ep  1570/2000  R=-223.527  eff_peak=0.9996  drop=0.004  polL=-0.000  valL=283.669  H=4.607
+Ep  1580/2000  R=-231.757  eff_peak=1.0054  drop=0.005  polL=-0.004  valL=235.977  H=4.635
+Ep  1590/2000  R=-223.466  eff_peak=1.0016  drop=0.004  polL=-0.006  valL=474.596  H=4.658
+Ep  1600/2000  R=-229.812  eff_peak=1.0071  drop=0.007  polL=0.001  valL=808.251  H=4.691
+  [EVAL] ep=1600  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=18/9999
+Ep  1610/2000  R=-231.000  eff_peak=1.0003  drop=0.005  polL=0.005  valL=362.006  H=4.672
+Ep  1620/2000  R=-230.625  eff_peak=0.9999  drop=0.004  polL=-0.004  valL=1207.095  H=4.666
+Ep  1630/2000  R=-225.669  eff_peak=1.0009  drop=0.003  polL=-0.000  valL=222.908  H=4.674
+Ep  1640/2000  R=-234.159  eff_peak=0.9914  drop=0.004  polL=-0.003  valL=153.538  H=4.681
+Ep  1650/2000  R=-231.510  eff_peak=0.9993  drop=0.004  polL=-0.003  valL=191.122  H=4.697
+  [EVAL] ep=1650  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=19/9999
+Ep  1660/2000  R=-228.256  eff_peak=0.9984  drop=0.003  polL=-0.002  valL=155.130  H=4.713
+Ep  1670/2000  R=-226.795  eff_peak=0.9947  drop=0.004  polL=-0.009  valL=303.489  H=4.709
+Ep  1680/2000  R=-235.968  eff_peak=1.0019  drop=0.006  polL=-0.007  valL=977.806  H=4.703
+Ep  1690/2000  R=-230.423  eff_peak=0.9967  drop=0.004  polL=-0.002  valL=918.243  H=4.692
+Ep  1700/2000  R=-229.618  eff_peak=0.9960  drop=0.004  polL=0.002  valL=841.940  H=4.653
+  >>> New best! eff_peak=0.9535  saved to checkpoints_ppo_cold_dimred_seed2024/ppo_best.pth
+  [EVAL] ep=1700  eff_peak=0.9535 +/- 0.0000  peak=0.9535  drop=0.000  no_improve=0/9999
+Ep  1710/2000  R=-220.431  eff_peak=1.0003  drop=0.003  polL=0.001  valL=220.750  H=4.608
+Ep  1720/2000  R=-230.552  eff_peak=0.9949  drop=0.002  polL=-0.004  valL=117.142  H=4.567
+Ep  1730/2000  R=-220.731  eff_peak=0.9947  drop=0.005  polL=-0.007  valL=115.944  H=4.586
+Ep  1740/2000  R=-229.697  eff_peak=0.9925  drop=0.002  polL=-0.006  valL=397.996  H=4.608
+Ep  1750/2000  R=-242.821  eff_peak=0.9921  drop=0.003  polL=-0.007  valL=306.989  H=4.604
+  [EVAL] ep=1750  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=1/9999
+Ep  1760/2000  R=-231.688  eff_peak=0.9902  drop=0.002  polL=-0.002  valL=142.976  H=4.600
+Ep  1770/2000  R=-229.063  eff_peak=0.9943  drop=0.004  polL=-0.000  valL=166.958  H=4.615
+Ep  1780/2000  R=-226.111  eff_peak=1.0029  drop=0.003  polL=-0.014  valL=374.209  H=4.589
+Ep  1790/2000  R=-238.718  eff_peak=1.0009  drop=0.005  polL=-0.008  valL=1187.494  H=4.554
+Ep  1800/2000  R=-224.412  eff_peak=1.0016  drop=0.004  polL=-0.009  valL=505.450  H=4.576
+  [EVAL] ep=1800  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=2/9999
+Ep  1810/2000  R=-227.977  eff_peak=0.9985  drop=0.003  polL=-0.013  valL=1490.564  H=4.540
+Ep  1820/2000  R=-228.977  eff_peak=0.9912  drop=0.003  polL=-0.008  valL=269.141  H=4.534
+Ep  1830/2000  R=-224.650  eff_peak=1.0009  drop=0.006  polL=-0.005  valL=110.990  H=4.522
+Ep  1840/2000  R=-217.073  eff_peak=0.9923  drop=0.002  polL=-0.002  valL=318.241  H=4.569
+Ep  1850/2000  R=-221.902  eff_peak=0.9987  drop=0.003  polL=-0.003  valL=1205.197  H=4.580
+  [EVAL] ep=1850  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=3/9999
+Ep  1860/2000  R=-239.690  eff_peak=0.9965  drop=0.006  polL=-0.002  valL=300.782  H=4.613
+Ep  1870/2000  R=-228.395  eff_peak=0.9985  drop=0.006  polL=0.002  valL=685.253  H=4.586
+Ep  1880/2000  R=-226.655  eff_peak=0.9935  drop=0.003  polL=0.000  valL=1149.977  H=4.576
+Ep  1890/2000  R=-219.787  eff_peak=0.9899  drop=0.004  polL=-0.006  valL=828.598  H=4.567
+Ep  1900/2000  R=-223.727  eff_peak=0.9890  drop=0.004  polL=-0.003  valL=1529.048  H=4.561
+  [EVAL] ep=1900  eff_peak=1.0032 +/- 0.0000  peak=1.0000  drop=0.003  no_improve=4/9999
+Ep  1910/2000  R=-226.133  eff_peak=0.9898  drop=0.004  polL=-0.010  valL=262.343  H=4.581
+Ep  1920/2000  R=-227.104  eff_peak=0.9999  drop=0.005  polL=0.003  valL=215.659  H=4.566
+Ep  1930/2000  R=-223.417  eff_peak=0.9943  drop=0.002  polL=-0.007  valL=873.716  H=4.551
+Ep  1940/2000  R=-221.139  eff_peak=0.9959  drop=0.001  polL=-0.000  valL=675.842  H=4.539
+Ep  1950/2000  R=-229.795  eff_peak=0.9960  drop=0.005  polL=-0.004  valL=491.025  H=4.527
+  [EVAL] ep=1950  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=5/9999
+Ep  1960/2000  R=-225.538  eff_peak=0.9967  drop=0.002  polL=-0.005  valL=993.214  H=4.521
+Ep  1970/2000  R=-223.788  eff_peak=1.0004  drop=0.003  polL=-0.003  valL=1254.986  H=4.519
+Ep  1980/2000  R=-236.435  eff_peak=1.0019  drop=0.004  polL=-0.004  valL=1738.404  H=4.516
+Ep  1990/2000  R=-244.281  eff_peak=1.0061  drop=0.006  polL=0.004  valL=2284.328  H=4.518
+Ep  2000/2000  R=-243.140  eff_peak=1.0042  drop=0.004  polL=-0.002  valL=1237.862  H=4.544
+  [EVAL] ep=2000  eff_peak=1.0000 +/- 0.0000  peak=1.0000  drop=0.000  no_improve=6/9999
+
+Training completed at ep=2000/2000
+Final model saved to checkpoints_ppo_cold_dimred_seed2024/ppo_checkpoint.pth
+Best eval eff_peak: 0.9535
+
+Training curves saved to checkpoints_ppo_cold_dimred_seed2024/training_curves.json
+
+============================================================
+Final Evaluation (20 episodes, BEST checkpoint, greedy policy)
+============================================================
+  Loaded best checkpoint from checkpoints_ppo_cold_dimred_seed2024/ppo_best.pth
+     eff_peak_mean: 0.9535
+      eff_peak_std: 0.0000
+         peak_mean: 0.9535
+          peak_std: 0.0000
+         drop_mean: 0.0000
+        delay_mean: 1.8558
+       reward_mean: -279.3402
+
+============================================================
+Comparison (same scenario, same seed)
+============================================================
+  Baseline (random_feasible):  eff_peak = 1.0064
+  PPO (greedy, 20 ep):         eff_peak = 0.9535
+  Improvement vs baseline:     +5.26%
+
+======================================================================
+[PPO] seed=42  save_dir=checkpoints_ppo_cold_dimred_seed42
+[CMD] /Users/youyuelin/code/new/RL/bin/python train_ppo.py --episodes 2000 --seed 42 --save-dir checkpoints_ppo_cold_dimred_seed42 --no-early-stop --order-mode random --period-mode simple --reward-mode load_balance --action-mode dimred --gamma 0.99
+======================================================================
+[DONE] ppo seed=42 rc=0 耗时=2.9 min
+
+======================================================================
+[PPO] seed=123  save_dir=checkpoints_ppo_cold_dimred_seed123
+[CMD] /Users/youyuelin/code/new/RL/bin/python train_ppo.py --episodes 2000 --seed 123 --save-dir checkpoints_ppo_cold_dimred_seed123 --no-early-stop --order-mode random --period-mode simple --reward-mode load_balance --action-mode dimred --gamma 0.99
+======================================================================
+[DONE] ppo seed=123 rc=0 耗时=2.9 min
+
+======================================================================
+[PPO] seed=2024  save_dir=checkpoints_ppo_cold_dimred_seed2024
+[CMD] /Users/youyuelin/code/new/RL/bin/python train_ppo.py --episodes 2000 --seed 2024 --save-dir checkpoints_ppo_cold_dimred_seed2024 --no-early-stop --order-mode random --period-mode simple --reward-mode load_balance --action-mode dimred --gamma 0.99
+======================================================================
+[DONE] ppo seed=2024 rc=0 耗时=3.2 min

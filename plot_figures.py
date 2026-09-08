@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""生成论文图 1（方法对比柱状图）与图 3（三算法训练收敛曲线）。
+"""生成论文图 3（奖励收敛）与图 4（eff_peak 收敛）。
 
-数据来源：
-  - 图1: results_plot_data.json（random 顺序 env, simple 集, 50 流）
-  - 图3: 各算法种子目录的 training_curves.json
-        PPO:   checkpoints_ppo_seed{42,123,2024}_0716/
+图 1（方法对比柱状图）由 duibi.py 单独生成 -> figure1_method_comparison.png。
+
+数据来源：各算法种子目录的 training_curves.json
+        PPO:   checkpoints_ppo_cold_seed{42,123,2024}/
         SAC:   checkpoints_sac_seed{42,123,2024}_0716/
         DDQN:  checkpoints_ddqn_seed{42,123,2024}_0716/
 
@@ -33,88 +33,8 @@ plt.rcParams.update({
     "grid.linestyle": "--",
 })
 
-# 文件由 eval_plot_data.py 在 Windows 默认编码(gbk/cp936)下写出，故按 gbk 读
-try:
-    DATA = json.load(open("results_plot_data.json", encoding="utf-8"))
-except UnicodeDecodeError:
-    DATA = json.load(open("results_plot_data.json", encoding="gbk"))
-M = DATA["methods"]
-D = DATA["derived"]
-
-# ----------------------------------------------------------------------------
-# 公共数据
-# ----------------------------------------------------------------------------
-baseline_mean = M["random_feasible"]["eff_peak_mean"]
-baseline_std = M["random_feasible"]["eff_peak_std"]
-baseline_per = M["random_feasible"]["per_seed"]
-
-ppo_mean = M["ppo_bc_best"]["eff_peak_mean"]
-ppo_std = M["ppo_bc_best"]["eff_peak_std"]
-ppo_per = M["ppo_bc_best"]["per_seed"]
-
-teacher_mean = M["teacher_random_minload"]["eff_peak_mean"]
-teacher_std = M["teacher_random_minload"]["eff_peak_std"]
-teacher_per = M["teacher_random_minload"]["per_seed"]
-
-milp = M["milp"]["eff_peak"]
-ppo_cold = M["ppo_cold_random"]["eff_peak"]  # 记忆值，无 std
-
-# ============================================================================
-# 图 1：带误差棒方法对比柱状图（headline 图）
-# ============================================================================
-fig1, ax1 = plt.subplots(figsize=(9, 5.5))
-
-groups = [
-    ("Random feasible\n(baseline)", baseline_mean, baseline_std, "#d62728", "baseline"),
-    ("PPO (cold,\nno BC)*", ppo_cold, None, "#ff9896", "cold"),
-    ("PPO + BC", ppo_mean, ppo_std, "#1f77b4", "ppo"),
-    ("Teacher\n(rand. min-load)", teacher_mean, teacher_std, "#7f7f7f", "teacher"),
-    ("MILP\nlower bound", milp, None, "#2ca02c", "milp"),
-]
-labels = [g[0] for g in groups]
-means = [g[1] for g in groups]
-stds = [g[2] if g[2] is not None else np.nan for g in groups]
-colors = [g[3] for g in groups]
-
-x = np.arange(len(groups))
-bars = ax1.bar(x, means, color=colors, edgecolor="black", linewidth=1.0,
-               yerr=stds, capsize=6, error_kw=dict(elinewidth=1.5, ecolor="black"))
-
-# 标注数值
-for xi, (lab, mv, sd) in enumerate(zip(labels, means, stds)):
-    if sd is None:
-        txt = f"{mv:.3f}"
-    else:
-        txt = f"{mv:.3f}\n±{sd:.3f}"
-    ax1.text(xi, mv + 0.012, txt, ha="center", va="bottom", fontsize=10, fontweight="bold")
-
-# 标注 PPO+BC 相对基线的改进（20 种子均值口径）
-imp = D["framing_20seed_mean"]["improvement_vs_baseline_pct"]
-gap = D["framing_20seed_mean"]["milp_gap_filled_pct"]
-ax1.annotate(
-    f"PPO+BC vs baseline:\n−{imp:.1f}% eff_peak\n(fills {gap:.1f}% of\nMILP gap)",
-    xy=(2, ppo_mean), xytext=(2.35, 0.62),
-    fontsize=10, color="#1f77b4", fontweight="bold",
-    arrowprops=dict(arrowstyle="->", color="#1f77b4", lw=1.5),
-    bbox=dict(boxstyle="round,pad=0.3", fc="#e8f0fe", ec="#1f77b4", alpha=0.9),
-)
-
-ax1.axhline(milp, color="#2ca02c", linestyle=":", linewidth=1.5)
-ax1.set_ylabel("Effective peak load (lower = better)")
-ax1.set_title("Fig.1  Eff-peak comparison on random-order env (50 flows, simple set)")
-ax1.set_xticks(x)
-ax1.set_xticklabels(labels)
-ax1.set_ylim(0.45, 1.12)
-ax1.legend(handles=[Patch(facecolor="#d62728", label="Naïve baseline (random feas.)"),
-                    Patch(facecolor="#1f77b4", label="PPO + BC (ours)"),
-                    Patch(facecolor="#7f7f7f", label="Non-RL teacher"),
-                    Patch(facecolor="#2ca02c", label="MILP lower bound")],
-           loc="upper right", framealpha=0.9)
-ax1.text(0.99, 0.02, "* cold start = memory value, not robustly re-evaluated",
-         transform=ax1.transAxes, ha="right", va="bottom", fontsize=8, style="italic", color="#555555")
-
-fig1.savefig("method_comparison.png", dpi=300)
-print("saved method_comparison.png")
+# 图 1（方法对比柱状图）由 duibi.py 单独生成 -> figure1_method_comparison.png
+# 本脚本只负责图 3（奖励收敛）与图 4（eff_peak 收敛），不再产出 BC 旧口径图。
 
 
 # ============================================================================
@@ -146,10 +66,10 @@ def read_algorithm_seeds(seed_dirs):
     """从多个种子目录读取 ep_reward，返回 (x_array, Y_matrix)。
     
     Y_matrix shape = (n_seeds, n_points)。
-    不同算法的数据密度不同（PPO 每 rollout 一个点，SAC/DDQN 每 episode 一个点），
-    返回各自的自然 x 网格，画图时 matplotlib 自动处理。
+    不同算法/种子的 episode 长度与起点可能不同（早停、采样间隔不同），
+    因此先插值到公共 x 网格，再求 mean/std，避免长度不一致报错。
     """
-    curves = []
+    raw = []
     for d in seed_dirs:
         p = os.path.join(d, "training_curves.json")
         if not os.path.exists(p):
@@ -158,13 +78,20 @@ def read_algorithm_seeds(seed_dirs):
         c = load_curves(p)
         xs = np.array(c["episode"], dtype=float)
         ys = np.array(c["ep_reward"], dtype=float)
-        curves.append((xs, ys))
+        if len(xs) != len(ys):
+            n = min(len(xs), len(ys))
+            xs, ys = xs[:n], ys[:n]
+        raw.append((xs, ys))
 
-    if len(curves) == 0:
+    if len(raw) == 0:
         return None, None
 
-    x_common = curves[0][0]
-    Y = np.stack([cv[1] for cv in curves], axis=0)  # (n_seeds, n_points)
+    # 公共网格：从最大起点到最小终点，点数取最短种子的点数
+    x_start = max(r[0][0] for r in raw)
+    x_end = min(r[0][-1] for r in raw)
+    n_min = min(len(r[1]) for r in raw)
+    x_common = np.linspace(x_start, x_end, n_min)
+    Y = np.stack([np.interp(x_common, r[0], r[1]) for r in raw], axis=0)
     return x_common, Y
 
 
@@ -173,13 +100,13 @@ ALGORITHMS = [
     {
         "name": "PPO",
         "seed_dirs": [
-            "checkpoints_ppo_seed42_0716",
-            "checkpoints_ppo_seed123_0716",
-            "checkpoints_ppo_seed2024_0716",
+            "checkpoints_ppo_cold_seed42",
+            "checkpoints_ppo_cold_seed123",
+            "checkpoints_ppo_cold_seed2024",
         ],
         "color": "#1f77b4",   # 蓝
         "smooth_window": 50,
-        "eval_step": 200,     # PPO旧版rollout=8 → LCM(8,50)=200；重跑rollout=10后改50
+        "eval_step": 50,
     },
     {
         "name": "SAC",
@@ -206,7 +133,7 @@ ALGORITHMS = [
 ]
 
 
-def plot_multi_algorithm_convergence(algorithms, save_name="figure3.png"):
+def plot_multi_algorithm_convergence(algorithms, save_name="figure3_reward_convergence.png"):
     """三算法同图收敛曲线，各算法 3 种子 mean±std，正数平移。"""
     
     # 先收集所有有效算法的数据，算全局 offset
@@ -306,18 +233,21 @@ def read_algorithm_seeds_field(seed_dirs, field="ep_eff_peak", eval_step=None):
             # 逐 episode 字段：直接用 episode 数组
             xs = np.array(c["episode"], dtype=float)
 
+        if len(xs) != len(ys):
+            n = min(len(xs), len(ys))
+            xs, ys = xs[:n], ys[:n]
+
         curves.append((xs, ys))
 
     if len(curves) == 0:
         return None, None
 
-    # eval 字段：各种子 eval 点数可能不同（早停/Ctrl+C），取最短的公共长度
-    if eval_step is not None:
-        min_len = min(len(cv[1]) for cv in curves)
-        curves = [(cv[0][:min_len], cv[1][:min_len]) for cv in curves]
-
-    x_common = curves[0][0]
-    Y = np.stack([cv[1] for cv in curves], axis=0)
+    # 不同种子长度可能不同（早停/采样间隔），插值到公共网格对齐
+    x_start = max(cv[0][0] for cv in curves)
+    x_end = min(cv[0][-1] for cv in curves)
+    n_min = min(len(cv[1]) for cv in curves)
+    x_common = np.linspace(x_start, x_end, n_min)
+    Y = np.stack([np.interp(x_common, cv[0], cv[1]) for cv in curves], axis=0)
     return x_common, Y
 
 

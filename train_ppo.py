@@ -283,10 +283,13 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--period-mode", type=str, default="cyclic",
                         choices=["cyclic", "simple", "random"],
-                        help="cyclic=历史基线复现; simple=Simple集(2固定周期); random=Random集")
+                        help="cyclic=历史复现; simple=Simple集(2固定周期); random=Random集")
     parser.add_argument("--order-mode", type=str, default="edf",
                         choices=["edf", "random"],
-                        help="edf=固定EDF顺序(历史); random=随机顺序(在random_feasible基线上进行)")
+                        help="edf=固定EDF顺序(历史); random=随机顺序(native/dimred统一口径)")
+    parser.add_argument("--action-mode", type=str, default="native",
+                        choices=["native", "dimred"],
+                        help="native=Discrete(96)动作; dimred=结构化7位二值动作(动作空间降维)")
     parser.add_argument("--bc-pretrain", action="store_true",
                         help="BC暖启动：用随机顺序min-load teacher预训练actor，再PPO微调")
     parser.add_argument("--bc-episodes", type=int, default=150,
@@ -323,13 +326,14 @@ def main():
         reward_delta=args.reward_delta,
         reward_zeta=args.reward_zeta,
         order_mode=args.order_mode,
+        action_mode=args.action_mode,
     )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[Device] {device}" + (f" ({torch.cuda.get_device_name(0)})" if device == "cuda" else ""))
     agent = PPOAgent(
         obs_dim=env.observation_space.shape[0],
-        n_actions=env.action_space.n,
+        n_actions=env.n_actions,
         hidden_dims=tuple(args.hidden_dims),
         lr=args.lr,
         gamma=args.gamma,
@@ -339,13 +343,14 @@ def main():
         ent_coef=args.ent_coef,
         value_coef=args.value_coef,
         device=device,
+        action_mode=args.action_mode,
     )
 
     print(f"{'='*60}")
     print(f"PPO Training for 5G-TSN Scheduling (period_mode={period_mode})")
     print(f"{'='*60}")
     print(f"  Obs dim:       {env.observation_space.shape[0]}")
-    print(f"  Action dim:    {env.action_space.n}")
+    print(f"  Action dim:    {env.n_actions} ({env.action_mode})")
     print(f"  Episodes:      {args.episodes} (rollout={args.rollout_episodes} ep/update)")
     print(f"  PPO epochs:    {args.epochs}  minibatch={args.minibatch}")
     print(f"  LR:            {args.lr}")
@@ -388,7 +393,8 @@ def main():
         print(f"\nEvaluation (20 episodes):")
         for k, v in em.items():
             print(f"  {k:>16s}: {v:.4f}")
-        # compare with true naive baseline (random_feasible)
+        # Reference scale: random_feasible (random lower bound), NOT the baseline.
+        # The comparison baseline for dimred is the native (non-reduced) version.
         from tsn_sim.heuristics import schedule_with_heuristic
         from tsn_sim.config import HeuristicConfig
         scenario = build_scenario_safe(sim_config)
@@ -398,9 +404,9 @@ def main():
         )
         base_peak = base.metrics["effective_peak_load"]
         improvement = (base_peak - em["eff_peak_mean"]) / base_peak * 100
-        print(f"\n  Baseline (random_feasible): eff_peak = {base_peak:.4f}")
+        print(f"\n  Reference (random_feasible): eff_peak = {base_peak:.4f}")
         print(f"  PPO (greedy, 20 ep):        eff_peak = {em['eff_peak_mean']:.4f}")
-        print(f"  Improvement vs baseline:    {improvement:+.2f}%")
+        print(f"  Gain vs random reference:   {improvement:+.2f}%")
         return
 
     history = train(
@@ -433,13 +439,12 @@ def main():
     for k, v in em.items():
         print(f"  {k:>16s}: {v:.4f}")
 
-    # --- Compare with the TRUE naive baseline (random_feasible) ---
-    # NOTE: the real baseline is random_feasible (random order + random
-    # placement), NOT the handcrafted min-load heuristic. When the env uses
-    # order_mode='random', DRL is evaluated "on the baseline" and its gain is
-    # attributable to RL, not to a hand-picked EDF ordering.
+    # --- Reference scale: random_feasible (random lower bound) ---
+    # NOTE: the comparison baseline for the dimred method is the native
+    # (non-reduced) version of the SAME algorithm. random_feasible / heuristics
+    # / MILP are reference scales only, used to mark the absolute level.
     print(f"\n{'='*60}")
-    print("Comparison (same scenario, same seed)")
+    print("Reference scale (same scenario, same seed)")
     print(f"{'='*60}")
     from tsn_sim.heuristics import schedule_with_heuristic
     from tsn_sim.config import HeuristicConfig
@@ -451,9 +456,9 @@ def main():
     base_peak = base.metrics["effective_peak_load"]
     ppo_peak = em["eff_peak_mean"]
     improvement = (base_peak - ppo_peak) / base_peak * 100
-    print(f"  Baseline (random_feasible):  eff_peak = {base_peak:.4f}")
+    print(f"  Reference (random_feasible): eff_peak = {base_peak:.4f}")
     print(f"  PPO (greedy, 20 ep):         eff_peak = {ppo_peak:.4f}")
-    print(f"  Improvement vs baseline:     {improvement:+.2f}%")
+    print(f"  Gain vs random reference:    {improvement:+.2f}%")
 
 
 def build_scenario_safe(sim_config):

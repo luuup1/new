@@ -244,6 +244,9 @@ class SACAgent:
         obs_dim: int,
         n_actions: int,
         *,
+        n_cells: Optional[int] = None,
+        n_links: int = 3,
+        n_slots: int = 32,
         hidden_dims: Tuple[int, ...] = (256, 256),
         lr: float = 3e-4,
         gamma: float = 0.99,
@@ -262,14 +265,55 @@ class SACAgent:
         self.tau = tau
         self.device = torch.device(device)
 
+        # n_cells: critic output dim (the FULL cell space). For native it equals
+        # n_actions (96). For dimred the actor outputs n_actions=7 bits, but the
+        # critic still evaluates the FULL 96-cell space so that the value
+        # function loses no representational power (this is the fix for the
+        # previously-failing factored-Q dimred).
+        if n_cells is not None:
+            self.n_cells = n_cells
+        elif action_mode == "dimred":
+            self.n_cells = n_links * n_slots
+        else:
+            self.n_cells = n_actions
+        self.n_links = n_links
+        self.n_slots = n_slots
+        self.n_link_bits = int(np.ceil(np.log2(self.n_links)))
+        if action_mode == "dimred":
+            # dimred: n_actions IS the bit count (7); slot bits = total - link bits.
+            self.n_slot_bits = n_actions - self.n_link_bits
+        else:
+            self.n_slot_bits = int(np.ceil(np.log2(self.n_slots)))
+
+        # Precompute the canonical cell -> bits encoding matrix (n_cells x n_bits).
+        # Matches env._cell_to_bits: n_link_bits link bits (MSB) + n_slot_bits slot
+        # bits (MSB first). Used only in dimred mode: the n_bits Bernoulli policy
+        # induces a distribution over the FULL 96-cell space, which the
+        # (full-dimensional) critic then evaluates. This is the
+        # "strategy-space reduction + full-value critic" fix that replaces the
+        # previously-failing factored-Q dimred.
+        n_bits = self.n_link_bits + self.n_slot_bits
+        cell_bits = torch.zeros(self.n_cells, n_bits, dtype=torch.float32)
+        for c in range(self.n_cells):
+            link = c // self.n_slots + 1
+            slot = c % self.n_slots
+            link_code = link - 1
+            cell_bits[c, 0] = (link_code >> 1) & 1
+            cell_bits[c, 1] = link_code & 1
+            for i in range(self.n_slot_bits):
+                cell_bits[c, self.n_link_bits + i] = (
+                    slot >> (self.n_slot_bits - 1 - i)) & 1
+        self._cell_bits = cell_bits.to(self.device)
+
         # --- Networks ---
+        # Actor outputs n_actions (96 native / 7 dimred); critics output n_cells.
         self.policy = PolicyNetwork(obs_dim, n_actions, hidden_dims).to(self.device)
-        self.q1 = QNetwork(obs_dim, n_actions, hidden_dims).to(self.device)
-        self.q2 = QNetwork(obs_dim, n_actions, hidden_dims).to(self.device)
+        self.q1 = QNetwork(obs_dim, self.n_cells, hidden_dims).to(self.device)
+        self.q2 = QNetwork(obs_dim, self.n_cells, hidden_dims).to(self.device)
 
         # Target networks (hard copy initially)
-        self.q1_target = QNetwork(obs_dim, n_actions, hidden_dims).to(self.device)
-        self.q2_target = QNetwork(obs_dim, n_actions, hidden_dims).to(self.device)
+        self.q1_target = QNetwork(obs_dim, self.n_cells, hidden_dims).to(self.device)
+        self.q2_target = QNetwork(obs_dim, self.n_cells, hidden_dims).to(self.device)
         self.q1_target.load_state_dict(self.q1.state_dict())
         self.q2_target.load_state_dict(self.q2.state_dict())
         for p in self.q1_target.parameters():
@@ -316,24 +360,52 @@ class SACAgent:
         mask: np.ndarray,
         deterministic: bool = False,
     ):
-        """Select an action. Native: returns int. Dimred: returns (bits, logp)."""
+        """Select an action. Native: returns int (cell). Dimred: also returns int
+        (cell index), but the cell is sampled from a distribution induced by the
+        7-bit Bernoulli policy (strategy-space reduction). Both return a plain
+        int so the training loop / buffer treat them identically."""
         with torch.no_grad():
             s = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
             if self._action_mode == "dimred":
-                logits = self.policy(s)                 # (1, n_bits)
-                probs = torch.sigmoid(logits).squeeze(0)   # (n_bits,)
+                m = torch.from_numpy(mask).bool().to(self.device)   # (n_cells,)
+                logits = self.policy(s)                             # (1, n_bits)
+                bit_probs = torch.sigmoid(logits).squeeze(0)        # (n_bits,)
+
+                # Induced cell distribution: pi(c|s) ∝ prod_i p_i^{b_i(c)} (1-p_i)^{1-b_i(c)}
+                logp_cell = (
+                    self._cell_bits * torch.log(bit_probs + 1e-8)
+                    + (1 - self._cell_bits) * torch.log(1 - bit_probs + 1e-8)
+                ).sum(-1)                                           # (n_cells,)
+
+                # Mask invalid cells -> -1e9 (finite, avoids NaN when no cell is
+                # valid), then normalize to a valid-cell distribution.
+                masked_logp = torch.where(
+                    m, logp_cell,
+                    torch.full_like(logp_cell, -1e9),
+                )
+                if not bool(m.any()):
+                    # No valid cell at all (terminal): return 0.
+                    return 0
+                cell_probs = torch.softmax(masked_logp, dim=-1)     # (n_cells,)
+
                 if deterministic:
-                    bits = (probs > 0.5).int().cpu().numpy()
-                    logp = self._bits_logprob(probs, torch.from_numpy(bits).float())
+                    cell = int(torch.argmax(cell_probs).item())
                 else:
-                    dist = torch.distributions.Bernoulli(probs)
-                    b = dist.sample()
-                    bits = b.int().cpu().numpy()
-                    logp = dist.log_prob(b).sum().item()
-                return bits, logp
+                    dist = torch.distributions.Categorical(probs=cell_probs)
+                    cell = int(dist.sample().item())
+                return cell
             m = torch.from_numpy(mask).bool().unsqueeze(0).to(self.device)
             action, _ = self.policy.sample(s, m, deterministic=deterministic)
             return int(action.item())
+
+    def cell_to_bits(self, cell: int) -> np.ndarray:
+        """Map a cell index (0..n_cells-1) to its canonical 7-bit action.
+
+        Used by the training loop: `select_action` returns a cell index even in
+        dimred mode (so the buffer/critic treat it like native), and this method
+        converts it back to the 7-bit form the dimred env expects in `env.step`.
+        """
+        return self._cell_bits[int(cell)].cpu().numpy().astype(int)
 
     # --- training step ---
 
@@ -445,77 +517,89 @@ class SACAgent:
 
     # --- dimred helpers ------------------------------------------------
 
-    @staticmethod
-    def _bits_logprob(probs: torch.Tensor, bits: torch.Tensor) -> float:
-        """Sum of independent Bernoulli log-probs for a 7-bit action."""
-        return float(((bits) * torch.log(probs + 1e-8) +
-                      (1 - bits) * torch.log(1 - probs + 1e-8)).sum().item())
+    def _cell_distribution(
+        self, state: torch.Tensor, mask: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Induced distribution over the FULL cell space from the 7-bit policy.
 
-    def _all_combos(self) -> torch.Tensor:
-        """All 2^n_bits binary combinations, cached on device."""
-        if getattr(self, "_combos", None) is None:
-            n = self.n_actions
-            idx = torch.arange(2 ** n, device=self.device)
-            combos = torch.zeros(2 ** n, n, device=self.device)
-            for i in range(n):
-                combos[:, i] = ((idx >> (n - 1 - i)) & 1).float()
-            self._combos = combos
-        return self._combos
+        The actor outputs 7 independent Bernoulli logits. Each valid cell c has a
+        canonical 7-bit code b(c) (see `self._cell_bits`); the induced cell
+        probability is
+            pi(c|s) ∝ prod_i p_i(s)^{b_i(c)} (1 - p_i(s))^{1 - b_i(c)}  *  1[c valid]
+        i.e. log pi(c|s) = sum_i [ b_i(c) log p_i + (1-b_i(c)) log(1-p_i) ].
+        Invalid cells are masked to zero probability and the valid cells
+        renormalize (softmax).
+
+        Returns:
+            log_pi : (B, n_cells)  log-probability over cells (renormalized)
+            pi     : (B, n_cells)  probability over cells
+        """
+        bit_probs = torch.sigmoid(self.policy(state))               # (B, n_bits)
+        # (B, n_cells) unnormalized log-prob per cell
+        logp_cell = (
+            self._cell_bits.unsqueeze(0) * torch.log(bit_probs.unsqueeze(1) + 1e-8)
+            + (1 - self._cell_bits.unsqueeze(0))
+            * torch.log(1 - bit_probs.unsqueeze(1) + 1e-8)
+        ).sum(-1)
+
+        # Mask invalid cells -> -1e9 (finite, avoids NaN when the whole mask is
+        # False at terminal states), then renormalize via softmax.
+        invalid = torch.full_like(logp_cell, -1e9)
+        masked_logp = torch.where(mask.bool(), logp_cell, invalid)
+        log_pi = torch.log_softmax(masked_logp, dim=-1)
+        pi = torch.exp(log_pi)
+        return log_pi, pi
 
     def _update_dimred(self, buffer, batch_size):
-        """Factored SAC update for the 7-bit action space.
+        """Discrete-SAC update for the reduced (7-bit) action space.
 
-        Actor outputs 7 per-bit Bernoulli logits; Q-networks output 7 per-bit
-        Q-values with joint Q = Σ_i q_bit[i] * bit[i]. V(s') and the policy
-        objective are computed by enumerating the 2^7 = 128 joint actions.
+        Key fix vs. the old factored-Q dimred: the **critic stays full 96-dim**,
+        so the value function loses no representational power. The 7-bit policy
+        induces a distribution pi(c|s) over the 96 valid cells, and the standard
+        discrete-SAC objectives are computed exactly as in the native branch —
+        the only difference is how pi(c|s) is parameterized (masked-softmax of 96
+        logits vs. product of 7 Bernoulli bits).
         """
         batch = buffer.sample(batch_size)
         state = batch["state"].to(self.device)
-        action = batch["action"].to(self.device)        # (B, n_bits) 0/1
+        action = batch["action"].to(self.device)        # (B,) cell indices (long)
         reward = batch["reward"].to(self.device)
         next_state = batch["next_state"].to(self.device)
         done = batch["done"].to(self.device)
+        mask = batch["action_mask"].to(self.device)     # (B, n_cells)
+        next_mask = batch["next_mask"].to(self.device)  # (B, n_cells)
         alpha_val = self.log_alpha.exp()
-        combos = self._all_combos()                      # (K, n_bits)
 
-        # ---- V(s') over all joint actions ----
+        # ---- V(s') over the full cell space (target nets + current policy) ----
         with torch.no_grad():
-            next_probs = torch.sigmoid(self.policy(next_state))          # (B, n)
-            logp_c = (combos.unsqueeze(0) * torch.log(next_probs.unsqueeze(1) + 1e-8) +
-                      (1 - combos).unsqueeze(0) *
-                      torch.log(1 - next_probs.unsqueeze(1) + 1e-8)).sum(-1)
-            logpi = logp_c                                      # (B, K)
-            pi = torch.exp(logpi)
-            qmin_bit = torch.min(self.q1_target(next_state),
-                                 self.q2_target(next_state))     # (B, n)
-            q_comb = (qmin_bit.unsqueeze(1) * combos.unsqueeze(0)).sum(-1)  # (B, K)
-            v_next = (pi * (q_comb - alpha_val * logpi)).sum(-1)
+            next_log_pi, next_pi = self._cell_distribution(next_state, next_mask)
+            q1_next = self.q1_target(next_state)        # (B, n_cells)
+            q2_next = self.q2_target(next_state)
+            q_next_min = torch.min(q1_next, q2_next)
+            v_next = (next_pi * (q_next_min - alpha_val * next_log_pi)).sum(dim=-1)
             q_target = reward + self.gamma * (1.0 - done) * v_next
 
-        # ---- Q updates (joint Q = Σ q_bit * bit) ----
-        q1_pred = (self.q1(state) * action).sum(-1)
+        # ---- Update Q1 / Q2 (full 96-dim critics, gather taken cell) ----
+        q1_pred = self.q1(state).gather(1, action.unsqueeze(-1)).squeeze(-1)
         q1_loss = F.mse_loss(q1_pred, q_target)
         self.opt_q1.zero_grad(); q1_loss.backward(); self.opt_q1.step()
-        q2_pred = (self.q2(state) * action).sum(-1)
+        q2_pred = self.q2(state).gather(1, action.unsqueeze(-1)).squeeze(-1)
         q2_loss = F.mse_loss(q2_pred, q_target)
         self.opt_q2.zero_grad(); q2_loss.backward(); self.opt_q2.step()
 
-        # ---- Policy update ----
-        probs = torch.sigmoid(self.policy(state))               # (B, n)
-        logp_cs = (combos.unsqueeze(0) * torch.log(probs.unsqueeze(1) + 1e-8) +
-                   (1 - combos).unsqueeze(0) *
-                   torch.log(1 - probs.unsqueeze(1) + 1e-8)).sum(-1)
-        logpi_s = logp_cs
-        pi_s = torch.exp(logpi_s)
-        qmin_s = torch.min(self.q1(state), self.q2(state))
-        q_comb_s = (qmin_s.unsqueeze(1) * combos.unsqueeze(0)).sum(-1)   # (B, K)
-        policy_loss = (pi_s * (alpha_val * logpi_s - q_comb_s)).sum(-1).mean()
+        # ---- Update Policy ----
+        log_pi, pi = self._cell_distribution(state, mask)
+        with torch.no_grad():
+            q1_val = self.q1(state)
+            q2_val = self.q2(state)
+            q_min = torch.min(q1_val, q2_val)
+        policy_loss = (pi * (alpha_val * log_pi - q_min)).sum(dim=-1).mean()
 
         self.opt_policy.zero_grad(); policy_loss.backward(); self.opt_policy.step()
 
         # ---- Alpha ----
         with torch.no_grad():
-            entropy = -(pi_s * logpi_s).sum(-1).mean()
+            entropy = -(pi * log_pi).sum(dim=-1).mean()
         if self.auto_alpha:
             alpha_loss = (self.log_alpha * (entropy + self.target_entropy).detach()).mean()
             self.opt_alpha.zero_grad(); alpha_loss.backward(); self.opt_alpha.step()

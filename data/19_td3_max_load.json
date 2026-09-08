@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "algorithm": "TD3",
+    "period_mode": "simple",
+    "order_mode": "random",
+    "flow_count": 50,
+    "reward_mode": "load_balance",
+    "gamma": 0.9,
+    "metric": "eval_best = min(eval_eff_peak)  (训练全程最佳贪婪评估, lower=better)",
+    "note": "dimred 的唯一合法对比基线是 native 同算法；启发式/MILP 仅作参考标尺"
+  },
+  "algorithms": {
+    "native": {
+      "eval_best_per_seed": {
+        "42": 0.814,
+        "123": 0.7222,
+        "2024": 0.7907
+      },
+      "note": null
+    },
+    "dimred": {
+      "eval_best_per_seed": {
+        "42": 0.7619,
+        "123": 0.7727,
+        "2024": 0.8056
+      },
+      "note": null
+    }
+  }
+}

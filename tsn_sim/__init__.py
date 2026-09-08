@@ -6,6 +6,7 @@ from .heuristics import schedule_with_heuristic
 from .sac import SACAgent, ReplayBuffer
 from .ppo import PPOAgent
 from .ddqn import DDQNAgent
+from .td3 import TD3Agent
 from .scenario import build_scenario
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "SACAgent",
     "PPOAgent",
     "DDQNAgent",
+    "TD3Agent",
     "ReplayBuffer",
     "SimulationConfig",
     "TSNSchedulingEnv",

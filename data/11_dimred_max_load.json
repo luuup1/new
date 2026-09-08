@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "dim_reduction": true,
+    "action_mode": "dimred",
+    "period_mode": "simple",
+    "order_mode": "random",
+    "flow_count": 50,
+    "reward_mode": "load_balance",
+    "metric": "eval_best = min(eval_eff_peak)  (训练全程最佳贪婪评估, lower=better)"
+  },
+  "algorithms": {
+    "PPO": {
+      "eval_best_per_seed": {
+        "42": 0.9744,
+        "123": 0.9756,
+        "2024": 0.9535
+      },
+      "note": null
+    },
+    "SAC": {
+      "eval_best_per_seed": {
+        "42": 1.0601,
+        "123": 1.0205,
+        "2024": 1.0385
+      },
+      "note": null
+    },
+    "DDQN": {
+      "eval_best_per_seed": {
+        "42": 1.0538,
+        "123": 1.0171,
+        "2024": 1.0256
+      },
+      "note": null
+    }
+  }
+}

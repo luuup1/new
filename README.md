@@ -44,7 +44,7 @@ python -m unittest -v
 
 Available heuristic strategies:
 
-- `random_feasible`: random feasible baseline.
+- `random_feasible`: random feasible reference (random lower bound).
 - `edf_min_load`: earliest-deadline-first order, choose the lowest loaded slot.
 - `urgency_lexicographic`: narrowest feasible window first, lexicographic scoring (peak → slot-load → tiebreakers).
 - `edf_min_peak`: earliest-deadline-first order, same lexicographic scoring.
