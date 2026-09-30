@@ -1,6 +1,11 @@
 """5G-TSN scheduling simulation package."""
 
-from .config import HeuristicConfig, SimulationConfig, default_config
+from .config import (
+    HeuristicConfig,
+    SimulationConfig,
+    default_config,
+    write_example_config,
+)
 from .env import TSNSchedulingEnv
 from .heuristics import schedule_with_heuristic
 from .sac import SACAgent, ReplayBuffer
@@ -21,4 +26,5 @@ __all__ = [
     "build_scenario",
     "default_config",
     "schedule_with_heuristic",
+    "write_example_config",
 ]

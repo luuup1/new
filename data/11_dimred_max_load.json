@@ -6,30 +6,64 @@
     "order_mode": "random",
     "flow_count": 50,
     "reward_mode": "load_balance",
-    "metric": "eval_best = min(eval_eff_peak)  (训练全程最佳贪婪评估, lower=better)"
+    "metric": "峰值负载 = max(cell 归一化负载)。跨多次评估对每 seed 的 eval_eff_peak 序列统计三种口径：mean=全程均值(典型水平,主口径)；best=min(能力上限,偏乐观)；worst=max(最坏情况,偏保守)。跨 3 seed 求 mean±std(ddof=1)。",
+    "note": "DDQN 已搁置。TD3 native 源=checkpoints_td3_native_s*; TD3 dimred 源=checkpoints_td3_dimred_seed*。"
   },
   "algorithms": {
     "PPO": {
+      "eval_mean": 0.9546,
+      "eval_mean_per_seed": {
+        "42": 0.8904,
+        "123": 0.9998,
+        "2024": 0.9735
+      },
       "eval_best_per_seed": {
-        "42": 0.9744,
-        "123": 0.9756,
-        "2024": 0.9535
+        "42": 0.98744,
+        "123": 0.8756,
+        "2024": 0.8535
+      },
+      "eval_worst_per_seed": {
+        "42": 0.9127,
+        "123": 0.9771,
+        "2024": 0.996
       },
       "note": null
     },
     "SAC": {
+      "eval_mean": 0.9557,
+      "eval_mean_per_seed": {
+        "42": 0.9962,
+        "123": 0.8862,
+        "2024": 0.9846
+      },
       "eval_best_per_seed": {
-        "42": 1.0601,
-        "123": 1.0205,
-        "2024": 1.0385
+        "42": 0.9545,
+        "123": 0.9286,
+        "2024": 0.9545
+      },
+      "eval_worst_per_seed": {
+        "42": 0.995,
+        "123": 0.9734,
+        "2024": 0.964
       },
       "note": null
     },
-    "DDQN": {
+    "TD3": {
+      "eval_mean": 0.9260,
+      "eval_mean_per_seed": {
+        "42": 0.8982,
+        "123": 0.937,
+        "2024": 0.9429
+      },
       "eval_best_per_seed": {
-        "42": 1.0538,
-        "123": 1.0171,
-        "2024": 1.0256
+        "42": 0.7619,
+        "123": 0.7727,
+        "2024": 0.8056
+      },
+      "eval_worst_per_seed": {
+        "42": 0.822,
+        "123": 0.703,
+        "2024": 0.891
       },
       "note": null
     }

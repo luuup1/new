@@ -8,7 +8,7 @@ PPO fine-tune on the RL reward.
 Why random-order demonstrations?
 --------------------------------
 The DRL MDP uses order_mode="random" (evaluated "on the baseline", see
-EXPERIMENT_PROTOCOL.md). If we cloned the EDF-order edf_min_load trajectory
+EXPERIMENT_PROTOCOL.md). If we cloned the EDF-order `greedy` trajectory
 as the teacher, the demo distribution would NOT match the DRL MDP and the
 warm-start would be off-distribution. So the teacher here is the *min-load
 placement rule* applied step-by-step on the same random-order env the agent

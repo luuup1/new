@@ -5,30 +5,65 @@
     "period_mode": "simple",
     "order_mode": "random",
     "flow_count": 50,
-    "metric": "eval_best = min(eval_eff_peak)  (训练全程最佳贪婪评估, lower=better)"
+    "reward_mode": "load_balance",
+    "metric": "峰值负载 = max(cell 归一化负载)。跨多次评估对每 seed 的 eval_eff_peak 序列统计三种口径：mean=全程均值(典型水平,主口径)；best=min(能力上限,偏乐观)；worst=max(最坏情况,偏保守)。跨 3 seed 求 mean±std(ddof=1)。",
+    "note": "DDQN 已搁置。TD3 native 源=checkpoints_td3_native_s*; TD3 dimred 源=checkpoints_td3_dimred_seed*。"
   },
   "algorithms": {
     "PPO": {
+      "eval_mean": 0.9903,
+      "eval_mean_per_seed": {
+        "42": 0.9975,
+        "123": 0.9998,
+        "2024": 0.9735
+      },
       "eval_best_per_seed": {
         "42": 0.9545,
         "123": 0.973,
         "2024": 1.0
       },
+      "eval_worst_per_seed": {
+        "42": 1.0063,
+        "123": 1.0137,
+        "2024": 1.016
+      },
       "note": null
     },
     "SAC": {
+      "eval_mean": 0.9885,
+      "eval_mean_per_seed": {
+        "42": 0.9975,
+        "123": 0.9886,
+        "2024": 0.9793
+      },
       "eval_best_per_seed": {
         "42": 0.6111,
         "123": 0.6591,
         "2024": 0.7727
       },
+      "eval_worst_per_seed": {
+        "42": 0.9283,
+        "123": 0.7727,
+        "2024": 1.0
+      },
       "note": null
     },
-    "DDQN": {
+    "TD3": {
+      "eval_mean": 0.9418,
+      "eval_mean_per_seed": {
+        "42": 0.935,
+        "123": 0.9789,
+        "2024": 0.9116
+      },
       "eval_best_per_seed": {
-        "42": 0.6111,
-        "123": 0.6512,
-        "2024": 1.0
+        "42": 0.814,
+        "123": 0.7222,
+        "2024": 0.7907
+      },
+      "eval_worst_per_seed": {
+        "42": 0.822,
+        "123": 0.703,
+        "2024": 0.8889
       },
       "note": null
     }

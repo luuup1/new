@@ -311,12 +311,20 @@ def main():
     parser.add_argument("--action-mode", type=str, default="native",
                         choices=["native", "dimred"],
                         help="native=Discrete(96)动作; dimred=结构化7位二值动作(动作空间降维)")
+    parser.add_argument("--flow-count", type=int, default=None,
+                        help="训练场景的流数（默认 None=沿用 SimulationConfig 默认 50）。"
+                             "用于 per-flow-count 训练：每个流数各自训练一个 checkpoint。")
     parser.add_argument("--save-dir", type=str, default="checkpoints_td3")
     parser.add_argument("--eval-only", action="store_true")
     parser.add_argument("--model", type=str, default=None)
     args = parser.parse_args()
 
     sim_config = SimulationConfig(seed=args.seed, period_mode=args.period_mode)
+    if args.flow_count is not None:
+        sim_config = SimulationConfig(
+            seed=args.seed, period_mode=args.period_mode,
+            flow_count=args.flow_count,
+        )
 
     if args.reward_mode == "shaping":
         env_reward_mode, env_shaping = "terminal", True
@@ -364,6 +372,7 @@ def main():
     print(f"{'='*60}")
     print(f"  Obs dim:       {env.observation_space.shape[0]}")
     print(f"  Action dim:    {env.n_actions} ({env.action_mode})")
+    print(f"  Flow count:    {sim_config.flow_count}")
     print(f"  Episodes:      {args.episodes}")
     print(f"  Warmup steps:  {args.warmup}")
     print(f"  Batch size:    {args.batch_size}")

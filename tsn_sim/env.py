@@ -370,7 +370,7 @@ class TSNSchedulingEnv(Env):
     def expert_min_load_action(self) -> int:
         """Return the feasible action that minimizes post-placement cell load
         for the *current* packet. This is the per-step placement rule used by
-        the `edf_min_load` heuristic (placement part only). It is used as the
+        the `greedy` heuristic (placement part only). It is used as the
         BC / DAGGER **teacher on the random-order env** so the demonstration
         distribution matches the DRL MDP (random order + learned placement).
 

@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "period_mode": "simple",
+    "flow_count": 50,
+    "seeds": [
+      42,
+      123,
+      2024
+    ],
+    "metric_load": "effective_peak_load = max(cell 归一化负载) + drop_ratio (lower=better)",
+    "metric_delay": "average_delay_ms (lower=better)",
+    "note": "启发式为确定性单次调度，每 seed 一个值，跨 3 seed 求 mean±std(跨 seed)。RL 负载用 04_native_max_load.json 的 eval_mean_per_seed（训练全程均值）；RL 时延用 05/06/16_*_delay.json 的 delay_mean_ms。"
+  },
+  "algorithms": {
+    "random_feasible": {
+      "eff_peak_per_seed": {
+        "42": 1.0,
+        "123": 1.003425,
+        "2024": 1.00641
+      },
+      "avg_delay_per_seed": {
+        "42": 2.107595,
+        "123": 2.134021,
+        "2024": 2.164516
+      },
+      "eff_peak_mean": 1.003278,
+      "eff_peak_std": 0.003208,
+      "avg_delay_mean": 2.135377,
+      "avg_delay_std": 0.028485
+    },
+    "greedy": {
+      "eff_peak_per_seed": {
+        "42": 0.772727,
+        "123": 0.954545,
+        "2024": 0.931818
+      },
+      "avg_delay_per_seed": {
+        "42": 2.60443,
+        "123": 2.821918,
+        "2024": 2.689103
+      },
+      "eff_peak_mean": 0.886363,
+      "eff_peak_std": 0.099066,
+      "avg_delay_mean": 2.70515,
+      "avg_delay_std": 0.109628
+    },
+    "proportional_fair": {
+      "eff_peak_per_seed": {
+        "42": 1.088608,
+        "123": 1.047945,
+        "2024": 1.064103
+      },
+      "avg_delay_per_seed": {
+        "42": 2.732639,
+        "123": 2.848921,
+        "2024": 2.787671
+      },
+      "eff_peak_mean": 1.066885,
+      "eff_peak_std": 0.020474,
+      "avg_delay_mean": 2.789744,
+      "avg_delay_std": 0.058169
+    },
+    "genetic_algorithm": {
+      "eff_peak_per_seed": {
+        "42": 0.728551,
+        "123": 0.809153,
+        "2024": 0.815789
+      },
+      "avg_delay_per_seed": {
+        "42": 2.573248,
+        "123": 2.725694,
+        "2024": 2.564103
+      },
+      "eff_peak_mean": 0.784498,
+      "eff_peak_std": 0.048565,
+      "avg_delay_mean": 2.621015,
+      "avg_delay_std": 0.09077
+    }
+  }
+}

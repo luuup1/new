@@ -5,10 +5,13 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Iterable, List, Mapping
 
-from .config import HeuristicConfig, SimulationConfig
+from .config import SimulationConfig
 from .heuristics import schedule_with_heuristic
 from .milp import solve_optimal_milp
 from .scenario import build_scenario
+
+#: Canonical list of available heuristic strategies (post-refactor).
+ALL_STRATEGIES = ("random_feasible", "greedy", "proportional_fair", "genetic_algorithm")
 
 
 def run_single(config: SimulationConfig):
@@ -56,13 +59,12 @@ def sweep_load_scale(config: SimulationConfig, scales: Iterable[float]):
 
 def compare_heuristics(
     config: SimulationConfig,
-    strategies: Iterable[str] = ("random_feasible", "edf_min_load", "urgency_lexicographic", "edf_min_peak"),
+    strategies: Iterable[str] = ALL_STRATEGIES,
 ):
     rows: List[Mapping[str, float | str]] = []
     scenario = build_scenario(config)
     for strategy in strategies:
-        heuristic = _heuristic_with_strategy(config.heuristic, strategy)
-        result = schedule_with_heuristic(scenario, heuristic, seed=config.seed)
+        result = schedule_with_heuristic(scenario, strategy, seed=config.seed)
         rows.append(
             {
                 "strategy": strategy,
@@ -81,7 +83,7 @@ def compare_heuristics(
 
 def compare_with_milp(
     config: SimulationConfig,
-    strategies: Iterable[str] = ("random_feasible", "edf_min_load", "urgency_lexicographic", "edf_min_peak"),
+    strategies: Iterable[str] = ALL_STRATEGIES,
     time_limit_s: float = 30.0,
 ):
     scenario = build_scenario(config)
@@ -103,8 +105,7 @@ def compare_with_milp(
     ]
 
     for strategy in strategies:
-        heuristic = _heuristic_with_strategy(config.heuristic, strategy)
-        result = schedule_with_heuristic(scenario, heuristic, seed=config.seed)
+        result = schedule_with_heuristic(scenario, strategy, seed=config.seed)
         eff_peak = result.metrics["effective_peak_load"]
         gap = (eff_peak - opt_effective) / opt_effective if optimal_is_comparable else "n/a"
         rows.append(
@@ -170,14 +171,3 @@ def sweep_rb_utilization(config: SimulationConfig, scales: Iterable[float]):
             }
         )
     return rows
-
-
-def _heuristic_with_strategy(base: HeuristicConfig, strategy: str) -> HeuristicConfig:
-    return HeuristicConfig(
-        strategy=strategy,
-        peak_weight=base.peak_weight,
-        slot_load_weight=base.slot_load_weight,
-        link_avg_weight=base.link_avg_weight,
-        delay_weight=base.delay_weight,
-        efficiency_weight=base.efficiency_weight,
-    )

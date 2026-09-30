@@ -29,7 +29,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--load-scale", type=float, help="Packet-size load multiplier.")
     parser.add_argument(
         "--strategy",
-        choices=("random_feasible", "edf_min_load", "urgency_lexicographic", "edf_min_peak"),
+        choices=("random_feasible", "greedy", "proportional_fair", "genetic_algorithm"),
         help="Heuristic strategy override.",
     )
     parser.add_argument("--preview", type=int, default=30, help="Rows of schedule preview.")
@@ -66,17 +66,7 @@ def build_config(args: argparse.Namespace):
         overrides["load_scale"] = args.load_scale
     config = replace(config, **overrides)
     if args.strategy is not None:
-        config = replace(
-            config,
-            heuristic=HeuristicConfig(
-                strategy=args.strategy,
-                peak_weight=config.heuristic.peak_weight,
-                slot_load_weight=config.heuristic.slot_load_weight,
-                link_avg_weight=config.heuristic.link_avg_weight,
-                delay_weight=config.heuristic.delay_weight,
-                efficiency_weight=config.heuristic.efficiency_weight,
-            ),
-        )
+        config = replace(config, heuristic=HeuristicConfig(strategy=args.strategy))
     return config
 
 
